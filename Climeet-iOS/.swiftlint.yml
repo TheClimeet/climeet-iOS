@@ -1,0 +1,43 @@
+only_rules:
+  - colon # var count: Int O var count : Int X
+  - fatal_error_message # fatalError("some error message") O fatalError() X
+  - operator_usage_whitespace # result = 1 + 2 O result = 1+ 2 X
+  - return_arrow_whitespace # func some() -> Int O func some()-> Int X
+  - trailing_newline # 줄 마지막에 공백 없어야 함
+  - vertical_whitespace # 수직 공백 한 줄만 허용
+  - void_return # Void 타입을 리턴하는 경우 모두 Void로 명시
+  - unowned_variable_capture # 크래시 가능성이 있는 unowned 대신 weak 사용
+  - force_unwrapping # 크래시 가능성이 있는 강제 언래핑 사용 금지
+  - custom_rules # 아래 커스텀 룰 적용
+
+excluded:
+  - .build # 빌드 폴더 제외
+  - Climeet-iOSTests # 단위 테스트 코드 제외
+  - Climeet-iOSUITests # UI 테스트 코드 제외
+
+colon:
+  apply_to_dictionaries: false # 딕셔너리는 colon 규칙에서 제외
+
+custom_rules:
+  no_file_literal: # #file 대신 #fiileID 사용
+    name: "#file is disallowed"
+    regex: "(\\b#file\\b)"
+    match_kinds:
+    - identifier
+    message: "Instead of #file, use #fileID"
+    severity: error
+  no_filepath_literal: # #filePath 대신 #fileID 사용
+    name: "#filePath is disallowed"
+    regex: "(\\b#filePath\\b)"
+    match_kinds:
+    - identifier
+    message: "Instead of #filePath, use #fileID."
+    severity: error
+  no_unchecked_sendable: # @unchecked Sendable 대신 Sendable 적용하거나 preconcurrency import 사용
+    name: "`@unchecked Sendable` is discouraged."
+    regex: "@unchecked Sendable"
+    match_kinds:
+    - attribute.builtin
+    - typeidentifier
+    message: "Instead of using `@unchecked Sendable`, consider a safe alternative like a standard `Sendable` conformance or using `@preconcurrency import`. If you really must use `@unchecked Sendable`, you can add a `// swiftlint:disable:next no_unchecked_sendable` annotation with an explanation for how we know the type is thread-safe, and why we have to use @unchecked Sendable instead of Sendable. More explanation and suggested safe alternatives are available at https://github.com/airbnb/swift#unchecked-sendable."
+    severity: error
