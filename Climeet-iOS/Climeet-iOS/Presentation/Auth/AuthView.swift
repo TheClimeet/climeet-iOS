@@ -18,6 +18,21 @@ struct AuthView: View {
             
             VStack(spacing: 22) {
                 kakaoBtn()
+                    .overlay {
+                        TooltipView(
+                            alignment: .top,
+                            isVisible: .constant(true),
+                            xPadding: 0,
+                            yPadding: 14
+                        ) {
+                            HStack {
+                                Image(.authTooltipIcon)
+                                
+                                Text("3초만에 로그인하세요")
+                                    .foregroundStyle(.black)
+                            }
+                        }
+                    }
                 
                 naverBtn()
             }
