@@ -12,6 +12,11 @@ import DesignSystem
 struct ActivityTabView: View {
     @Bindable var store: StoreOf<ActivityTabReducer>
     
+    private let activityCalendarStore = Store(
+        initialState: ActivityCalendarReducer.State(), reducer: {
+            ActivityCalendarReducer()
+        })
+    
     var body: some View {
         NavigationStack {
             TabView {
@@ -22,9 +27,7 @@ struct ActivityTabView: View {
                     }
                 )
                 
-                ActivityCalendarView(store: Store(initialState: ActivityCalendarReducer.State(), reducer: {
-                    ActivityCalendarReducer()
-                }))
+                ActivityCalendarView(store: activityCalendarStore)
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
