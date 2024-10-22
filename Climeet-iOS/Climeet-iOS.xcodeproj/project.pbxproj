@@ -13,6 +13,7 @@
 		6C566F532CC67C990064299C /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 6C566F522CC67C990064299C /* KakaoSDKAuth */; };
 		6C566F552CC67C990064299C /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 6C566F542CC67C990064299C /* KakaoSDKCommon */; };
 		6C566F572CC67C990064299C /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = 6C566F562CC67C990064299C /* KakaoSDKUser */; };
+		6C8A2E8A2CC7CE37009D7F95 /* NaverThirdPartyLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 6C8A2E892CC7CE37009D7F95 /* NaverThirdPartyLogin */; };
 		6CB868862CBBE6B8008D0BA5 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 6CB868852CBBE6B8008D0BA5 /* DesignSystem */; };
 		6CFF85E62CB22A5400572F2E /* NetworkKit in Frameworks */ = {isa = PBXBuildFile; productRef = 6CFF85E52CB22A5400572F2E /* NetworkKit */; };
 		B94EC2422BD1473E00DC3FDB /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = B94EC2412BD1473E00DC3FDB /* .swiftlint.yml */; };
@@ -94,6 +95,7 @@
 				6CB868862CBBE6B8008D0BA5 /* DesignSystem in Frameworks */,
 				0489EE962C2EA05900BFC55B /* ComposableArchitecture in Frameworks */,
 				D45EB2462BFE10BD00BDC871 /* (null) in Frameworks */,
+				6C8A2E8A2CC7CE37009D7F95 /* NaverThirdPartyLogin in Frameworks */,
 				6C566F572CC67C990064299C /* KakaoSDKUser in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -202,6 +204,7 @@
 				6C566F522CC67C990064299C /* KakaoSDKAuth */,
 				6C566F542CC67C990064299C /* KakaoSDKCommon */,
 				6C566F562CC67C990064299C /* KakaoSDKUser */,
+				6C8A2E892CC7CE37009D7F95 /* NaverThirdPartyLogin */,
 			);
 			productName = "Climeet-iOS";
 			productReference = B94EC2222BD13CBB00DC3FDB /* Climeet-iOS.app */;
@@ -246,6 +249,7 @@
 				6CFF85E42CB22A5400572F2E /* XCLocalSwiftPackageReference "../NetworkKit" */,
 				6CB868842CBBE6B8008D0BA5 /* XCLocalSwiftPackageReference "../DesignSystem" */,
 				6C566F512CC67C980064299C /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
+				6C8A2E882CC7CE37009D7F95 /* XCRemoteSwiftPackageReference "naveridlogin-sdk-ios" */,
 			);
 			productRefGroup = B94EC2232BD13CBB00DC3FDB /* Products */;
 			projectDirPath = "";
@@ -722,6 +726,14 @@
 				minimumVersion = 2.23.0;
 			};
 		};
+		6C8A2E882CC7CE37009D7F95 /* XCRemoteSwiftPackageReference "naveridlogin-sdk-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/naver/naveridlogin-sdk-ios";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -754,6 +766,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6C566F512CC67C980064299C /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
 			productName = KakaoSDKUser;
+		};
+		6C8A2E892CC7CE37009D7F95 /* NaverThirdPartyLogin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6C8A2E882CC7CE37009D7F95 /* XCRemoteSwiftPackageReference "naveridlogin-sdk-ios" */;
+			productName = NaverThirdPartyLogin;
 		};
 		6CB868852CBBE6B8008D0BA5 /* DesignSystem */ = {
 			isa = XCSwiftPackageProductDependency;

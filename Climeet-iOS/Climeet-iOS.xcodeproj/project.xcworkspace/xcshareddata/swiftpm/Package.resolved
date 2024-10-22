@@ -1,5 +1,5 @@
 {
-  "originHash" : "9e5bcffc27643cc7fa51918467b96483bf7a919f8fc77ac91daa8115eac2ab43",
+  "originHash" : "85f89a6a8d1310391ecddcbf1b71b94b9f66c954212520c279ca0c2dd737ae93",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -35,6 +35,15 @@
       "state" : {
         "revision" : "2ef543ee21d63734e1c004ad6c870255e8716c50",
         "version" : "7.12.0"
+      }
+    },
+    {
+      "identity" : "naveridlogin-sdk-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/naver/naveridlogin-sdk-ios",
+      "state" : {
+        "branch" : "master",
+        "revision" : "0d89660344926a625824387a130f7e38e0fad2d7"
       }
     },
     {
