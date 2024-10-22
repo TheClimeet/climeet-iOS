@@ -10,25 +10,23 @@ import ComposableArchitecture
 import DesignSystem
 
 struct ActivityTimerView: View {
-    
-    var gym: Gym
-    var handleClimbingGymSelectionTapped: () -> Void
-    
+    @Bindable var store: StoreOf<ActivityTimerReducer>
+        
     var body: some View {
         
         VStack(spacing: 40) {
             ChallengeStats()
             
             Button(action: {
-                handleClimbingGymSelectionTapped()
+                store.send(.gymSelectionButtonTapped)
             }, label: {
                 HStack(alignment: .center, spacing: 5) {
-                    if !gym.name.isEmpty {
+                    if !store.selectedGym.name.isEmpty {
                         Image("activitytimer_map")
                             .resizable()
                             .frame(width: 15, height: 15)
                         
-                        Text(gym.name)
+                        Text(store.selectedGym.name)
                             .font(.climeetFontParagraph4())
                             .foregroundColor(Color.starNotFilled)
                     } else {
@@ -50,13 +48,17 @@ struct ActivityTimerView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(25)
         .background(Color.text09)
+        .onReadSize({ size in
+            store.send(.readViewSize(size))
+        })
+        .sheet(
+            item: $store.scope(
+                state: \.destination?.searchGymSheet,
+                action: \.destination.searchGymSheet)
+        ) { searchGymStore in
+            SearchView(store: searchGymStore)
+                .presentationDetents([.height(store.bottomSheetHeight)])
+        }
     }
 }
 
-#Preview {
-    ActivityTimerView(
-        gym: Gym(),
-        handleClimbingGymSelectionTapped: {
-            
-        })
-}
