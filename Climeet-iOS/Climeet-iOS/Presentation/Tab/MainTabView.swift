@@ -20,6 +20,11 @@ struct MainTabView: View {
     
     @State private var selectedTab: MainTab = .home
     
+    private let activityCalendarStore = Store(
+        initialState: ActivityCalendarReducer.State(), reducer: {
+            ActivityCalendarReducer()
+        })
+    
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
@@ -38,9 +43,7 @@ struct MainTabView: View {
                         ShortsSelectReducer()
                     }))
                 case .activity:
-                    ActivityCalendarView(store: Store(initialState: ActivityCalendarReducer.State(), reducer: {
-                        ActivityCalendarReducer()
-                    }))
+                    ActivityCalendarView(store: activityCalendarStore)
                     
                 case .mypage:
                     // 마이페이지화면
