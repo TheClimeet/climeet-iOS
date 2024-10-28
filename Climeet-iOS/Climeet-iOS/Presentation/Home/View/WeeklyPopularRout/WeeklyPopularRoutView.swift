@@ -1,5 +1,5 @@
 //
-//  WeeklyPopularRout.swift
+//  WeeklyPopularRoutView.swift
 //  Climeet-iOS
 //
 //  Created by 권승용 on 9/24/24.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct WeeklyPopularRout: View {
+struct WeeklyPopularRoutView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
@@ -87,6 +87,6 @@ struct RouteView: View {
 }
 
 #Preview {
-    WeeklyPopularRout()
+    WeeklyPopularRoutView()
         .background(Color.climeetBackground)
 }

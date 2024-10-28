@@ -15,19 +15,19 @@ struct HomeView: View {
             
             ScrollView {
                 VStack(spacing: 0) {
-                    HomeHeader()
+                    HomeHeaderView()
                         .padding(.vertical, 30)
-                    Banner()
+                    BannerView()
                         .padding(.bottom, 48)
-                    HomeGymShortcut()
+                    HomeGymShortcutView()
                         .padding(.bottom, 48)
-                    BestClimber()
+                    BestClimberView()
                         .padding(.bottom, 48)
-                    WeeklyPopularShorts()
+                    WeeklyPopularShortsView()
                         .padding(.bottom, 48)
-                    WeeklyPopularGym()
+                    WeeklyPopularGymView()
                         .padding(.bottom, 48)
-                    WeeklyPopularRout()
+                    WeeklyPopularRoutView()
                         .padding(.bottom, 120)
                 }
             }

@@ -1,5 +1,5 @@
 //
-//  BestClimber.swift
+//  BestClimberView.swift
 //  Climeet-iOS
 //
 //  Created by 권승용 on 9/24/24.
@@ -25,7 +25,7 @@ enum BestClimberSegments {
     }
 }
 
-struct BestClimber: View {
+struct BestClimberView: View {
     @State private var selectedSegment: BestClimberSegments = .complete
     
     var body: some View {
@@ -167,6 +167,6 @@ struct RankingBar: View {
 }
 
 #Preview {
-    BestClimber()
+    BestClimberView()
         .background(Color.climeetBackground)
 }

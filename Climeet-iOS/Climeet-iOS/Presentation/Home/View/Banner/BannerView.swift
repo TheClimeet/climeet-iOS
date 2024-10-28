@@ -1,5 +1,5 @@
 //
-//  Banner.swift
+//  BannerView.swift
 //  Climeet-iOS
 //
 //  Created by 권승용 on 9/24/24.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct Banner: View {
+struct BannerView: View {
     var body: some View {
         Rectangle()
             .frame(maxWidth: .infinity)
@@ -16,5 +16,5 @@ struct Banner: View {
 }
 
 #Preview {
-    Banner()
+    BannerView()
 }
