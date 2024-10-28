@@ -10,9 +10,16 @@ import Foundation
 enum BannerDTO {
     struct ResponseElement: Decodable {
         let id: Int?
+        let bannerImageURL: String?
+        let bannerTargetURL: String?
         let title, bannerStartDate, bannerEndDate: String?
         let isPopup: Bool?
-        let createdAt, status: String?
+        
+        enum CodingKeys: String, CodingKey {
+            case id, title, bannerStartDate, bannerEndDate, isPopup
+            case bannerImageURL = "bannerImageUrl"
+            case bannerTargetURL = "bannerTargetUrl"
+        }
     }
 
     typealias Response = [BannerDTO.ResponseElement]
