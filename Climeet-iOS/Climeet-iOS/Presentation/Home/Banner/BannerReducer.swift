@@ -8,7 +8,7 @@
 import Foundation
 import ComposableArchitecture
 
-struct BannerInfo: Identifiable, Equatable {
+struct BannerInfo: Hashable, Identifiable, Equatable {
     let id: Int
     let bannerImageURL: String
     let title: String
@@ -40,11 +40,13 @@ struct BannerInfo: Identifiable, Equatable {
 
 @Reducer
 struct BannerReducer {
+    
+    @ObservableState
     struct State: Equatable {
         var bannerInfos: [BannerInfo] = []
     }
     
-    enum Action: Equatable {
+    enum Action {
         case onFirstAppear
         case bannerResponse([BannerInfo])
     }
