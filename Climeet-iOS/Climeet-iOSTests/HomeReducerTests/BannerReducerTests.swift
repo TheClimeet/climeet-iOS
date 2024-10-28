@@ -29,8 +29,7 @@ class BannerReducerTest: XCTestCase {
                     title: "배너테스트1",
                     bannerStartDate: "2024-10-03",
                     bannerEndDate: "2024-10-31",
-                    isPopup: false,
-                    linkURL: nil
+                    isPopup: false
                 ),
                 BannerDTO.ResponseElement(
                     id: 2,
@@ -39,8 +38,7 @@ class BannerReducerTest: XCTestCase {
                     title: "배너테스트2",
                     bannerStartDate: "2024-10-03",
                     bannerEndDate: "2024-10-31",
-                    isPopup: false,
-                    linkURL: nil
+                    isPopup: false
                 )
             ].map {
                 try BannerInfo(from: $0)
