@@ -44,6 +44,31 @@ extension BannerClient: DependencyKey {
             ]
         }
     )
+    
+    static var previewValue: BannerClient = .init(
+        banners: {
+            return [
+                BannerDTO.ResponseElement(
+                    id: 1,
+                    bannerImageURL: "https://climeet-production-bucket.s3.ap-northeast-2.amazonaws.com/1615cdad-d781-4bf6-a4de-57a136eb0089.jpg",
+                    bannerTargetURL: "https://www.naver.com/",
+                    title: "배너테스트1",
+                    bannerStartDate: "2024-10-03",
+                    bannerEndDate: "2024-10-31",
+                    isPopup: false
+                ),
+                BannerDTO.ResponseElement(
+                    id: 2,
+                    bannerImageURL: "https://climeet-production-bucket.s3.ap-northeast-2.amazonaws.com/1615cdad-d781-4bf6-a4de-57a136eb0089.jpg",
+                    bannerTargetURL: "https://www.naver.com/",
+                    title: "배너테스트2",
+                    bannerStartDate: "2024-10-03",
+                    bannerEndDate: "2024-10-31",
+                    isPopup: false
+                )
+            ]
+        }
+    )
 }
 
 extension DependencyValues {
