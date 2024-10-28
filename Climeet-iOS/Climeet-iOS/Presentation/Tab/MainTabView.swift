@@ -26,7 +26,9 @@ struct MainTabView: View {
                 switch selectedTab {
                 case .home:
                     // 홈화면
-                    HomeView()
+                    HomeView(store: Store(initialState: HomeReducer.State(), reducer: {
+                        HomeReducer()
+                    }))
                 case .shorts:
                     // 쇼츠화면
                     ShortsDeckView(store: Store(initialState: ShortsDeckReducer.State(), reducer: {
