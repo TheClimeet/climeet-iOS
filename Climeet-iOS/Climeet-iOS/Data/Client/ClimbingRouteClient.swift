@@ -19,11 +19,13 @@ extension ClimbingRouteClient: DependencyKey {
     static var liveValue: ClimbingRouteClient = .init(
         gymRoutes: { gymID in
             let endPoint = ClimbingRouteEndPoint.gymRoutes(gymID: gymID)
-            return try await APIClient.shared.request(endPoint, decode: [ClimbingRouteDTO.Response].self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: [ClimbingRouteDTO.Response].self)
         },
         gymRoute: { routeID in
             let endPoint = ClimbingRouteEndPoint.gymRoute(routeID: routeID)
-            return try await APIClient.shared.request(endPoint, decode: ClimbingRouteDTO.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ClimbingRouteDTO.Response.self)
         }
     )
 }

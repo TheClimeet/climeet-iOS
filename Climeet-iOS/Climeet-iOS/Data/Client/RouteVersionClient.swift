@@ -25,23 +25,28 @@ extension RouteVersionClient: DependencyKey {
     static var liveValue: RouteVersionClient = .init(
         gymVersionList: { gymID in
             let endPoint = RouteVersionEndPoint.gymVersionList(gymID: gymID)
-            return try await APIClient.shared.request(endPoint, decode: [String].self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: [String].self)
         },
         gymVersionKey: { gymID, timePoint in
             let endPoint = RouteVersionEndPoint.gymVersionKey(gymID: gymID, timePoint: timePoint)
-            return try await APIClient.shared.request(endPoint, decode: RouteVersionDTO.GymVersionKey.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: RouteVersionDTO.GymVersionKey.Response.self)
         },
         gymVersionAll: { timePoint in
             let endPoint = RouteVersionEndPoint.gymVersionAll(timePoint: timePoint)
-            return try await APIClient.shared.request(endPoint, decode: RouteVersionDTO.GymVersionAll.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: RouteVersionDTO.GymVersionAll.Response.self)
         },
         gymVersionRoute: { param in
             let endPoint = RouteVersionEndPoint.gymVersionRoute(param)
-            return try await APIClient.shared.request(endPoint, decode: RouteVersionDTO.GymVersionRoute.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: RouteVersionDTO.GymVersionRoute.Response.self)
         },
         addGymVersion: { param in
             let endPoint = RouteVersionEndPoint.addGymVersion(param)
-            return try await APIClient.shared.request(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
         }
     )
 }

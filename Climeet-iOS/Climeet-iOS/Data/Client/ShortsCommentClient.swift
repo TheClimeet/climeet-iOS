@@ -27,27 +27,33 @@ extension ShortsCommentClient: DependencyKey {
     static var liveValue: ShortsCommentClient = .init(
         comments: { param in
             let endPoint = ShortsCommentEndPoint.comments(param)
-            return try await APIClient.shared.request(endPoint, decode: ShortsCommentDTO.Comments.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ShortsCommentDTO.Comments.Response.self)
         },
         childComments: { param in
             let endPoint = ShortsCommentEndPoint.childComments(param)
-            return try await APIClient.shared.request(endPoint, decode: ShortsCommentDTO.ChildComments.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ShortsCommentDTO.ChildComments.Response.self)
         },
         myComments: { page, size in
             let endPoint = ShortsCommentEndPoint.myComments(page: page, size: size)
-            return try await APIClient.shared.request(endPoint, decode: ShortsCommentDTO.MyComments.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ShortsCommentDTO.MyComments.Response.self)
         },
         commentState: { param in
             let endPoint = ShortsCommentEndPoint.commentState(param)
-            return try await APIClient.shared.request(endPoint, decode: ShortsState.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ShortsState.self)
         },
         report: { commentID, reason in
             let endPoint = ShortsCommentEndPoint.report(commentID: commentID, reason: reason)
-            return try await APIClient.shared.request(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
         },
         write: { param in
             let endPoint = ShortsCommentEndPoint.Write(param)
-            return try await APIClient.shared.request(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
         }
     )
 }

@@ -37,47 +37,58 @@ extension ShortsClient: DependencyKey {
     static var liveValue: ShortsClient = .init(
         shorts: { shortsID in
             let endPoint = ShortsEndPoint.shorts(shortsID: shortsID)
-            return try await APIClient.shared.request(endPoint, decode: ShortsDTO.Shorts.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ShortsDTO.Shorts.Response.self)
         },
         likedShorts: { page, size in
             let endPoint = ShortsEndPoint.likedShorts(page: page, size: size)
-            return try await APIClient.shared.request(endPoint, decode: ShortsDTO.List.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ShortsDTO.List.Response.self)
         },
         bookmarkedShorts: { page, size in
             let endPoint = ShortsEndPoint.bookmarkedShorts(page: page, size: size)
-            return try await APIClient.shared.request(endPoint, decode: ShortsDTO.List.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ShortsDTO.List.Response.self)
         },
         uploaderShorts: { param in
             let endPoint = ShortsEndPoint.uploaderShorts(param)
-            return try await APIClient.shared.request(endPoint, decode: ShortsDTO.List.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ShortsDTO.List.Response.self)
         },
         profile: {
             let endPoint = ShortsEndPoint.profile
-            return try await APIClient.shared.request(endPoint, decode: ShortsDTO.Profile.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ShortsDTO.Profile.Response.self)
         },
         popularShorts: { param in
             let endPoint = ShortsEndPoint.popularShorts(param)
-            return try await APIClient.shared.request(endPoint, decode: ShortsDTO.List.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ShortsDTO.List.Response.self)
         },
         myShorts: { param in
             let endPoint = ShortsEndPoint.myShorts(param)
-            return try await APIClient.shared.request(endPoint, decode: ShortsDTO.List.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ShortsDTO.List.Response.self)
         },
         latestShorts: { param in
             let endPoint = ShortsEndPoint.LatestShorts(param)
-            return try await APIClient.shared.request(endPoint, decode: ShortsDTO.List.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ShortsDTO.List.Response.self)
         },
         addViewCount: { shortsID in
             let endPoint = ShortsEndPoint.addViewCount(shortsID: shortsID)
-            return try await APIClient.shared.request(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
         },
         report: { shortsID, reason in
             let endPoint = ShortsEndPoint.report(shortsID: shortsID, reason: reason)
-            return try await APIClient.shared.request(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
         },
         upload: { param in
             let endPoint = ShortsEndPoint.upload(param)
-            return try await APIClient.shared.upload(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .upload(endPoint, decode: String.self)
         }
     )
 }

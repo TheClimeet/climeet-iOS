@@ -17,7 +17,8 @@ extension BestTimeClimberClient: DependencyKey {
     static var liveValue: BestTimeClimberClient = .init(
         rankWeeksClimbersTime: {
             let endPoint = BestTimeClimberEndPoint.rankWeeksClimbersTime
-            return try await APIClient.shared.request(endPoint, decode: BestTimeClimberDTO.RankWeeksClimbersTime.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: BestTimeClimberDTO.RankWeeksClimbersTime.Response.self)
         }
     )
 }

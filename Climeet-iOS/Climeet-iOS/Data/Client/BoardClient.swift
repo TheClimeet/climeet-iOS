@@ -19,11 +19,13 @@ extension BoardClient: DependencyKey {
     static var liveValue: BoardClient = .init(
         boards: {
             let endPoint = BoardEndPoint.boards
-            return try await APIClient.shared.request(endPoint, decode: BoardDTO.Boards.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: BoardDTO.Boards.Response.self)
         },
         board: { boardID in
             let endPoint = BoardEndPoint.board(boardID: boardID)
-            return try await APIClient.shared.request(endPoint, decode: BoardDTO.Board.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: BoardDTO.Board.Response.self)
         }
     )
 }

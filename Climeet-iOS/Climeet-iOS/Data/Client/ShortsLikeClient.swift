@@ -17,7 +17,8 @@ extension ShortsLikeClient: DependencyKey {
     static var liveValue: ShortsLikeClient = .init(
         like: { shortsID in
             let endPoint = ShortsLikeEndPoint.like(shortsID: shortsID)
-            return try await APIClient.shared.request(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
         }
     )
 }

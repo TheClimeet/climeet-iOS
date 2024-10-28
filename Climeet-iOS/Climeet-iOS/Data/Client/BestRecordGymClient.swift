@@ -17,7 +17,8 @@ extension BestRecordGymClient: DependencyKey {
     static var liveValue: BestRecordGymClient = .init(
         rankWeeksGymsRecord: {
             let endPoint = BestRecordGymEndPoint.rankWeeksGymsRecord
-            return try await APIClient.shared.request(endPoint, decode: BestRecordGymDTO.RankWeeksGymsRecord.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: BestRecordGymDTO.RankWeeksGymsRecord.Response.self)
         }
     )
 }

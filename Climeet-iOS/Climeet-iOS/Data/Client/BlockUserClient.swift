@@ -17,7 +17,8 @@ extension BlockUserClient: DependencyKey {
     static var liveValue: BlockUserClient = .init(
         usersBlock: { userID in
             let endPoint = BlockUserEndPoint.usersBlock(userID: userID)
-            let response = try await APIClient.shared.request(endPoint, decode: String.self)
+            let response = try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
             return !response.isEmpty
         }
     )

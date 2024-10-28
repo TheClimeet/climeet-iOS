@@ -41,55 +41,68 @@ extension ClimbingGymClient: DependencyKey {
     static var liveValue: ClimbingGymClient = .init(
         gym: { gymID in
             let endPoint = ClimbingGymEndPoint.gym(gymID: gymID)
-            return try await APIClient.shared.request(endPoint, decode: ClimbingGymDTO.Gym.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ClimbingGymDTO.Gym.Response.self)
         },
         gymTab: { gymID in
             let endPoint = ClimbingGymEndPoint.gymTab(gymID: gymID)
-            return try await APIClient.shared.request(endPoint, decode: ClimbingGymDTO.GymTab.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ClimbingGymDTO.GymTab.Response.self)
         },
         skillDistribution: { gymID in
             let endPoint = ClimbingGymEndPoint.skillDistribution(gymID: gymID)
-            return try await APIClient.shared.request(endPoint, decode: ClimbingGymDTO.SkillDistribution.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ClimbingGymDTO.SkillDistribution.Response.self)
         },
         mySkill: { gymID in
             let endPoint = ClimbingGymEndPoint.mySkill(gymID: gymID)
-            return try await APIClient.shared.request(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
         },
         search: { param in
             let endPoint = ClimbingGymEndPoint.search(param)
-            return try await APIClient.shared.request(endPoint, decode: ClimbingGymDTO.Search.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ClimbingGymDTO.Search.Response.self)
         },
         searchFollow: { param in
             let endPoint = ClimbingGymEndPoint.searchFollow(param)
-            return try await APIClient.shared.request(endPoint, decode: ClimbingGymDTO.SearchFollow.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ClimbingGymDTO.SearchFollow.Response.self)
         },
         searchAll: { param in
             let endPoint = ClimbingGymEndPoint.searchAll(param)
-            return try await APIClient.shared.request(endPoint, decode: ClimbingGymDTO.SearchAll.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ClimbingGymDTO.SearchAll.Response.self)
         },
         service: { serviceList in
             let endPoint = ClimbingGymEndPoint.service(serviceList)
-            return try await APIClient.shared.request(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
         },
         profileImage: { imageURL in
             let endPoint = ClimbingGymEndPoint.profileImage(imageURL: imageURL)
-            return try await APIClient.shared.request(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
         },
         name: { name in
             let endPoint = ClimbingGymEndPoint.name(name: name)
-            return try await APIClient.shared.request(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
         },
         backgroundImage: { imageURL in
             let endPoint = ClimbingGymEndPoint.backgroundImage(imageURL: imageURL)
-            return try await APIClient.shared.request(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
         },
         gymInfo: { gymID in
             let endPoint = ClimbingGymEndPoint.gymInfo(gymID: gymID)
-            return try await APIClient.shared.request(endPoint, decode: ClimbingGymDTO.GymInfo.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ClimbingGymDTO.GymInfo.Response.self)
         },
         price: { param in
             let endPoint = ClimbingGymEndPoint.price(param)
-            return try await APIClient.shared.request(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
         }
     )
 }

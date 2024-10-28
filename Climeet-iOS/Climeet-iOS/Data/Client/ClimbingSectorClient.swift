@@ -17,7 +17,8 @@ extension ClimbingSectorClient: DependencyKey {
     static var liveValue: ClimbingSectorClient = .init(
         sector: { gymID in
             let endPoint = ClimbingSectorEndPoint.sector(gymID: gymID)
-            return try await APIClient.shared.request(endPoint, decode: ClimbingSectorDTO.Sector.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: ClimbingSectorDTO.Sector.Response.self)
         }
     )
 }

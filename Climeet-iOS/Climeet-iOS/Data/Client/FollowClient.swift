@@ -23,19 +23,23 @@ extension FollowClient: DependencyKey {
     static var liveValue: FollowClient = .init(
         unFollow: { userID in
             let endPoint = FollowEndPoint.unFollow(userID: userID)
-            return try await APIClient.shared.request(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
         },
         gymUnFollow: { gymID in
             let endPoint = FollowEndPoint.gymUnFollow(gymID: gymID)
-            return try await APIClient.shared.request(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
         },
         follow: { userID in
             let endPoint = FollowEndPoint.follow(userID: userID)
-            return try await APIClient.shared.request(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
         },
         gymFollow: { gymID in
             let endPoint = FollowEndPoint.gymFollow(gymID: gymID)
-            return try await APIClient.shared.request(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
         }
     )
 }

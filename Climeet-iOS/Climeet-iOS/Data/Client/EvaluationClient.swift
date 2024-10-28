@@ -17,7 +17,8 @@ extension EvaluationClient: DependencyKey {
     static var liveValue: EvaluationClient = .init(
         evaluation: { content, rating in
             let endPoint = EvaluationEndPoint.evaluation(content: content, rating: rating)
-            return try await APIClient.shared.request(endPoint, decode: String.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: String.self)
         }
     )
 }

@@ -17,7 +17,8 @@ extension BestClearClimberClient: DependencyKey {
     static var liveValue: BestClearClimberClient = .init(
         rankWeekClimbersClear: {
             let endPoint = BestClearClimberEndPoint.rankWeekClimbersClear
-            return try await APIClient.shared.request(endPoint, decode: BestClearClimberDTO.RankWeekClimbersClear.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: BestClearClimberDTO.RankWeekClimbersClear.Response.self)
         }
     )
 }

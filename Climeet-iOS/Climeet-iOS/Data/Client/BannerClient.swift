@@ -16,7 +16,8 @@ extension BannerClient: DependencyKey {
     static var liveValue: BannerClient = .init(
         banners: {
             let endPoint = BannerEndPoint.banners
-            return try await APIClient.shared.request(endPoint, decode: BannerDTO.Response.self)
+            return try await APIClient(tokenRefresher: TokenRefresher())
+                .request(endPoint, decode: BannerDTO.Response.self)
         }
     )
 }
