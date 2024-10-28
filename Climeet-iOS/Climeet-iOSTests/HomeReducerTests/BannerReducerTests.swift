@@ -1,28 +1,27 @@
 //
-//  BannerClient.swift
+//  BannerReducerTests.swift
 //  Climeet-iOS
 //
-//  Created by 송형욱 on 10/6/24.
+//  Created by 권승용 on 10/28/24.
 //
 
-import NetworkKit
-import Dependencies
+import ComposableArchitecture
+import XCTest
 
-struct BannerClient {
-    var banners: @Sendable () async throws -> BannerDTO.Response
-}
+@testable import Climeet_iOS
 
-extension BannerClient: DependencyKey {
-    static var liveValue: BannerClient = .init(
-        banners: {
-            let endPoint = BannerEndPoint.banners
-            return try await APIClient.shared.request(endPoint, decode: BannerDTO.Response.self)
-        }
-    )
+@MainActor
+class BannerReducerTest: XCTestCase {
     
-    static var testValue: BannerClient = .init(
-        banners: {
-            return [
+    func testbannerRequest() async throws {
+        let store = TestStore(initialState: BannerReducer.State()) {
+            BannerReducer()
+        }
+        
+        await store.send(.onFirstAppear)
+        
+        await store.receive(\.bannerResponse) {
+            $0.bannerInfos = try [
                 BannerDTO.ResponseElement(
                     id: 1,
                     bannerImageURL: "https://climeet-production-bucket.s3.ap-northeast-2.amazonaws.com/1615cdad-d781-4bf6-a4de-57a136eb0089.jpg",
@@ -30,7 +29,8 @@ extension BannerClient: DependencyKey {
                     title: "배너테스트1",
                     bannerStartDate: "2024-10-03",
                     bannerEndDate: "2024-10-31",
-                    isPopup: false
+                    isPopup: false,
+                    linkURL: nil
                 ),
                 BannerDTO.ResponseElement(
                     id: 2,
@@ -39,16 +39,12 @@ extension BannerClient: DependencyKey {
                     title: "배너테스트2",
                     bannerStartDate: "2024-10-03",
                     bannerEndDate: "2024-10-31",
-                    isPopup: false
+                    isPopup: false,
+                    linkURL: nil
                 )
-            ]
+            ].map {
+                try BannerInfo(from: $0)
+            }
         }
-    )
-}
-
-extension DependencyValues {
-    var bannerClient: BannerClient {
-        get { self[BannerClient.self] }
-        set { self[BannerClient.self] = newValue }
     }
 }
