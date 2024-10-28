@@ -13,6 +13,7 @@ import DesignSystem
 struct ClimeetiOSApp: App {
     
     init() {
+//        UserDefaults.standard.set(Env.MASTER_TOKEN, forKey: "token")
         applyGlobalNavigationTitleAttributes()
     }
     
