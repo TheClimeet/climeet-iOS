@@ -3,6 +3,7 @@ import Alamofire
 import NetworkKit
 
 public protocol TokenRefreshable: Sendable {
+    func readToken() -> String
     func refreshToken() async -> Bool
 }
 
@@ -16,10 +17,7 @@ final class APIInterceptor: RequestInterceptor {
     
     func adapt(_ urlRequest: URLRequest, for session: Alamofire.Session, completion: @escaping (Result<URLRequest, any Error>) -> Void) {
         var request = urlRequest
-        guard let token = UserDefaults.standard.value(forKey: "token") as? String else { // Get token
-            completion(.failure(NSError(domain: "TokenError", code: 401, userInfo: ["description": "Token not found in UserDefaults.standards"])))
-            return
-        }
+        let token = tokenRefresher.readToken()
         
         request.headers.add(.authorization(bearerToken: token))
         
