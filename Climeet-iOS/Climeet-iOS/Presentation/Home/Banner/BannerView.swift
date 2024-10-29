@@ -12,11 +12,10 @@ import ComposableArchitecture
 struct BannerView: View {
     @Bindable var store: StoreOf<BannerReducer>
     
-    @State var selection: Int = 0
     let screenWidth = UIWindow().screen.bounds.width
     
     var body: some View {
-        TabView(selection: $selection) {
+        TabView(selection: $store.selection) {
             ForEach(store.bannerInfos.indices, id: \.self) { index in
                 KFImage(URL(string: store.bannerInfos[index].bannerImageURL))
                     .scaledToFill()
@@ -27,16 +26,13 @@ struct BannerView: View {
         }
         .frame(width: screenWidth, height: screenWidth / 2.08)
         .tabViewStyle(.page(indexDisplayMode: .never))
-        .animation(.bouncy, value: selection)
-        .onFirstAppear {
-            store.send(.onFirstAppear)
-        }
+        .animation(.bouncy, value: store.selection)
         .overlay {
             VStack {
                 Spacer()
                 HStack {
                     Spacer()
-                    Text(String(format: "%02d / %02d", selection + 1, store.bannerInfos.count))                        .font(.climeetFontCaptionText1())
+                    Text(String(format: "%02d / %02d", store.selection + 1, store.bannerInfos.count))                        .font(.climeetFontCaptionText1())
                         .foregroundStyle(.white)
                         .padding(.vertical, 3)
                         .padding(.horizontal, 4)
@@ -48,6 +44,12 @@ struct BannerView: View {
                         .padding(.bottom, 11)
                 }
             }
+        }
+        .onFirstAppear {
+            store.send(.onFirstAppear)
+        }
+        .onAppear {
+            store.send(.onAppear)
         }
     }
 }
