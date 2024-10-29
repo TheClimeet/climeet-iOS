@@ -19,6 +19,11 @@ final class APIInterceptor: RequestInterceptor {
         var request = urlRequest
         let token = tokenRefresher.readToken()
         
+        guard !token.isEmpty else {
+            completion(.failure(APIError(errorCode: "401 Token Error", message: "Token Missing")))
+            return
+        }
+        
         request.headers.add(.authorization(bearerToken: token))
         
         if let tokenHeader = request.headers.first(where: { $0 == .authorization(bearerToken: token) }) {
