@@ -2,16 +2,34 @@ import Foundation
 import Alamofire
 
 public final class APIClient: APIProtocol, @unchecked Sendable {
-    public static let shared: APIClient = .init()
-    public init() {}
     
-    private var session: Session = {
+    public static let shared = APIClient()
+    private var tokenRefresher: TokenRefreshable?
+    private var isConfigured = false
+
+    private init() { }
+    
+    private lazy var session: Session = {
         let configuration = URLSessionConfiguration.af.default
         configuration.waitsForConnectivity = true
         configuration.timeoutIntervalForRequest = 60 // seconds that a task will wait for data to arrive
         configuration.timeoutIntervalForResource = 300 // seconds for whole resource request to complete ,.
-        return Session(configuration: configuration, eventMonitors: [APILogger()])
+        return Session(
+            configuration: configuration,
+            interceptor: tokenRefresher.map { APIInterceptor(tokenRefresher: $0) },
+            eventMonitors: [APILogger()]
+        )
     }()
+    
+    public func configure(tokenRefresher: TokenRefreshable) {
+        guard !isConfigured else {
+            print("APIClient는 이미 초기화 되었습니다.")
+            return
+        }
+        
+        self.tokenRefresher = tokenRefresher
+        self.isConfigured = true
+    }
     
     public func request<T: Decodable>(_ endpoint: Endpoint, decode: T.Type) async throws -> T {
         do {
