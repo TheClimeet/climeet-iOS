@@ -19,14 +19,12 @@ extension BoardLikeClient: DependencyKey {
     static var liveValue: BoardLikeClient = .init(
         unlike: { boardID in
             let endPoint = BoardLikeEndPoint.unlike(boardID: boardID)
-            let response = try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: String.self)
+            let response = try await APIClient.shared.request(endPoint, decode: String.self)
             return !response.isEmpty
         },
         like: { boardID in
             let endPoint = BoardLikeEndPoint.like(boardID: boardID)
-            let response = try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: String.self)
+            let response = try await APIClient.shared.request(endPoint, decode: String.self)
             return !response.isEmpty
         }
     )

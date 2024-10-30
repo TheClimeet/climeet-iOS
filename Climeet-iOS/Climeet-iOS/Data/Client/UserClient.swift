@@ -37,61 +37,50 @@ extension UserClient: DependencyKey {
     static var liveValue: UserClient = .init(
         usersNotification: { param in
             let endPoint = UserEndPoint.usersNotification(param)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: UserDTO.UsersNotification.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: UserDTO.UsersNotification.Response.self)
         },
         usersAccounts: {
             let endPoint = UserEndPoint.usersAccounts
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: UserDTO.UsersAccounts.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: UserDTO.UsersAccounts.Response.self)
         },
         profile: { userID in
             let endPoint = UserEndPoint.profile(userID: userID)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: UserDTO.Profile.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: UserDTO.Profile.Response.self)
         },
         homeGyms: { userID in
             let endPoint = UserEndPoint.homeGyms(userID: userID)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: UserDTO.HomeGyms.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: UserDTO.HomeGyms.Response.self)
         },
         gymFollowing: {
             let endPoint = UserEndPoint.gymFollowing
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: UserDTO.GymFollowing.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: UserDTO.GymFollowing.Response.self)
         },
         followers: { param in
             let endPoint = UserEndPoint.followers(param)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: UserDTO.Followers.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: UserDTO.Followers.Response.self)
         },
         climberFollowing: {
             let endPoint = UserEndPoint.climberFollowing
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: UserDTO.ClimberFollowing.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: UserDTO.ClimberFollowing.Response.self)
         },
         profileName: { name in
             let endPoint = UserEndPoint.profileName(name: name)
-            let response = try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: String.self)
+            let response = try await APIClient.shared.request(endPoint, decode: String.self)
             return !response.isEmpty
         },
         profileImage: { imageURL in
             let endPoint = UserEndPoint.profileImage(imageURL: imageURL)
-            let response = try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: String.self)
+            let response = try await APIClient.shared.request(endPoint, decode: String.self)
             return !response.isEmpty
         },
         userFCMToken: { token in
             let endPoint = UserEndPoint.usersFCMToken(token: token)
-            let response = try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: String.self)
+            let response = try await APIClient.shared.request(endPoint, decode: String.self)
             return !response.isEmpty
         },
         refreshToken: {
             let endPoint = UserEndPoint.refreshToken
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: UserDTO.RefreshToken.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: UserDTO.RefreshToken.Response.self)
         }
     )
 }

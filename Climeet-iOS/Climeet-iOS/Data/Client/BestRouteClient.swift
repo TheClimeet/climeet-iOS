@@ -17,8 +17,7 @@ extension BestRouteClient: DependencyKey {
     static var liveValue: BestRouteClient = .init(
         rankWeeksRoutes: {
             let endPoint = BestRouteEndPoint.rankWeeksRoutes
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: BestRouteDTO.RankWeeksRoutes.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: BestRouteDTO.RankWeeksRoutes.Response.self)
         }
     )
 }

@@ -23,23 +23,19 @@ extension RouteRecordsClient: DependencyKey {
     static var liveValue: RouteRecordsClient = .init(
         delete: { id in
             let endPoint = RouteRecordsEndPoint.delete(id: id)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: String.self)
+            return try await APIClient.shared.request(endPoint, decode: String.self)
         },
         routeRecord: { id in
             let endPoint = RouteRecordsEndPoint.routeRecord(id: id)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: RouteRecordsDTO.RouteRecord.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: RouteRecordsDTO.RouteRecord.Response.self)
         },
         routeRecords: {
             let endPoint = RouteRecordsEndPoint.routeRecords
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: [RouteRecordsDTO.RouteRecord.Response].self)
+            return try await APIClient.shared.request(endPoint, decode: [RouteRecordsDTO.RouteRecord.Response].self)
         },
         update: { param in
             let endPoint = RouteRecordsEndPoint.update(param)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: RouteRecordsDTO.RouteRecord.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: RouteRecordsDTO.RouteRecord.Response.self)
         }
     )
 }

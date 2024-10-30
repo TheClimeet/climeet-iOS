@@ -35,57 +35,48 @@ extension ClimberClient: DependencyKey {
     static var liveValue: ClimberClient = .init(
         deactivate: {
             let endPoint = ClimberEndPoint.deactivate
-            let response = try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: String.self)
+            let response = try await APIClient.shared.request(endPoint, decode: String.self)
             return !response.isEmpty
         },
         search: { param in
             let endPoint = ClimberEndPoint.search(param)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: ClimberDTO.Search.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: ClimberDTO.Search.Response.self)
         },
         privacySetting: { climberID in
             let endPoint = ClimberEndPoint.privacySetting(climberID: climberID)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: ClimberDTO.PrivacySetting.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: ClimberDTO.PrivacySetting.Response.self)
         },
         checkNickname: { nickname in
             let endPoint = ClimberEndPoint.checkNickname(nickname: nickname)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: Bool.self)
+            return try await APIClient.shared.request(endPoint, decode: Bool.self)
         },
         shortsPrivacySetting: {
             let endPoint = ClimberEndPoint.shortsPrivacySetting
-            let response = try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: String.self)
+            let response = try await APIClient.shared.request(endPoint, decode: String.self)
             return !response.isEmpty
         },
         homeGymPrivacySetting: {
             let endPoint = ClimberEndPoint.homegymPrivacySetting
-            let response = try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: String.self)
+            let response = try await APIClient.shared.request(endPoint, decode: String.self)
             return !response.isEmpty
         },
         averageCompletionRatePrivacySetting: {
             let endPoint = ClimberEndPoint.averageCompletionRatePrivacySetting
-            let response = try await APIClient(tokenRefresher: TokenRefresher()).request(endPoint, decode: String.self)
+            let response = try await APIClient.shared.request(endPoint, decode: String.self)
             return !response.isEmpty
         },
         averageCompletionLevelPrivacySetting: {
             let endPoint = ClimberEndPoint.averageCompletionLevelPrivacySetting
-            let response = try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: String.self)
+            let response = try await APIClient.shared.request(endPoint, decode: String.self)
             return !response.isEmpty
         },
         signupExtra: { param in
             let endPoint = ClimberEndPoint.signupExtra(param)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: SignResponse.self)
+            return try await APIClient.shared.request(endPoint, decode: SignResponse.self)
         },
         login: { param in
             let endPoint = ClimberEndPoint.login(param)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: SignResponse.self)
+            return try await APIClient.shared.request(endPoint, decode: SignResponse.self)
         }
     )
 }

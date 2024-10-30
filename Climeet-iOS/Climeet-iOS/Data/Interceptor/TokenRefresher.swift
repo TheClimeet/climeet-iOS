@@ -21,8 +21,7 @@ struct TokenRefresher: TokenRefreshable {
     func refreshToken() async -> Bool {
         // TODO: RefreshToken API 호출
         let endpoint = UserEndPoint.refreshToken
-        let result = try? await APIClient(tokenRefresher: nil)
-            .request(endpoint, decode: UserDTO.RefreshToken.Response.self)
+        let result = try? await APIClient.shared.request(endpoint, decode: UserDTO.RefreshToken.Response.self)
         
         // TODO: Save RefreshToken to (KeyChain)
         if let refreshToken = result?.refreshToken {

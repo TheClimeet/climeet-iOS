@@ -19,13 +19,11 @@ extension DifficultyMappingClient: DependencyKey {
     static var liveValue: DifficultyMappingClient = .init(
         gymDifficulty: { gymID in
             let endPoint = DifficultyMappingEndPoint.gymDifficulty(gymID: gymID)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: DifficultyMappingDTO.GymDifficulty.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: DifficultyMappingDTO.GymDifficulty.Response.self)
         },
         difficultyColor: {
             let endPoint = DifficultyMappingEndPoint.difficultyColor
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: DifficultyMappingDTO.DifficultyColor.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: DifficultyMappingDTO.DifficultyColor.Response.self)
         }
     )
 }

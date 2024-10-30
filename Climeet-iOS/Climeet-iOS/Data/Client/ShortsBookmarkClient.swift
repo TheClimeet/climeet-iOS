@@ -17,8 +17,7 @@ extension ShortsBookmarkClient: DependencyKey {
     static var liveValue: ShortsBookmarkClient = .init(
         bookmark: { shortsID in
             let endPoint = ShortsBookmarkEndPoint.bookmark(shortsID: shortsID)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: String.self)
+            return try await APIClient.shared.request(endPoint, decode: String.self)
         }
     )
 }

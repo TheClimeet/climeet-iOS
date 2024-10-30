@@ -17,8 +17,7 @@ extension BestLevelClimberClient: DependencyKey {
     static var liveValue: BestLevelClimberClient = .init(
         rankWeeksClimbersLevel: {
             let endPoint = BestLevelClimberEndPoint.rankWeeksClimbersLevel
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: BestLevelClimberDTO.RankWeeksClimbersLevel.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: BestLevelClimberDTO.RankWeeksClimbersLevel.Response.self)
         }
     )
 }

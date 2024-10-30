@@ -21,18 +21,15 @@ extension ClimbingReviewClient: DependencyKey {
     static var liveValue: ClimbingReviewClient = .init(
         gymReviews: { param in
             let endPoint = ClimbingReviewEndPoint.gymReviews(param)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: ClimbingReviewDTO.GymReviews.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: ClimbingReviewDTO.GymReviews.Response.self)
         },
         update: { param in
             let endPoint = ClimbingReviewEndPoint.update(param)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: String.self)
+            return try await APIClient.shared.request(endPoint, decode: String.self)
         },
         create: { param in
             let endPoint = ClimbingReviewEndPoint.create(param)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: String.self)
+            return try await APIClient.shared.request(endPoint, decode: String.self)
         }
     )
 }

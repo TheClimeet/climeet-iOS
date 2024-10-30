@@ -45,78 +45,63 @@ extension ClimbingRecordsClient: DependencyKey {
     static var liveValue: ClimbingRecordsClient = .init(
         delete: { id in
             let endPoint = ClimbingRecordsEndPoint.delete(id: id)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: String.self)
+            return try await APIClient.shared.request(endPoint, decode: String.self)
         },
         climbingRecords: {
             let endPoint = ClimbingRecordsEndPoint.climbingRecords
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: ClimbingRecordsDTO.ClimbingRecords.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: ClimbingRecordsDTO.ClimbingRecords.Response.self)
         },
         climbingRecord: { id in
             let endPoint = ClimbingRecordsEndPoint.climbingRecords
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: ClimbingRecordsDTO.ClimbingRecord.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: ClimbingRecordsDTO.ClimbingRecord.Response.self)
         },
         usersStatistics: { userID in
             let endPoint = ClimbingRecordsEndPoint.usersStatistics(userID: userID)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: ClimbingRecordsDTO.UsersStatistics.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: ClimbingRecordsDTO.UsersStatistics.Response.self)
         },
         usersList: { userID in
             let endPoint = ClimbingRecordsEndPoint.usersList(userID: userID)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: ClimbingRecordsDTO.UsersList.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: ClimbingRecordsDTO.UsersList.Response.self)
         },
         gymsStatistics: { userID, gymID in
             let endPoint = ClimbingRecordsEndPoint.gymsStatistics(userID: userID, gymID: gymID)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: ClimbingRecordsDTO.GymsStatistics.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: ClimbingRecordsDTO.GymsStatistics.Response.self)
         },
         myStatisticsMonths: { year, month in
             let endPoint = ClimbingRecordsEndPoint.myStatisticsMonths(year: year, month: month)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: ClimbingRecordsDTO.MyStatisticsMonths.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: ClimbingRecordsDTO.MyStatisticsMonths.Response.self)
         },
         myMonthsList: { year, month in
             let endPoint = ClimbingRecordsEndPoint.myMonthsList(year: year, month: month)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: ClimbingRecordsDTO.UsersList.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: ClimbingRecordsDTO.UsersList.Response.self)
         },
         myGymStatisticsMonth: { param in
             let endPoint = ClimbingRecordsEndPoint.myGymStatisticsMonth(param)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: ClimbingRecordsDTO.MyGymStatisticsMonth.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: ClimbingRecordsDTO.MyGymStatisticsMonth.Response.self)
         },
         gymStatisticsWeeks: { gymID in
             let endPoint = ClimbingRecordsEndPoint.gymStatisticsWeeks(gymID: gymID)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: ClimbingRecordsDTO.GymStatisticsWeeks.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: ClimbingRecordsDTO.GymStatisticsWeeks.Response.self)
         },
         gymRankWeeksClimbersTime: { gymID in
             let endPoint = ClimbingRecordsEndPoint.gymRankWeeksClimbersTime(gymID: gymID)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: ClimbingRecordsDTO.GymRankWeeksClimbersTime.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: ClimbingRecordsDTO.GymRankWeeksClimbersTime.Response.self)
         },
         gymRankWeeksClimbersLevel: { gymID in
             let endPoint = ClimbingRecordsEndPoint.gymRankWeeksClimbersLevel(gymID: gymID)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: ClimbingRecordsDTO.GymRankWeeksClimbersLevel.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: ClimbingRecordsDTO.GymRankWeeksClimbersLevel.Response.self)
         },
         gymRankWeeksClimbersClear: { gymID in
             let endPoint = ClimbingRecordsEndPoint.gymRankWeeksClimbersClear(gymID: gymID)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: ClimbingRecordsDTO.GymRankWeeksClimbersClear.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: ClimbingRecordsDTO.GymRankWeeksClimbersClear.Response.self)
         },
         update: { param in
             let endPoint = ClimbingRecordsEndPoint.update(param)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: ClimbingRecordsDTO.Update.Response.self)
+            return try await APIClient.shared.request(endPoint, decode: ClimbingRecordsDTO.Update.Response.self)
         },
         create: { param in
             let endPoint = ClimbingRecordsEndPoint.create(param)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .request(endPoint, decode: String.self)
+            return try await APIClient.shared.request(endPoint, decode: String.self)
         }
     )
 }

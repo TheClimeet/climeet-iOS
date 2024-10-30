@@ -17,13 +17,11 @@ extension S3Client: DependencyKey {
     static var liveValue: S3Client = .init(
         retoolFile: { param in
             let endpoint = S3EndPoint.retoolUpload(data: param.file)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .upload(endpoint, decode: S3DTO.Retool.Response.self)
+            return try await APIClient.shared.upload(endpoint, decode: S3DTO.Retool.Response.self)
         },
         file: { param in
             let endpoint = S3EndPoint.upload(data: param.file)
-            return try await APIClient(tokenRefresher: TokenRefresher())
-                .upload(endpoint, decode: S3DTO.File.Response.self)
+            return try await APIClient.shared.upload(endpoint, decode: S3DTO.File.Response.self)
         }
     )
 }
