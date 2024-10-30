@@ -3,11 +3,11 @@ import Alamofire
 
 public final class APIClient: APIProtocol, @unchecked Sendable {
     
-    private let tokenRefresher: TokenRefreshable?
-    
-    public init(tokenRefresher: TokenRefreshable? = nil) {
-        self.tokenRefresher = tokenRefresher
-    }
+    public static let shared = APIClient()
+    private var tokenRefresher: TokenRefreshable?
+    private var isConfigured = false
+
+    private init() { }
     
     private lazy var session: Session = {
         let configuration = URLSessionConfiguration.af.default
@@ -20,6 +20,16 @@ public final class APIClient: APIProtocol, @unchecked Sendable {
             eventMonitors: [APILogger()]
         )
     }()
+    
+    public func configure(tokenRefresher: TokenRefreshable) {
+        guard !isConfigured else {
+            print("APIClient는 이미 초기화 되었습니다.")
+            return
+        }
+        
+        self.tokenRefresher = tokenRefresher
+        self.isConfigured = true
+    }
     
     public func request<T: Decodable>(_ endpoint: Endpoint, decode: T.Type) async throws -> T {
         do {
