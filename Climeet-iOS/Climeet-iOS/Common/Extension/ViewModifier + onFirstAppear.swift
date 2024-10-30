@@ -7,16 +7,16 @@
 
 import SwiftUI
 
-public struct FirstAppearModifer: ViewModifier {
+struct FirstAppearModifer: ViewModifier {
 
     private let action: () async -> Void
     @State private var hasAppeared = false
     
-    public init(_ action: @escaping () async -> Void) {
+    init(_ action: @escaping () async -> Void) {
         self.action = action
     }
     
-    public func body(content: Content) -> some View {
+    func body(content: Content) -> some View {
         content
             .task {
                 guard !hasAppeared else { return }
