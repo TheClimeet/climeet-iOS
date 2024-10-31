@@ -34,7 +34,7 @@ struct ActivityTabView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
-                        
+                        store.send(.closeButtonTapped)
                     }, label: {
                         Image("activity_close")
                             .resizable()
