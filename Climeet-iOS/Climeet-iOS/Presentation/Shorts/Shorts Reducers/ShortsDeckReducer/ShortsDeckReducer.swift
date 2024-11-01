@@ -110,8 +110,9 @@ struct ShortsDeckReducer {
                         let shortsDeckItems = response.result.compactMap {
                             $0.toEntity()
                         }
+                        
                         let result = ShortsDeck(page: response.page, hasNext: response.hasNext, result: shortsDeckItems)
-                        print(result)
+                        
                         await send(.fetchResult(result))
                     } catch let error {
                         Log.error("fetchShortsItem에서 에러 발생", "error: \(error)")
