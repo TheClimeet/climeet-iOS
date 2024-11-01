@@ -22,7 +22,7 @@ struct ShortsDeckView: View {
             ScrollView {
                 ShortsDeckAddFollowView()
                 LazyVGrid(columns: columns, spacing: 0) {
-                    ForEach(store.shortsDeckItems, id: \.shortsId) { item in
+                    ForEach(store.shortsDeckItems, id: \.self) { item in
                         Button(action: {
                             store.send(.tapShortsItem)
                         }, label: {

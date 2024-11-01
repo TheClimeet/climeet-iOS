@@ -14,7 +14,7 @@ struct ShortsDeck {
 }
 
 //TODO: DTO 역할 분리
-struct ShortsDeckItem: Decodable, Equatable, Hashable {
+struct ShortsDeckItem: Hashable {
     let shortsId: Int
     let thumbnailImageUrl: String
     let gymName: String?
@@ -24,7 +24,7 @@ struct ShortsDeckItem: Decodable, Equatable, Hashable {
     let shortsDetailInfo: ShortsDetailInfo
 }
 
-struct ShortsDetailInfo: Decodable, Equatable, Hashable {
+struct ShortsDetailInfo: Hashable {
     let userShortsSimpleInfo: UserShortsSimpleInfo
     let shortsId: Int
     let gymName: String?
@@ -45,7 +45,7 @@ struct ShortsDetailInfo: Decodable, Equatable, Hashable {
     let isSoundEnabled: Bool
 }
 
-struct UserShortsSimpleInfo: Decodable, Equatable, Hashable {
+struct UserShortsSimpleInfo: Hashable {
     let userId: Int
     let profileImgUrl: String?
     let profileName: String
