@@ -19,6 +19,9 @@ enum MainTab {
 struct MainTabView: View {
     
     @State private var selectedTab: MainTab = .home
+    private let shortsDeckStore = Store(initialState: ShortsDeckReducer.State(), reducer: {
+        ShortsDeckReducer()
+    })
     
     var body: some View {
         GeometryReader { geometry in
@@ -29,9 +32,7 @@ struct MainTabView: View {
                     HomeView()
                 case .shorts:
                     // 쇼츠화면
-                    ShortsDeckView(store: Store(initialState: ShortsDeckReducer.State(), reducer: {
-                        ShortsDeckReducer()
-                    }))
+                    ShortsDeckView(store: shortsDeckStore)
                 case .upload:
                     // 업로드화면
                     ShortsSelectView(store: Store(initialState: ShortsSelectReducer.State(), reducer: {

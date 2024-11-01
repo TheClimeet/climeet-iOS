@@ -3,13 +3,16 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 71;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		0489EE932C2EA04500BFC55B /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 0489EE922C2EA04500BFC55B /* Alamofire */; };
 		0489EE962C2EA05900BFC55B /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 0489EE952C2EA05900BFC55B /* ComposableArchitecture */; };
 		0489EE9C2C2EA18D00BFC55B /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 0489EE9B2C2EA18D00BFC55B /* Kingfisher */; };
+		04ED90072CD3A519009B59A0 /* Shared.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 04ED90062CD3A519009B59A0 /* Shared.xcconfig */; };
+		04ED90082CD3A519009B59A0 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 04ED90042CD3A519009B59A0 /* Debug.xcconfig */; };
+		04ED90092CD3A519009B59A0 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 04ED90052CD3A519009B59A0 /* Release.xcconfig */; };
 		6CB868862CBBE6B8008D0BA5 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 6CB868852CBBE6B8008D0BA5 /* DesignSystem */; };
 		6CFF85E62CB22A5400572F2E /* NetworkKit in Frameworks */ = {isa = PBXBuildFile; productRef = 6CFF85E52CB22A5400572F2E /* NetworkKit */; };
 		B94EC2422BD1473E00DC3FDB /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = B94EC2412BD1473E00DC3FDB /* .swiftlint.yml */; };
@@ -36,6 +39,9 @@
 /* Begin PBXFileReference section */
 		0453294E2C5B8E3400BBE289 /* Climeet-iOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Climeet-iOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0489EEF92C3BE58E00BFC55B /* Climeet-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Climeet-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		04ED90042CD3A519009B59A0 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		04ED90052CD3A519009B59A0 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		04ED90062CD3A519009B59A0 /* Shared.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Shared.xcconfig; sourceTree = "<group>"; };
 		B94EC2222BD13CBB00DC3FDB /* Climeet-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Climeet-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B94EC2412BD1473E00DC3FDB /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -100,6 +106,9 @@
 			children = (
 				604B958E2CC394EF005EDD29 /* XCConfig */,
 				B94EC2412BD1473E00DC3FDB /* .swiftlint.yml */,
+				04ED90042CD3A519009B59A0 /* Debug.xcconfig */,
+				04ED90052CD3A519009B59A0 /* Release.xcconfig */,
+				04ED90062CD3A519009B59A0 /* Shared.xcconfig */,
 				604B96BF2CC394F2005EDD29 /* Climeet-iOS */,
 				604B97A82CC394F5005EDD29 /* Climeet-iOSTests */,
 				604B97AC2CC394F7005EDD29 /* Climeet-iOSUITests */,
@@ -260,6 +269,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04ED90072CD3A519009B59A0 /* Shared.xcconfig in Resources */,
+				04ED90082CD3A519009B59A0 /* Debug.xcconfig in Resources */,
+				04ED90092CD3A519009B59A0 /* Release.xcconfig in Resources */,
 				B94EC2422BD1473E00DC3FDB /* .swiftlint.yml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -327,8 +339,6 @@
 /* Begin XCBuildConfiguration section */
 		045329572C5B8E3400BBE289 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 604B958E2CC394EF005EDD29 /* XCConfig */;
-			baseConfigurationReferenceRelativePath = Debug.xcconfig;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -351,8 +361,6 @@
 		};
 		045329582C5B8E3400BBE289 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 604B958E2CC394EF005EDD29 /* XCConfig */;
-			baseConfigurationReferenceRelativePath = Release.xcconfig;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -375,8 +383,6 @@
 		};
 		0489EF002C3BE58E00BFC55B /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 604B958E2CC394EF005EDD29 /* XCConfig */;
-			baseConfigurationReferenceRelativePath = Debug.xcconfig;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -400,8 +406,6 @@
 		};
 		0489EF012C3BE58E00BFC55B /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 604B958E2CC394EF005EDD29 /* XCConfig */;
-			baseConfigurationReferenceRelativePath = Release.xcconfig;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -425,8 +429,6 @@
 		};
 		B94EC22E2BD13CBD00DC3FDB /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 604B958E2CC394EF005EDD29 /* XCConfig */;
-			baseConfigurationReferenceRelativePath = Debug.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -490,8 +492,6 @@
 		};
 		B94EC22F2BD13CBD00DC3FDB /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 604B958E2CC394EF005EDD29 /* XCConfig */;
-			baseConfigurationReferenceRelativePath = Release.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -548,8 +548,7 @@
 		};
 		B94EC2312BD13CBD00DC3FDB /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 604B958E2CC394EF005EDD29 /* XCConfig */;
-			baseConfigurationReferenceRelativePath = Debug.xcconfig;
+			baseConfigurationReference = 04ED90042CD3A519009B59A0 /* Debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -585,8 +584,7 @@
 		};
 		B94EC2322BD13CBD00DC3FDB /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 604B958E2CC394EF005EDD29 /* XCConfig */;
-			baseConfigurationReferenceRelativePath = Release.xcconfig;
+			baseConfigurationReference = 04ED90052CD3A519009B59A0 /* Release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

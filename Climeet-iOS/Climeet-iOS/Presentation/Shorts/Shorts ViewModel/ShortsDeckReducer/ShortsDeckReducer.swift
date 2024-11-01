@@ -105,7 +105,7 @@ struct ShortsDeckReducer {
                 print("in loading")
                 return .run { [page = state.page] send in
                     do {
-                        let response = try await shortsClient.popularShorts(.init(page: page, size: self.size))
+                        let response = try await shortsClient.popularShorts(.init(page: 0, size: self.size))
                         let shortsDeckItems = response.result.compactMap {
                             $0.toEntity()
                         }
