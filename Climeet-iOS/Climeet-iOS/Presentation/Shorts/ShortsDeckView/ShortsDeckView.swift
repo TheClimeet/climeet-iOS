@@ -38,8 +38,8 @@ struct ShortsDeckView: View {
                         })
                     }
                     .padding(.horizontal, 0)
+                    
                 }
-                
                 switch store.fetchingStatus {
                 case .isLoading:
                     ProgressView()
