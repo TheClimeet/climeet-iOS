@@ -25,6 +25,8 @@ struct BannerReducer {
         case onFirstAppear
         case onAppear
         case onDisappear
+        case onUserDrag
+        case onUserDragEnd
         case timerTick
         case bannerResponse([BannerInfo])
     }
@@ -54,6 +56,7 @@ struct BannerReducer {
                 }
                 
             case .onAppear:
+                state.timerCount = 0
                 return .run { send in
                     while true {
                         try await Task.sleep(for: .seconds(1))
@@ -65,8 +68,22 @@ struct BannerReducer {
             case .onDisappear:
                 return .cancel(id: CancelID.timer)
                 
+            case .onUserDrag:
+                return .cancel(id: CancelID.timer)
+                
+            case .onUserDragEnd:
+                state.timerCount = 0
+                return .run { send in
+                    while true {
+                        try await Task.sleep(for: .seconds(1))
+                        await send(.timerTick)
+                    }
+                }
+                .cancellable(id: CancelID.timer)
+                
             case .timerTick:
                 state.timerCount += 1
+                print(state.timerCount)
                 if state.timerCount == bannerChangeTime {
                     state.timerCount = 0
                     // TODO: banner change

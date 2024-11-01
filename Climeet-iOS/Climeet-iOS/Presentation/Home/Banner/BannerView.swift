@@ -41,7 +41,7 @@ struct BannerView: View {
                     return nil
                 }
                 
-                var nextIndex = store.selection + 1
+                let nextIndex = store.selection + 1
                 if nextIndex == store.bannerInfos.count {
                     return URL(string: store.bannerInfos[0].bannerImageURL)
                 } else {
@@ -75,6 +75,15 @@ struct BannerView: View {
         .onAppear {
             store.send(.onAppear)
         }
+        .simultaneousGesture(
+            DragGesture()
+                .onChanged { _ in
+                    store.send(.onUserDrag)
+                }
+                .onEnded { _ in
+                    store.send(.onUserDragEnd)
+                }
+        )
     }
 }
 
@@ -85,10 +94,11 @@ struct BannerView: View {
     BannerView(store: store)
 }
 
-struct BidirectionalInfiniteBanner: View {
+fileprivate struct BidirectionalInfiniteBanner: View {
     
     @Binding var currentIndex: Int
     @State private var selection: Int = 0
+    @State private var isUserDragging: Bool = false
     
     let screenWidth = UIWindow().screen.bounds.width
     let bannerCount: Int
