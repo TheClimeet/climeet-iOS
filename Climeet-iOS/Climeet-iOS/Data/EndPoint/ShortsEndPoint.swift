@@ -97,12 +97,11 @@ extension ShortsEndPoint: Endpoint {
     }
     
     var headers: Alamofire.HTTPHeaders? {
-        guard let token else { return nil }
         switch self {
         case .upload:
-            return [.authorization(bearerToken: token), .contentType("multipart/form-data")]
+            return .applicationJSON
         default:
-            return [.authorization(bearerToken: token)]
+            return nil
         }
     }
     

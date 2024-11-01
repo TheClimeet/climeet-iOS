@@ -40,8 +40,7 @@ extension RouteVersionEndPoint: Endpoint {
     }
     
     var headers: Alamofire.HTTPHeaders? {
-        guard let token else { return nil }
-        return [.authorization(bearerToken: token)]
+        return nil
     }
     
     var body: Alamofire.Parameters? {

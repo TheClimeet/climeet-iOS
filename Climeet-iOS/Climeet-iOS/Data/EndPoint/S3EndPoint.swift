@@ -32,8 +32,10 @@ extension S3EndPoint: Endpoint {
     }
     
     var headers: Alamofire.HTTPHeaders? {
-        guard let token else { return nil }
-        return [.authorization(bearerToken: token), .contentType("multipart/form-data")]
+        switch self {
+        case .retoolUpload, .upload:
+            return .applicationJSON
+        }
     }
     
     var body: Alamofire.Parameters? {
