@@ -37,8 +37,7 @@ extension RouteRecordsEndPoint: Endpoint {
     }
     
     var headers: Alamofire.HTTPHeaders? {
-        guard let token else { return nil }
-        return [.authorization(bearerToken: token)]
+        return nil
     }
     
     var body: Alamofire.Parameters? {
@@ -53,18 +52,7 @@ extension RouteRecordsEndPoint: Endpoint {
         }
     }
     
-    var token: String? { UserDefaults.standard.value(forKey: "token") as? String }
+    var token: String? { KeyChain.shared.refreshToken }
     
     var multipart: Alamofire.MultipartFormData? { nil }
-    
-    func asURLRequest() throws -> URLRequest {
-        guard let url = URL(string: baseURL + path) else {
-            throw AppError.urlConvertingError("URL Component 조합 실패")
-        }
-        var request = URLRequest(url: url)
-        request.headers = headers ?? .default
-        request.method = method
-        
-        return request
-    }
 }

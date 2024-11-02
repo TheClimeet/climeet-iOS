@@ -97,12 +97,11 @@ extension ShortsEndPoint: Endpoint {
     }
     
     var headers: Alamofire.HTTPHeaders? {
-        guard let token else { return nil }
         switch self {
         case .upload:
-            return [.authorization(bearerToken: token), .contentType("multipart/form-data")]
+            return .applicationJSON
         default:
-            return [.authorization(bearerToken: token)]
+            return nil
         }
     }
     
@@ -119,16 +118,5 @@ extension ShortsEndPoint: Endpoint {
         }
     }
     
-    var token: String? { UserDefaults.standard.value(forKey: "token") as? String }
-    
-    func asURLRequest() throws -> URLRequest {
-        guard let url = URL(string: baseURL + path) else {
-            throw AppError.urlConvertingError("URL Component 조합 실패")
-        }
-        var request = URLRequest(url: url)
-        request.headers = headers ?? .default
-        request.method = method
-        
-        return request
-    }
+    var token: String? { KeyChain.shared.refreshToken }
 }
