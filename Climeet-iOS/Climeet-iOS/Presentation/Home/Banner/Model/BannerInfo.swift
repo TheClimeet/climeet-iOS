@@ -5,7 +5,7 @@
 //  Created by 권승용 on 10/30/24.
 //
 
-struct BannerInfo: Hashable, Identifiable, Equatable {
+struct BannerInfo: Hashable, Identifiable {
     let id: Int
     let bannerImageURL: String
     let title: String

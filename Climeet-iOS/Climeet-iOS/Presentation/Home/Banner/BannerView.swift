@@ -75,6 +75,9 @@ struct BannerView: View {
         .onAppear {
             store.send(.onAppear)
         }
+        .onDisappear {
+            store.send(.onDisappear)
+        }
         .simultaneousGesture(
             DragGesture()
                 .onChanged { _ in
