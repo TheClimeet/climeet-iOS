@@ -1,5 +1,5 @@
 //
-//  HomeGymShortcut.swift
+//  HomeGymShortcutView.swift
 //  Climeet-iOS
 //
 //  Created by 권승용 on 9/24/24.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct HomeGymShortcut: View {
+struct HomeGymShortcutView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
@@ -72,6 +72,6 @@ struct HomeGymIcon: View {
 #Preview {
     ZStack {
         Color.climeetBackground
-        HomeGymShortcut()
+        HomeGymShortcutView()
     }
 }
