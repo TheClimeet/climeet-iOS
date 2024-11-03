@@ -6,15 +6,21 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
+import Kingfisher
 
 struct HomeGymShortcutView: View {
+    @Bindable var store: StoreOf<HomeGymShortcutReducer>
+    
     var body: some View {
         VStack(spacing: 0) {
             header
                 .padding(.leading, 16)
                 .padding(.bottom, 20)
-            
             scrollView
+        }
+        .onFirstAppear {
+            store.send(.onFirstAppear)
         }
     }
     
@@ -31,11 +37,11 @@ struct HomeGymShortcutView: View {
         ScrollView(.horizontal) {
             let width = UIScreen.main.bounds.width / 4
             HStack(spacing: 0) {
-                ForEach(0..<6, id: \.self) { _ in
+                ForEach(store.homeGymInfo) { homeGymInfo in
                     HomeGymIcon(
-                        resource: .activitytabEllipse,
-                        gymName: "더클라임 연남",
-                        followerCount: 2555
+                        profileURL: homeGymInfo.gymProfileURL,
+                        gymName: homeGymInfo.gymName,
+                        followerCount: homeGymInfo.followerCount
                     )
                     .frame(width: width)
                 }
@@ -47,31 +53,35 @@ struct HomeGymShortcutView: View {
 
 fileprivate
 struct HomeGymIcon: View {
-    let resource: ImageResource
+    let profileURL: String
     let gymName: String
     let followerCount: Int
     
     var body: some View {
         VStack(spacing: 0) {
-            Image(resource)
+            KFImage(URL(string: profileURL))
                 .resizable()
-                .scaledToFit()
+                .scaledToFill()
                 .frame(width: 50, height: 50)
+                .clipShape(Circle())
                 .padding(.bottom, 11)
             Text(gymName)
                 .font(.climeetFontCaptionText3())
                 .foregroundStyle(Color.starNotFilled)
                 .padding(.bottom, 5)
             Text("팔로워 \(followerCount)")
-                .font(.climeetFontCaptionText2())
+                .font(.custom("Pretendard-Regular", size: 10))
                 .foregroundStyle(Color.text05)
         }
     }
 }
 
 #Preview {
+    let store = StoreOf<HomeGymShortcutReducer>(initialState: HomeGymShortcutReducer.State()) {
+        HomeGymShortcutReducer()
+    }
     ZStack {
         Color.climeetBackground
-        HomeGymShortcutView()
+        HomeGymShortcutView(store: store)
     }
 }
