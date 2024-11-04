@@ -36,16 +36,5 @@ struct ActivityTimerView: View {
             Spacer()
         }
         .background(Color.text09)
-        .onReadSize({ size in
-            store.send(.readViewSize(size))
-        })
-        .sheet(
-            item: $store.scope(
-                state: \.destination?.searchGymSheet,
-                action: \.destination.searchGymSheet)
-        ) { searchGymStore in
-            SearchView(store: searchGymStore)
-                .presentationDetents([.height(store.bottomSheetHeight)])
-        }
     }
 }
