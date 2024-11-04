@@ -18,6 +18,7 @@ struct ActivityTimerReducer {
     
     enum Action {
         case gymSelectionButtonTapped
+        case gymSet(Gym)
         case startButtonTapped
         case pauseButtonTapped
         case resetButtonTapped
@@ -32,6 +33,11 @@ struct ActivityTimerReducer {
         Reduce { state, action in
             switch action {
             case .gymSelectionButtonTapped:
+                return .none
+                
+            case .gymSet(let gym):
+                state.selectedGym = gym
+                
                 return .none
                 
             case .startButtonTapped:

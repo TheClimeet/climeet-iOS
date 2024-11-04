@@ -70,10 +70,11 @@ struct ActivityTabReducer {
                 return .none
                 
             case .destination(.presented(.searchGymSheet(.delegate(.selectGym(let gym))))):
-                state.activityTimerState.selectedGym = gym
-                state.activityTimerRecordState.selectedGym = gym
                 
-                return .none
+                return .run { send in
+                    await send(.activityTimerAction(.gymSet(gym)))
+                    await send(.activityTimerRecordAction(.gymSet(gym)))
+                }
                 
             case .destination:
                 return .none
