@@ -17,7 +17,7 @@ struct ChallengeStats: View {
             Spacer()
             Stat(stat: "V6+", title: "평균레벨")
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 47)
         .font(.climeetFontTitle3())
         .foregroundColor(.levelWhite)
     }

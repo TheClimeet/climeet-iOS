@@ -14,25 +14,27 @@ struct ActivityTimerView: View {
         
     var body: some View {
         
-        VStack(spacing: 40) {
+        VStack(spacing: 0) {
             ChallengeStats()
+                .padding(.vertical, 49)
             
             SelectGymButton(
                 selectedGym: store.selectedGym,
                 buttonAction: { store.send(.gymSelectionButtonTapped) })
+            .padding(.bottom, 40)
             
+            ActivityTimerText(elapsedTime: store.elapsedTime)
+                .padding(.bottom, 110)
+
             ExpandableControlButton(
                 startAction: { store.send(.startButtonTapped) },
                 pauseAction: { store.send(.pauseButtonTapped) },
                 resetAction: { store.send(.resetButtonTapped) }
             )
-            
-            ActivityTimer(elapsedTime: store.elapsedTime)
+            .padding(.bottom, 52)
             
             Spacer()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(25)
         .background(Color.text09)
         .onReadSize({ size in
             store.send(.readViewSize(size))

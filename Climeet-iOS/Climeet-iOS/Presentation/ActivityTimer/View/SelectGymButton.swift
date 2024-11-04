@@ -26,13 +26,13 @@ struct SelectGymButton: View {
                         .font(.climeetFontParagraph4())
                         .foregroundColor(Color.starNotFilled)
                 } else {
-                    Text("암장을 선택해주세요")
+                    Text("이용할 암장을 선택해주세요")
                         .font(.climeetFontParagraph4())
                         .foregroundColor(Color.starNotFilled)
                 }
             }
         })
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 65)
         .frame(height: 35)
         .background(Color.text08)
         .cornerRadius(5.0)

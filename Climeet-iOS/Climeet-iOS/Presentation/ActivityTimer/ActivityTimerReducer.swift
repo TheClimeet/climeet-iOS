@@ -20,7 +20,7 @@ struct ActivityTimerReducer {
         var screenSize = CGSize(width: 0, height: 0)
         var bottomSheetHeight: CGFloat = 0.0
         var selectedGym = Gym()
-        var elapsedTime: String = ""
+        var elapsedTime: String = "00:00:0"
         
         @Presents var destination: Destination.State?
     }
