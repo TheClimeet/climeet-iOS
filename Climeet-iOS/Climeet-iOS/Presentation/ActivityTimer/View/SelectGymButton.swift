@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SelectGymButton: View {
     
-    let selectedGym: Gym
+    let selectedGym: Gym?
     let buttonAction: () -> Void
     
     var body: some View {
@@ -17,7 +17,7 @@ struct SelectGymButton: View {
             buttonAction()
         }, label: {
             HStack(alignment: .center, spacing: 5) {
-                if !selectedGym.name.isEmpty {
+                if let selectedGym = selectedGym {
                     Image("activitytimer_map")
                         .resizable()
                         .frame(width: 15, height: 15)
