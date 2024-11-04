@@ -12,7 +12,7 @@ import ComposableArchitecture
 struct ActivityTabReducer {
     @ObservableState
     struct State {
-        var selectedGym = Gym()
+        var selectedGym: Gym?
         var elapsedTimeInterval: TimeInterval?
         
         var activityTimerState = ActivityTimerReducer.State()
@@ -34,6 +34,11 @@ struct ActivityTabReducer {
             switch action {
             case .closeButtonTapped:
                 return .run { _ in await dismiss() }
+                
+            case .activityTimerAction(.destination(.presented(.searchGymSheet(.delegate(.selectGym(let gym)))))):
+                state.selectedGym = gym
+                
+                return .none
                 
             case .activityTimerAction(.timeChanged(let timeInterval)):
                 state.elapsedTimeInterval = timeInterval
