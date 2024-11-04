@@ -17,31 +17,17 @@ struct ActivityTimerView: View {
         VStack(spacing: 40) {
             ChallengeStats()
             
-            Button(action: {
-                store.send(.gymSelectionButtonTapped)
-            }, label: {
-                HStack(alignment: .center, spacing: 5) {
-                    if !store.selectedGym.name.isEmpty {
-                        Image("activitytimer_map")
-                            .resizable()
-                            .frame(width: 15, height: 15)
-                        
-                        Text(store.selectedGym.name)
-                            .font(.climeetFontParagraph4())
-                            .foregroundColor(Color.starNotFilled)
-                    } else {
-                        Text("암장을 선택해주세요")
-                            .font(.climeetFontParagraph4())
-                            .foregroundColor(Color.starNotFilled)
-                    }
-                }
-            })
-            .padding(.horizontal, 20)
-            .frame(height: 35)
-            .background(Color.text08)
-            .cornerRadius(5.0)
+            SelectGymButton(
+                selectedGym: store.selectedGym,
+                buttonAction: { store.send(.gymSelectionButtonTapped) })
             
-            ExpandableControlButton()
+            ExpandableControlButton(
+                startAction: { store.send(.startButtonTapped) },
+                pauseAction: { store.send(.pauseButtonTapped) },
+                resetAction: { store.send(.resetButtonTapped) }
+            )
+            
+            ActivityTimer(elapsedTime: store.elapsedTime)
             
             Spacer()
         }
