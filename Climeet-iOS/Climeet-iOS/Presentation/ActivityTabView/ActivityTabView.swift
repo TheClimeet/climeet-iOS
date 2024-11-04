@@ -12,11 +12,6 @@ import DesignSystem
 struct ActivityTabView: View {
     @Bindable var store: StoreOf<ActivityTabReducer>
     
-    private let activityCalendarStore = Store(
-        initialState: ActivityCalendarReducer.State(), reducer: {
-            ActivityCalendarReducer()
-        })
-    
     var body: some View {
         NavigationStack {
             TabView {
@@ -24,7 +19,8 @@ struct ActivityTabView: View {
                     state: \.activityTimerState, action: \.activityTimerAction)
                 )
                 
-                ActivityCalendarView(store: activityCalendarStore)
+                ActivityTimerRecordView(store: store.scope(
+                    state: \.activityTimerRecordState, action: \.activityTimerRecordAction))
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -45,6 +41,17 @@ struct ActivityTabView: View {
         .onAppear {
             UIPageControl.appearance().pageIndicatorTintColor = UIColor(.gray217)
             UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(.climeetMain)
+        }
+        .onReadSize({ size in
+            store.send(.readViewSize(size))
+        })
+        .sheet(
+            item: $store.scope(
+                state: \.destination?.searchGymSheet,
+                action: \.destination.searchGymSheet)
+        ) { searchGymStore in
+            SearchView(store: searchGymStore)
+                .presentationDetents([.height(store.bottomSheetHeight)])
         }
     }
 }

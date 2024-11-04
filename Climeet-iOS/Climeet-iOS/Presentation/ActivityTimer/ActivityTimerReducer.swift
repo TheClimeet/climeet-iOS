@@ -10,19 +10,10 @@ import ComposableArchitecture
 
 @Reducer
 struct ActivityTimerReducer {
-    @Reducer
-    enum Destination {
-        case searchGymSheet(SearchReducer)
-    }
-    
     @ObservableState
     struct State {
-        var screenSize = CGSize(width: 0, height: 0)
-        var bottomSheetHeight: CGFloat = 0.0
-        var selectedGym = Gym()
+        var selectedGym: Gym?
         var elapsedTime: String = "00:00:0"
-        
-        @Presents var destination: Destination.State?
     }
     
     enum Action {
@@ -32,8 +23,6 @@ struct ActivityTimerReducer {
         case resetButtonTapped
         case timerTask
         case timeChanged(TimeInterval)
-        case readViewSize(CGSize)
-        case destination(PresentationAction<Destination.Action>)
     }
     
     @ObservationIgnored @Dependency(\.timerClient) private var timerClient
@@ -43,14 +32,6 @@ struct ActivityTimerReducer {
         Reduce { state, action in
             switch action {
             case .gymSelectionButtonTapped:
-                state.bottomSheetHeight = state.screenSize.height *
-                SheetType.search.displaySizeRatio
-                
-                let reducerState = SearchReducer.State(
-                    transitionType: .modal
-                )
-                state.destination = .searchGymSheet(reducerState)
-                
                 return .none
                 
             case .startButtonTapped:
@@ -81,22 +62,8 @@ struct ActivityTimerReducer {
                 state.elapsedTime = formattedTime(timeInterval)
                 
                 return .none
-                
-            case .readViewSize(let size):
-                state.screenSize = size
-                
-                return .none
-                
-            case let .destination(.presented(.searchGymSheet(.delegate(.selectGym(gym))))):
-                state.selectedGym = gym
-                
-                return .none
-                
-            case .destination:
-                return .none
             }
         }
-        .ifLet(\.$destination, action: \.destination)
     }
 }
 
