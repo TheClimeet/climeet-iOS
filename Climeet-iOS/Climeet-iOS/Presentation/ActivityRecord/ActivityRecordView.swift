@@ -74,10 +74,8 @@ struct ActivityRecordView: View {
                             .background(Color.text08)
                             .cornerRadius(5)
                         } else {
-                            RouteSelectionView(
-                                store: store.scope(
-                                    state: \.routeSelectionState, action: \.routeSelectionAction
-                                )
+                            RouteSelectionView(store: store.scope(
+                                state: \.routeSelectionState, action: \.routeSelectionAction)
                             )
                         }
                     }

@@ -15,16 +15,10 @@ struct ActivityTabView: View {
     var body: some View {
         NavigationStack {
             TabView {
-                ActivityTimerView(
-                    gym: store.selectedGym,
-                    handleClimbingGymSelectionTapped: {
-                        store.send(.selectGymButtonTapped)
-                    }
+                ActivityTimerView(store: store.scope(
+                    state: \.activityTimerState, action: \.activityTimerAction)
                 )
                 
-                ActivityCalendarView(store: Store(initialState: ActivityCalendarReducer.State(), reducer: {
-                    ActivityCalendarReducer()
-                }))
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -32,7 +26,7 @@ struct ActivityTabView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
-                        
+                        store.send(.closeButtonTapped)
                     }, label: {
                         Image("activity_close")
                             .resizable()

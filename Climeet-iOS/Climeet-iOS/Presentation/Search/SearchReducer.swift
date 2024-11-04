@@ -84,6 +84,7 @@ struct SearchReducer {
                                 size: 15
                             )
                         )
+                        
                         let result = GymSearchResult(
                             page: response.page,
                             hasNext: response.hasNext,

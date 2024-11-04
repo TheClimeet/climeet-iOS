@@ -10,12 +10,17 @@ import DesignSystem
 
 struct ExpandableControlButton: View {
     @State private var isExpanded = false
-        
+    
+    let startAction: () -> Void
+    let pauseAction: () -> Void
+    let resetAction: () -> Void
+    
     var body: some View {
         HStack {
              ZStack {
                  Button(action: {
-                     // TODO: Pause Action
+                     pauseAction()
+                     
                      withAnimation {
                          isExpanded.toggle()
                      }
@@ -32,7 +37,12 @@ struct ExpandableControlButton: View {
                  .offset(x: isExpanded ? 100 : 0, y: 0)
                  
                  Button(action: {
-                     // TODO: Play & Stop Action
+                     if !isExpanded {
+                         startAction()
+                     } else {
+                         resetAction()
+                     }
+                     
                      withAnimation {
                          isExpanded.toggle()
                      }
@@ -55,8 +65,4 @@ struct ExpandableControlButton: View {
          }
         .animation(.linear(duration: 0.15), value: isExpanded)  // 애니메이션 적용
      }
-}
-
-#Preview {
-    ExpandableControlButton()
 }

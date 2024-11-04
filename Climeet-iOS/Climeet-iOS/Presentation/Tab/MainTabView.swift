@@ -35,6 +35,11 @@ struct MainTabView: View {
         SearchReducer()
     })
     
+    private let activityCalendarStore = Store(
+        initialState: ActivityCalendarReducer.State(), reducer: {
+            ActivityCalendarReducer()
+        })
+    
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
@@ -46,7 +51,7 @@ struct MainTabView: View {
                 case .upload:
                     ShortsSelectView(store: shortsSelectStore)
                 case .activity:
-                    ActivityCalendarView(store: activityCalenderStore)
+                    ActivityCalendarView(store: activityCalendarStore)
                 case .mypage:
                     SearchView(store: searchStore)
                 }
