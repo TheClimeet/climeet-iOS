@@ -19,33 +19,49 @@ struct ActivityTabReducer {
     struct State {
         var screenSize = CGSize(width: 0, height: 0)
         var bottomSheetHeight: CGFloat = 0.0
-        var selectedGym = Gym()
+        var elapsedTimeInterval: TimeInterval?
+        var activityTimerRecordState = ActivityTimerRecordReducer.State()
+        var activityTimerState = ActivityTimerReducer.State()
+        
         @Presents var destination: Destination.State?
     }
     
     enum Action {
-        case destination(PresentationAction<Destination.Action>)
         case readViewSize(CGSize)
         case closeButtonTapped
-        case selectGymButtonTapped
+        case activityTimerRecordAction(ActivityTimerRecordReducer.Action)
+        case activityTimerAction(ActivityTimerReducer.Action)
+        case destination(PresentationAction<Destination.Action>)
     }
     
     @Dependency(\.dismiss) var dismiss
     var body: some ReducerOf<Self> {
+        Scope(state: \.activityTimerState, action: \.activityTimerAction) {
+            ActivityTimerReducer()
+        }
+        Scope(state: \.activityTimerRecordState, action: \.activityTimerRecordAction) {
+            ActivityTimerRecordReducer()
+        }
+        
         Reduce { state, action in
             switch action {
-            case .closeButtonTapped:
-                return .run { _ in await dismiss() }
-                
             case .readViewSize(let size):
                 state.screenSize = size
                 
                 return .none
-
-            case .selectGymButtonTapped:
+                
+            case .closeButtonTapped:
+                return .run { _ in await dismiss() }
+                
+            case .activityTimerAction(.timeChanged(let timeInterval)):
+                state.elapsedTimeInterval = timeInterval
+                
+                return .none
+                
+            case .activityTimerAction(.gymSelectionButtonTapped), .activityTimerRecordAction(.gymSelectionButtonTapped):
                 state.bottomSheetHeight = state.screenSize.height *
                 SheetType.search.displaySizeRatio
-            
+                
                 let reducerState = SearchReducer.State(
                     transitionType: .modal
                 )
@@ -53,16 +69,21 @@ struct ActivityTabReducer {
                 
                 return .none
                 
-            case let .destination(.presented(.searchGymSheet(.delegate(.selectGym(gym))))):
-                state.selectedGym = gym
-
-                return .none
+            case .destination(.presented(.searchGymSheet(.delegate(.selectGym(let gym))))):
+                
+                return .run { send in
+                    await send(.activityTimerAction(.gymSet(gym)))
+                    await send(.activityTimerRecordAction(.gymSet(gym)))
+                }
                 
             case .destination:
+                return .none
                 
+            default:
                 return .none
             }
         }
         .ifLet(\.$destination, action: \.destination)
     }
+
 }
