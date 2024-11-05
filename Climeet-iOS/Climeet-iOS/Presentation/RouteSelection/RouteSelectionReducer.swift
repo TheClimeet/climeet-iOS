@@ -83,7 +83,7 @@ struct RouteSelectionReducer {
                 
             case .requestFilteredRoutes:
                 return .run { [
-                    gymID = state.selectedGym?.responseGymId,
+                    gymID = state.selectedGym?.gymId,
                     sector = state.selectedSector,
                     floor = state.selectedFloor,
                     difficulty = state.selectedDifficulty] send in
@@ -102,11 +102,10 @@ struct RouteSelectionReducer {
                                 .init(
                                     gymID: gymID,
                                     page: currentPage,
-                                    size: 0, // TODO: Size 처리 필요
-                                    floor: floor + 1, // 여기 왜 +1을 하는지?
+                                    size: 10,
+                                    floor: floor + 1,
                                     sectorID: sector.sectorId ?? 0,
-                                    difficulty: difficulty.difficulty ?? 0,
-                                    timePoint: nil
+                                    difficulty: difficulty.difficulty ?? 0
                                 )
                             )
                             
@@ -114,7 +113,8 @@ struct RouteSelectionReducer {
                                 FilteredRoute(from: $0)
                             }
                             
-                            guard let routes = filterdRoutes, let hasNextResponse = response.hasNext else {
+                            guard let routes = filterdRoutes,
+                                  let hasNextResponse = response.hasNext else {
                                 Log.error("No filtered Routes", [])
                                 throw AppError.networkError("No filtered Routes")
                             }
