@@ -46,8 +46,6 @@ struct RouteSelectionReducer {
                         return
                     }
                     
-                    Log.network("[RouteSelectionReducer.swift]", "암장 특정 루트버전 필터링 키 불러오기 - 1101")
-                    
                     let response = try await routeVersionClient.gymVersionKey(gymID, nil)
                     let result = GymRoutes(from: response)
                     
@@ -89,8 +87,6 @@ struct RouteSelectionReducer {
                     difficulty = state.selectedDifficulty] send in
                     
                     guard let gymID = gymID else { return }
-                    
-                    Log.network("[RouteSelectionReducer.swift]", "암장 특정 루트버전 루트 리스트 불러오기 (필터링 포함) - 1103")
                     
                     var allRoutes: [FilteredRoute] = []
                     var currentPage = 0
