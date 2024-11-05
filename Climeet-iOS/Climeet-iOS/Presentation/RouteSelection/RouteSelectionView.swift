@@ -15,17 +15,17 @@ struct RouteSelectionView: View {
     
     var body: some View {
         VStack {
-//            if shouldShowFloorControl {
-//                FloorSegmentedControl(
-//                    selectedIndex: $store.selectedFloor.sending(\.floorChangeSegmentedControlTapped)
-//                )
-//                .frame(maxWidth: .infinity)
-//                .padding(.bottom, 13)
-//            }
-//            selectedFloorImageView
-//            sectorScrollView
-//            difficultyScrollView
-//            filteredRoutesScrollView
+            if shouldShowFloorControl {
+                FloorSegmentedControl(
+                    selectedIndex: $store.selectedFloor.sending(\.floorChangeSegmentedControlTapped)
+                )
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 13)
+            }
+            selectedFloorImageView
+            sectorScrollView
+            difficultyScrollView
+            filteredRoutesScrollView
         }
     }
     
@@ -76,7 +76,6 @@ struct RouteSelectionView: View {
                         .padding(.horizontal, 16)
                         .padding(.top, 5.5)
                         .padding(.bottom, 6.5)
-                        .background()
                         .background(
                             store.selectedSector.sectorId == sector.sectorId ? Color.climeetMain
                             : Color.text06
