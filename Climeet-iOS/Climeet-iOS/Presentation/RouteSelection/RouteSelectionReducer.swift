@@ -42,7 +42,9 @@ struct RouteSelectionReducer {
             switch action {
             case .gymSet:
                 return .run { [selectedGym = state.selectedGym] send in
-                    guard let gymID = selectedGym?.responseGymId else { return }
+                    guard let gymID = selectedGym?.gymId else {
+                        return
+                    }
                     
                     Log.network("[RouteSelectionReducer.swift]", "암장 특정 루트버전 필터링 키 불러오기 - 1101")
                     
