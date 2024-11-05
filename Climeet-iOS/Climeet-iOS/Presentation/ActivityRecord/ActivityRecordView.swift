@@ -46,8 +46,7 @@ struct ActivityRecordView: View {
                         NavigationLink(state: SearchReducer.State()) {
                             ClimbingSetupView(
                                 placeholderText: "클라이밍 암장을 선택해주세요",
-                                text: store.selectedGym.name,
-                                isEmpty: store.selectedGym.name.isEmpty
+                                gym: store.selectedGym
                             )
                         }
                         .frame(maxWidth: .infinity, minHeight: 48)
@@ -62,21 +61,20 @@ struct ActivityRecordView: View {
                             .padding(.top, 28)
                             .padding(.bottom, 13)
                         
-                        if store.selectedGym.name.isEmpty {
+                        if let _ = store.selectedGym {
+                            RouteSelectionView(store: store.scope(
+                                state: \.routeSelectionState, action: \.routeSelectionAction)
+                            )
+                        } else {
                             NavigationLink(state: SearchReducer.State()) {
                                 ClimbingSetupView(
                                     placeholderText: "암장을 선택하면 루트를 기록할 수 있어요!",
-                                    text: "",
-                                    isEmpty: store.selectedGym.name.isEmpty
+                                    gym: store.selectedGym
                                 )
                             }
                             .frame(maxWidth: .infinity, minHeight: 48)
                             .background(Color.text08)
                             .cornerRadius(5)
-                        } else {
-                            RouteSelectionView(store: store.scope(
-                                state: \.routeSelectionState, action: \.routeSelectionAction)
-                            )
                         }
                     }
                     .padding(.leading, 28)

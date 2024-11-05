@@ -19,6 +19,9 @@ struct ActivityTabView: View {
                     state: \.activityTimerState, action: \.activityTimerAction)
                 )
                 
+                ActivityTimerRecordView(store: store.scope(
+                    state: \.activityTimerRecordState, action: \.activityTimerRecordAction)
+                )
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
             .frame(maxWidth: .infinity, maxHeight: .infinity)

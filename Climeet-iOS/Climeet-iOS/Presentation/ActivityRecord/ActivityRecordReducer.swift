@@ -20,7 +20,7 @@ struct ActivityRecordReducer {
     struct State {
         var screenSize = CGSize(width: 0, height: 0)
         var bottomSheetHeight: CGFloat = 0.0
-        var selectedGym = Gym()
+        var selectedGym: Gym?
         var selectedDate = ""
         var selectedTime = ""
         var filteredRoute: FilteredRoute?

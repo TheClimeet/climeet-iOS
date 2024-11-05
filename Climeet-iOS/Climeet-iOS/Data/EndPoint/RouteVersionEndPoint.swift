@@ -40,7 +40,10 @@ extension RouteVersionEndPoint: Endpoint {
     }
     
     var headers: Alamofire.HTTPHeaders? {
-        return nil
+        switch self {
+        case .gymVersionRoute: .applicationJSON
+        default: nil
+        }
     }
     
     var body: Alamofire.Parameters? {
@@ -48,24 +51,13 @@ extension RouteVersionEndPoint: Endpoint {
         case .gymVersionList, .gymVersionKey, .gymVersionAll:
             return nil
         case .gymVersionRoute(let param):
-            if param.timePoint != nil {
-                return [
-                    "page": param.page,
-                    "size": param.size,
-                    "floor": param.floor,
-                    "sectorID": param.sectorID,
-                    "difficulty": param.difficulty,
-                    "timePoint": param.timePoint!  // swiftlint:disable:this force_unwrapping
-                ]
-            } else {
-                return [
-                    "page": param.page,
-                    "size": param.size,
-                    "floor": param.floor,
-                    "sectorID": param.sectorID,
-                    "difficulty": param.difficulty
-                ]
-            }
+            return [
+                "page": param.page,
+                "size": param.size,
+                "floor": param.floor,
+                "sectorID": param.sectorID,
+                "difficulty": param.difficulty,
+            ]
         case .addGymVersion(let param):
             return [
                 "timePoint": param.timePoint,
