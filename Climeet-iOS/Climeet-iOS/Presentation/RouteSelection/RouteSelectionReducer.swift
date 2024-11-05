@@ -42,9 +42,9 @@ struct RouteSelectionReducer {
             switch action {
             case .gymSet:
                 return .run { [selectedGym = state.selectedGym] send in
-                    guard let gymID = selectedGym?.responseGymId else { return }
-                    
-                    Log.network("[RouteSelectionReducer.swift]", "암장 특정 루트버전 필터링 키 불러오기 - 1101")
+                    guard let gymID = selectedGym?.gymId else {
+                        return
+                    }
                     
                     let response = try await routeVersionClient.gymVersionKey(gymID, nil)
                     let result = GymRoutes(from: response)
@@ -81,14 +81,12 @@ struct RouteSelectionReducer {
                 
             case .requestFilteredRoutes:
                 return .run { [
-                    gymID = state.selectedGym?.responseGymId,
+                    gymID = state.selectedGym?.gymId,
                     sector = state.selectedSector,
                     floor = state.selectedFloor,
                     difficulty = state.selectedDifficulty] send in
                     
                     guard let gymID = gymID else { return }
-                    
-                    Log.network("[RouteSelectionReducer.swift]", "암장 특정 루트버전 루트 리스트 불러오기 (필터링 포함) - 1103")
                     
                     var allRoutes: [FilteredRoute] = []
                     var currentPage = 0
@@ -100,11 +98,10 @@ struct RouteSelectionReducer {
                                 .init(
                                     gymID: gymID,
                                     page: currentPage,
-                                    size: 0, // TODO: Size 처리 필요
-                                    floor: floor + 1, // 여기 왜 +1을 하는지?
+                                    size: 10,
+                                    floor: floor + 1,
                                     sectorID: sector.sectorId ?? 0,
-                                    difficulty: difficulty.difficulty ?? 0,
-                                    timePoint: nil
+                                    difficulty: difficulty.difficulty ?? 0
                                 )
                             )
                             
@@ -112,7 +109,8 @@ struct RouteSelectionReducer {
                                 FilteredRoute(from: $0)
                             }
                             
-                            guard let routes = filterdRoutes, let hasNextResponse = response.hasNext else {
+                            guard let routes = filterdRoutes,
+                                  let hasNextResponse = response.hasNext else {
                                 Log.error("No filtered Routes", [])
                                 throw AppError.networkError("No filtered Routes")
                             }

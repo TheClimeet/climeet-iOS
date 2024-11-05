@@ -15,7 +15,6 @@ extension RouteVersionDTO.GymVersionRoute {
         let floor: Int
         let sectorID: Int
         let difficulty: Int
-        let timePoint: String?
     }
     
     struct Response: Decodable {

@@ -10,18 +10,16 @@ import DesignSystem
 
 struct ClimbingSetupView: View {
     var placeholderText: String
-    var text: String
-    var isEmpty: Bool
+    var gym: Gym?
     
     var body: some View {
         HStack {
-            Text(isEmpty ? placeholderText : text)
-                .font(.climeetFontParagraph2())
-                .foregroundColor(
-                    isEmpty ? .starNotFilledEyes : .levelWhite
-                )
+            Text(gym?.name ?? placeholderText)
+                .foregroundColor(gym == nil ? .starNotfilledEyes : .levelWhite)
                 .padding(.leading, 18)
+            
             Spacer()
+            
             Image(uiImage: UIImage(named: "activity_arrow_right") ?? UIImage())
                 .padding(.trailing, 20)
         }
