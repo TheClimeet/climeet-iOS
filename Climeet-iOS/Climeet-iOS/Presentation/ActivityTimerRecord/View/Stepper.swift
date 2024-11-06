@@ -35,7 +35,7 @@ struct CardStyleStepper: View {
                             minusButtonAction: { minusButtonAction?() },
                             plusButtonAction: { plusButtonAction?() }
                         )
-                            .padding(.bottom, 25)
+                        .padding(.bottom, 25)
                         
                         FillButton(
                             size: 35,
@@ -56,6 +56,9 @@ struct CardStyleStepper: View {
 struct CellStyleStepper: View {
     
     var filteredRoute: FilteredRoute?
+    var attemptCount: Int
+    var minusButtonAction: (() -> Void)?
+    var plusButtonAction: (() -> Void)?
     
     var body: some View {
         
@@ -63,14 +66,44 @@ struct CellStyleStepper: View {
             HStack {
                 RouteChip(filteredRoute: filteredRoute)
                     .frame(width: 52, height: 66)
+                
+                VStack {
+                    Text("도전")
+                        .foregroundColor(Color.white)
+                        .font(Font.climeetFontParagraph1())
+                        .padding(.top, 5)
+                        .padding(.bottom, 10)
+                    
+                    AttemptStepper(
+                        attemptCount: attemptCount,
+                        minusButtonAction: { minusButtonAction?() },
+                        plusButtonAction: { plusButtonAction?() }
+                    )
+                    .padding(.bottom, 25)
+                }
+                
+                VStack {
+                    Text("완등")
+                    Button(action: {
+                        
+                    }, label: {
+                        
+                    })
+                }
+                
+                Button(action: {
+                    
+                }, label: {
+                    
+                })
             }
+            .background(Color.black)
         }
-        
     }
 }
 
 #Preview {
-    CardStyleStepper(filteredRoute: FilteredRoute(
+    CellStyleStepper(filteredRoute: FilteredRoute(
         routeId: 4321,
         sectorId: 361,
         sectorName: "서울",
@@ -123,7 +156,6 @@ fileprivate struct RouteChip: View {
     }
 }
 
-
 fileprivate struct AttemptStepper: View {
     var attemptCount: Int
     let minusButtonAction: () -> Void
@@ -134,12 +166,10 @@ fileprivate struct AttemptStepper: View {
             Button(action: {
                 minusButtonAction()
             }, label: {
-                Text("-")
+                Image("activitytimer_minus")
+                    .resizable()
+                    .frame(width: 20, height: 20)
             })
-            .foregroundColor(Color.text08)
-            .frame(width: 20, height: 20)
-            .background(Color.unnamedGray217)
-            .clipShape(Circle())
             
             Text("\(attemptCount)")
                 .foregroundColor(Color.white)
@@ -149,12 +179,10 @@ fileprivate struct AttemptStepper: View {
             Button(action: {
                 plusButtonAction()
             }, label: {
-                Text("+")
+                Image("activitytimer_plus")
+                    .resizable()
+                    .frame(width: 20, height: 20)
             })
-            .foregroundColor(Color.text08)
-            .frame(width: 20, height: 20)
-            .background(Color.unnamedGray217)
-            .clipShape(Circle())
         }
     }
 }
