@@ -67,7 +67,9 @@ struct CellStyleStepper: View {
                 RouteChip(filteredRoute: filteredRoute)
                     .frame(width: 52, height: 66)
                 
-                VStack {
+                Spacer().frame(width: 35)
+                
+                VStack(spacing: 0) {
                     Text("도전")
                         .foregroundColor(Color.white)
                         .font(Font.climeetFontParagraph1())
@@ -79,25 +81,40 @@ struct CellStyleStepper: View {
                         minusButtonAction: { minusButtonAction?() },
                         plusButtonAction: { plusButtonAction?() }
                     )
-                    .padding(.bottom, 25)
                 }
                 
-                VStack {
+                Spacer().frame(width: 41.5)
+                
+                VStack(spacing: 0) {
                     Text("완등")
+                        .foregroundColor(Color.white)
+                        .font(Font.climeetFontParagraph1())
+                        .padding(.top, 8)
+                    
                     Button(action: {
                         
                     }, label: {
-                        
+                        Image("activitytimer_check")
+                            .resizable()
+                            .frame(width: 30, height: 30)
                     })
+                    .padding(.bottom, 5)
                 }
+                
+                Spacer().frame(width: 41)
                 
                 Button(action: {
                     
                 }, label: {
-                    
+                    Image("activitytimer_delete")
+                        .resizable()
+                        .frame(width: 20, height: 20)
                 })
+                .padding(.bottom, 30)
             }
-            .background(Color.black)
+            .frame(height: 83)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 12)
         }
     }
 }
