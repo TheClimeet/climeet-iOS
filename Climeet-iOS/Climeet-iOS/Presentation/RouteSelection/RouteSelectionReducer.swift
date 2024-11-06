@@ -41,6 +41,7 @@ struct RouteSelectionReducer {
         Reduce { state, action in
             switch action {
             case .gymSet:
+                print("여기왜안불리고있지?")
                 return .run { [selectedGym = state.selectedGym] send in
                     guard let gymID = selectedGym?.gymId else {
                         return

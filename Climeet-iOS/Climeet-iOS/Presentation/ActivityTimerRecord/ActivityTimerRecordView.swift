@@ -17,7 +17,7 @@ struct ActivityTimerRecordView: View {
             selectGymButton
             
             HeaderText("루트기록")
-            routeSelection
+            additionalRouteSelection
                 .padding(.bottom, 36)
             
             HeaderText("루트 기록 더보기")
@@ -36,27 +36,13 @@ struct ActivityTimerRecordView: View {
         .cornerRadius(10)
     }
     
-    private var routeSelection: some View {
+    private var additionalRouteSelection: some View {
         radiusVStack {
-            RouteSelectionView(store: store.scope(
-                state: \.routeSelectionState, action: \.routeSelectionAction)
+            AdditionalRouteSelection(store: store.scope(
+                state: \.additionalRouteSelectionState, action: \.additionalRouteSelectionAction)
             )
-            .padding(.horizontal, 10)
-            .padding(.vertical, 16)
-            
-            routeChipAttemptStepper
-                .padding(.bottom, 20)
         }
         .padding(.horizontal, 26)
-    }
-    
-    private var routeChipAttemptStepper: some View {
-        Group {
-            if let selectedFilteredRoute = store.selectedFilteredRoute {
-                CardStyleStepper(filteredRoute: selectedFilteredRoute)
-            }
-        }
-        .padding(.horizontal, 12)
     }
     
     private var selectGymButton: some View {

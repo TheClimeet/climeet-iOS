@@ -13,36 +13,42 @@ struct ActivityTimerRecordReducer {
     @ObservableState
     struct State {
         var selectedGym: Gym?
-        var routeSelectionState = RouteSelectionReducer.State(selectedGym: nil)
+        var selectedFilteredRoute: FilteredRoute?
+        
+        var additionalRouteSelectionState = AdditionalRouteSelectionReducer.State()
     }
     
     enum Action {
         case gymSelectionButtonTapped
         case gymSet(Gym)
-        case routeSelectionAction(RouteSelectionReducer.Action)
+        case additionalRouteSelectionAction(AdditionalRouteSelectionReducer.Action)
     }
     
     var body: some ReducerOf<Self> {
-        Scope(state: \.routeSelectionState, action: \.routeSelectionAction) {
-            RouteSelectionReducer()
+        Scope(state: \.additionalRouteSelectionState, action: \.additionalRouteSelectionAction) {
+            AdditionalRouteSelectionReducer()
         }
         
         Reduce { state, action in
             switch action {
-            case .gymSelectionButtonTapped:
+            case .gymSelectionButtonTapped: /// ActivityTabReducer에서 액션처리
                 return .none
-            case .gymSet(let gym):
-                state.selectedGym = gym
-                state.routeSelectionState.selectedGym = gym
                 
-                return .run { send in
-                    await send(.routeSelectionAction(.gymSet))
+            case .gymSet(let gym): /// ActivityTabReducer 에서 호출
+                state.selectedGym = gym
+                
+                return .run { [gym = state.selectedGym] send in
+                    guard let gym else {
+                        print("짐이설정되지않음")
+                        return
+                    }
+                    
+                    await send(.additionalRouteSelectionAction(.gymSet(gym)))
                 }
                 
-            case .routeSelectionAction:
+            case .additionalRouteSelectionAction(_):
                 return .none
             }
         }
     }
-    
 }
