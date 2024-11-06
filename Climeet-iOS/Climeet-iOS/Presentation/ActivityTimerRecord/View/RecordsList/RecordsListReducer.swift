@@ -30,6 +30,14 @@ struct RecordsListReducer {
         Reduce { state, action in
             switch action {
             case .addRouteRecord(let route):
+                let isUniqueRoute = !state.routeRecords.contains { routeRecord in
+                    routeRecord.selectedRoute.routeId == route.routeId
+                }
+                
+                guard isUniqueRoute else {
+                    return .none
+                }
+                
                 let routeRecord = RouteRecord(
                     selectedRoute: route,
                     attemptCount: 0,
