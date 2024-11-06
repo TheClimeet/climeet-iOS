@@ -15,18 +15,24 @@ struct ActivityTimerRecordReducer {
         var selectedGym: Gym?
         var selectedFilteredRoute: FilteredRoute?
         
+        var recordsListState = RecordsListReducer.State()
         var additionalRouteSelectionState = AdditionalRouteSelectionReducer.State()
     }
     
     enum Action {
         case gymSelectionButtonTapped
         case gymSet(Gym)
+        case recordsListAction(RecordsListReducer.Action)
         case additionalRouteSelectionAction(AdditionalRouteSelectionReducer.Action)
     }
     
     var body: some ReducerOf<Self> {
         Scope(state: \.additionalRouteSelectionState, action: \.additionalRouteSelectionAction) {
             AdditionalRouteSelectionReducer()
+        }
+        
+        Scope(state: \.recordsListState, action: \.recordsListAction) {
+            RecordsListReducer()
         }
         
         Reduce { state, action in
@@ -45,8 +51,17 @@ struct ActivityTimerRecordReducer {
                     
                     await send(.additionalRouteSelectionAction(.gymSet(gym)))
                 }
+            
+            case .additionalRouteSelectionAction(.filteredRouteButtonTapped(let route)):
+                state.selectedFilteredRoute = route
+                
+                return .run { send in
+                    await send(.recordsListAction(.addRouteRecord(route)))
+                }
                 
             case .additionalRouteSelectionAction(_):
+                return .none
+            case .recordsListAction(_):
                 return .none
             }
         }
