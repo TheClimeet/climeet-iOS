@@ -144,6 +144,7 @@ fileprivate struct AttemptStepper: View {
             Text("\(attemptCount)")
                 .foregroundColor(Color.white)
                 .font(Font.climeetFontTitle3_5())
+                .monospacedDigit()
             
             Button(action: {
                 plusButtonAction()

@@ -39,8 +39,17 @@ struct AdditionalRouteSelectionReducer {
                 }
                 
             case .minusButtonTapped:
+                guard state.attemtCount > 0 else { return .none }
+                
+                state.attemtCount -= 1
+                
                 return .none
+                
             case .plusButtonTapped:
+                guard state.attemtCount < 15 else { return .none }
+                
+                state.attemtCount += 1
+                
                 return .none
                                 
             case .routeSelectionAction(.filteredRouteChangeButtonTapped(let filteredRoute)):
