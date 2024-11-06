@@ -13,17 +13,19 @@ struct ActivityTimerRecordView: View {
     @Bindable var store: StoreOf<ActivityTimerRecordReducer>
     
     var body: some View {
-        VStack(alignment: .leading) {
-            selectGymButton
-            
-            HeaderText("루트기록")
-            additionalRouteSelection
-                .padding(.bottom, 36)
-            
-            HeaderText("루트 기록 더보기")
-            
-            Spacer()
-            
+        ScrollView{
+            VStack(alignment: .leading) {
+                selectGymButton
+                
+                HeaderText("루트기록")
+                additionalRouteSelection
+                    .padding(.bottom, 36)
+                
+                HeaderText("루트 기록 더보기")
+                
+                Spacer()
+                
+            }
         }
         .background(Color.text09)
     }
