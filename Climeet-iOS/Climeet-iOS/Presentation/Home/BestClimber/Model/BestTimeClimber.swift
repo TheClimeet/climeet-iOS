@@ -28,6 +28,27 @@ struct BestTimeClimber: Identifiable, Equatable {
         self.ranking = ranking
         self.profileImageURL = profileImageURL
         self.profileName = profileName
-        self.thisWeekTotalClimbingTime = thisWeekTotalClimbingTime
+        self.thisWeekTotalClimbingTime = BestTimeClimber.convertClimbingTime(thisWeekTotalClimbingTime)
+    }
+    
+    static func convertClimbingTime(_ time: String) -> String {
+        let timeInfo = time.split(separator: ":")
+        var timeToPrint = ""
+        var hourInfo = "00"
+        var minuteInfo = "00"
+        var secondInfo = "00"
+        if let safeInfo = timeInfo[safe: 0] {
+            hourInfo = String(safeInfo)
+        }
+        if let safeInfo = timeInfo[safe: 1] {
+            minuteInfo = String(safeInfo)
+        }
+        if let safeInfo = timeInfo[safe: 2] {
+            secondInfo = String(safeInfo)
+        }
+        timeToPrint += hourInfo + "h "
+        timeToPrint += minuteInfo + "m "
+        timeToPrint += secondInfo + "s"
+        return timeToPrint
     }
 }
