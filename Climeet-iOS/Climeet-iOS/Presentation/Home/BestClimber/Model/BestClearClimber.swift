@@ -13,7 +13,7 @@ struct BestClearClimber: Identifiable, Equatable {
     let ranking: Int
     let profileImageURL: String
     let profileName: String
-    let thisWeekClearCount: Int?
+    let thisWeekClearCount: Int
     
     init(from dto: BestClearClimberDTO.RankWeekClimbersClear.ResponseElement) throws {
         guard let userID = dto.userID,
