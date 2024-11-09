@@ -14,13 +14,15 @@ struct BestLevelClimber: Identifiable, Equatable {
     let profileImageURL: String
     let profileName: String
     let thisWeekHighDifficulty: Int
+    let highDifficultyCount: Int
     
     init(from dto: BestLevelClimberDTO.RankWeeksClimbersLevel.ResponseElement) throws {
         guard let userID = dto.userID,
               let ranking = dto.ranking,
               let profileImageURL = dto.profileImageURL,
               let profileName = dto.profileName,
-              let thisWeekHighDifficulty = dto.thisWeekHighDifficulty else {
+              let thisWeekHighDifficulty = dto.thisWeekHighDifficulty,
+              let highDifficultyCount = dto.highDifficultyCount else {
             throw AppError.dataParsingError("DTO 변환 실패")
         }
         
@@ -29,5 +31,6 @@ struct BestLevelClimber: Identifiable, Equatable {
         self.profileImageURL = profileImageURL
         self.profileName = profileName
         self.thisWeekHighDifficulty = thisWeekHighDifficulty
+        self.highDifficultyCount = highDifficultyCount
     }
 }
