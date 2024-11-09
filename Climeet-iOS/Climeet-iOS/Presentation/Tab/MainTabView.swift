@@ -17,10 +17,22 @@ enum MainTab {
 }
 
 struct MainTabView: View {
-    
     @State private var selectedTab: MainTab = .home
+    
     private let shortsDeckStore = Store(initialState: ShortsDeckReducer.State(), reducer: {
         ShortsDeckReducer()
+    })
+    
+    private let shortsSelectStore = Store(initialState: ShortsSelectReducer.State(), reducer: {
+        ShortsSelectReducer()
+    })
+    
+    private let activityCalenderStore = Store(initialState: ActivityCalendarReducer.State(), reducer: {
+        ActivityCalendarReducer()
+    })
+    
+    private let searchStore = Store(initialState: SearchReducer.State(), reducer: {
+        SearchReducer()
     })
     
     var body: some View {
@@ -28,27 +40,17 @@ struct MainTabView: View {
             VStack(spacing: 0) {
                 switch selectedTab {
                 case .home:
-                    // 홈화면
                     HomeView()
                 case .shorts:
-                    // 쇼츠화면
                     ShortsDeckView(store: shortsDeckStore)
                 case .upload:
-                    // 업로드화면
-                    ShortsSelectView(store: Store(initialState: ShortsSelectReducer.State(), reducer: {
-                        ShortsSelectReducer()
-                    }))
+                    ShortsSelectView(store: shortsSelectStore)
                 case .activity:
-                    ActivityCalendarView(store: Store(initialState: ActivityCalendarReducer.State(), reducer: {
-                        ActivityCalendarReducer()
-                    }))
-                    
+                    ActivityCalendarView(store: activityCalenderStore)
                 case .mypage:
-                    // 마이페이지화면
-                    SearchView(store: Store(initialState: SearchReducer.State(), reducer: {
-                        SearchReducer()
-                    }))
+                    SearchView(store: searchStore)
                 }
+                
                 CustomTabView(selectedTab: $selectedTab)
                     .frame(height: geometry.size.height * 0.0874)
                     .background(Color.levelBlack)

@@ -45,7 +45,7 @@ struct AddVideoTagReducer {
         case changeAccessState(AccessStateReducer)
         case searchGym(SearchReducer)
         //TODO: Route 리듀서 연결
-        //case addRoute(//RouteReducer)
+        case addRoute(RouteSelectionReducer)
     }
     
     enum Action: BindableAction {
@@ -155,6 +155,15 @@ struct AddVideoTagReducer {
                 return .none
                 
                 //TODO: GymID 이용해서 route 받아오기
+            case .addRoute:
+                guard state.gym != nil else {
+                    return .none
+                }
+                
+                let reducer = RouteSelectionReducer.State(selectedGym: state.gym)
+                state.destination = .addRoute(reducer)
+                return .none
+
             case .binding(_):
                 return .none
                 

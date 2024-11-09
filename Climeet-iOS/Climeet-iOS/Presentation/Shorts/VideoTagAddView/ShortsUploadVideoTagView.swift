@@ -138,7 +138,11 @@ struct DetailTagView: View {
             
             //TODO: 루트추가
             shortsUploadOptionView(iconImageName: IconName.route.literal, title: "루트 추가") {
-                customLabel(text: "루트추가")
+                Button {
+                    videoTagStore.send(.addRoute)
+                } label: {
+                    customLabel(text: "루트추가")
+                }
             }
         }
     }
@@ -180,7 +184,7 @@ extension ShortsUploadVideoTagView {
         videoTagStore: Store(
             initialState: AddVideoTagReducer.State(
                 selectedVideoThumbnail: UIImage(),
-                selectedVideoURL: URL(string: "")! // swiftlint:disable:this force_unwrapping
+                selectedVideoURL: URL(string: "")!
             )
         ) {
         AddVideoTagReducer()
