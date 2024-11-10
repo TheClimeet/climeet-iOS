@@ -7,13 +7,16 @@
 
 import Foundation
 
-struct BestTimeClimber: Identifiable, Equatable {
+struct BestTimeClimber: BestClimberable {
     let id = UUID()
     let userID: Int
     let ranking: Int
     let profileImageURL: String
     let profileName: String
     let thisWeekTotalClimbingTime: String
+    var description: String {
+        convertClimbingTime(thisWeekTotalClimbingTime)
+    }
     
     init(from dto: BestTimeClimberDTO.RankWeeksClimbersTime.ResponseElement) throws {
         guard let userID = dto.userID,
@@ -28,10 +31,10 @@ struct BestTimeClimber: Identifiable, Equatable {
         self.ranking = ranking
         self.profileImageURL = profileImageURL
         self.profileName = profileName
-        self.thisWeekTotalClimbingTime = BestTimeClimber.convertClimbingTime(thisWeekTotalClimbingTime)
+        self.thisWeekTotalClimbingTime = thisWeekTotalClimbingTime
     }
     
-    static func convertClimbingTime(_ time: String) -> String {
+    private func convertClimbingTime(_ time: String) -> String {
         let timeInfo = time.split(separator: ":")
         var timeToPrint = ""
         var hourInfo = "00"

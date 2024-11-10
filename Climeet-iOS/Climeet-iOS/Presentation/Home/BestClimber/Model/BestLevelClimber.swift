@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct BestLevelClimber: Identifiable, Equatable {
+struct BestLevelClimber: BestClimberable {
     let id = UUID()
     let userID: Int
     let ranking: Int
@@ -15,6 +15,9 @@ struct BestLevelClimber: Identifiable, Equatable {
     let profileName: String
     let thisWeekHighDifficulty: Int
     let highDifficultyCount: Int
+    var description: String {
+        "V\(thisWeekHighDifficulty) - \(highDifficultyCount)"
+    }
     
     init(from dto: BestLevelClimberDTO.RankWeeksClimbersLevel.ResponseElement) throws {
         guard let userID = dto.userID,

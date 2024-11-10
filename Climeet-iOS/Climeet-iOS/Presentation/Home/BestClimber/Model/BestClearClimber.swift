@@ -7,13 +7,16 @@
 
 import Foundation
 
-struct BestClearClimber: Identifiable, Equatable {
+struct BestClearClimber: BestClimberable {
     let id = UUID()
     let userID: Int
     let ranking: Int
     let profileImageURL: String
     let profileName: String
     let thisWeekClearCount: Int
+    var description: String {
+        "\(thisWeekClearCount)개 완등"
+    }
     
     init(from dto: BestClearClimberDTO.RankWeekClimbersClear.ResponseElement) throws {
         guard let userID = dto.userID,
