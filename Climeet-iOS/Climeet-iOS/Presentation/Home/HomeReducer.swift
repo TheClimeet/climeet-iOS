@@ -14,11 +14,13 @@ struct HomeReducer {
     struct State: Equatable {
         var banner = BannerReducer.State()
         var shortcut = HomeGymShortcutReducer.State()
+        var bestClimber = HomeBestClimberReducer.State()
     }
     
     enum Action {
         case banner(BannerReducer.Action)
         case shortcut(HomeGymShortcutReducer.Action)
+        case bestClimber(HomeBestClimberReducer.Action)
     }
     
     var body: some ReducerOf<Self> {
@@ -27,6 +29,9 @@ struct HomeReducer {
         }
         Scope(state: \.shortcut, action: \.shortcut) {
             HomeGymShortcutReducer()
+        }
+        Scope(state: \.bestClimber, action: \.bestClimber) {
+            HomeBestClimberReducer()
         }
     }
 }

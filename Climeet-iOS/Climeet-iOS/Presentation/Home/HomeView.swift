@@ -24,7 +24,7 @@ struct HomeView: View {
                         .padding(.bottom, 48)
                     HomeGymShortcutView(store: store.scope(state: \.shortcut, action: \.shortcut))
                         .padding(.bottom, 48)
-                    BestClimberView()
+                    HomeBestClimberView(store: store.scope(state: \.bestClimber, action: \.bestClimber))
                         .padding(.bottom, 48)
                     WeeklyPopularShortsView()
                         .padding(.bottom, 48)
