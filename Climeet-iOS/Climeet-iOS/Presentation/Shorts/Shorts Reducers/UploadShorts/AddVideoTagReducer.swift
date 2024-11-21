@@ -23,19 +23,14 @@ struct AddVideoTagReducer {
         var isMuted: Bool = true
         var acessState: RevealState = .world
         
-        //MARK: For Search Climbing Gym (gymName property because SwiftUI Compiler error)
+        //MARK: For Search Gym and Routes
         var gym: Gym?
         var gymName: String = ""
-        
-        //TODO: Routes 목록 가지는 프로퍼티 생성 필요
-        
-        //TODO: Route 리듀서 및 뷰 완성되면 추후 수정 필요
-        var climbingRoute = ""
+        var gymRoutes: GymRoutes?
         
         static func == (lhs: State, rhs: State) -> Bool {
             return lhs.isMuted == rhs.isMuted &&
             lhs.acessState == rhs.acessState &&
-            lhs.climbingRoute == rhs.climbingRoute &&
             lhs.discription == rhs.discription
         }
     }
@@ -44,7 +39,6 @@ struct AddVideoTagReducer {
     enum Destination {
         case changeAccessState(AccessStateReducer)
         case searchGym(SearchReducer)
-        //TODO: Route 리듀서 연결
         case addRoute(RouteSelectionReducer)
     }
     
@@ -52,13 +46,15 @@ struct AddVideoTagReducer {
         case userAddedDiscriptions(String)
         case soundMuteButtonTapped
         case acessStateChangedButtonTapped
-        case addClimbingGym
         
-        //TODO: addRoute View 연결하기
-        case addRoute
+        //MARK: For Gym and Routes
+        case addClimbingGym
+        case addGymRoutes
+        case searchGymRoutes
+        case routesResponse(GymRoutes)
+        
         case generateShortsModel(String)
         case startUploading
-        
         case showErrorSheet
         
         case binding(BindingAction<State>)
@@ -69,6 +65,7 @@ struct AddVideoTagReducer {
         }
     }
     
+    @Dependency(\.routeVersionClient) var routeVersionClient
     @Dependency(\.s3Client) var s3Client
     
     var body: some ReducerOf<Self> {
@@ -152,18 +149,39 @@ struct AddVideoTagReducer {
             ):
                 state.gym = gym
                 state.gymName = gym.name
-                return .none
                 
-                //TODO: GymID 이용해서 route 받아오기
-            case .addRoute:
+                return .run { send in
+                    await send(.searchGymRoutes)
+                }
+            
+                //MARK: For Search Gym Routes
+            case .addGymRoutes:
                 guard state.gym != nil else {
                     return .none
                 }
                 
-                let reducer = RouteSelectionReducer.State(selectedGym: state.gym)
+                let reducer = RouteSelectionReducer.State(selectedGym: state.gym,
+                                                          gymRoutes: state.gymRoutes)
+                
                 state.destination = .addRoute(reducer)
                 return .none
-
+            
+            case .searchGymRoutes:
+                return .run { [selectedGym = state.gym] send in
+                    guard let gymID = selectedGym?.gymId else { return }
+                    
+                    Log.network("[RouteSelectionReducer.swift]", "암장 특정 루트버전 필터링 키 불러오기 - 1101")
+                    
+                    let response = try await routeVersionClient.gymVersionKey(gymID, nil)
+                    let result = GymRoutes(from: response)
+                    
+                    await send(.routesResponse(result))
+                }
+                
+            case .routesResponse(let gymRoutes):
+                state.gymRoutes = gymRoutes
+                return .none
+                
             case .binding(_):
                 return .none
                 

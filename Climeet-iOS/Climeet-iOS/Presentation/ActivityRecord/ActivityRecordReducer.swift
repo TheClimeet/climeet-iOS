@@ -46,7 +46,7 @@ struct ActivityRecordReducer {
     
     var body: some ReducerOf<Self> {
         Scope(
-            state: \.routeSelectionState,action: \.routeSelectionAction) {
+            state: \.routeSelectionState, action: \.routeSelectionAction) {
                 RouteSelectionReducer()
             }
         

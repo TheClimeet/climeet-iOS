@@ -22,7 +22,8 @@ enum IconName: String {
 
 struct ShortsUploadVideoTagView: View {
     @Bindable var videoTagStore: StoreOf<AddVideoTagReducer>
-    
+    @State private var isPresented: Bool = false
+
     private struct Const {
         private static let figmaWidth: CGFloat = 375
         private static let figmaHeight: CGFloat = 889
@@ -67,6 +68,7 @@ struct ShortsUploadVideoTagView: View {
                                    dividerWidth: 341)
                 
                 DetailTagView(videoTagStore: videoTagStore)
+                
                     .frame(width: proxy.size.width * Const.textFieldWidthProportion)
                     .padding(.leading, proxy.size.width * Const.shortsOptionLeftPaddingProportion)
                     .padding(.trailing, proxy.size.width * Const.shortsOptionLeftPaddingProportion)
@@ -99,10 +101,9 @@ struct ShortsUploadVideoTagView: View {
                                           action: \.destination.searchGym), content: { store in
             SearchView(store: store)
         })
-        
-        .sheet(item: $videoTagStore.scope(state: \.destination?.searchGym,
-                                          action: \.destination.searchGym), content: { store in
-            SearchView(store: store)
+        .sheet(item: $videoTagStore.scope(state: \.destination?.addRoute,
+                                          action: \.destination.addRoute), content: { store in
+            RouteSelectionView(store: store)
         })
 
         .background(.climeetBackground)
@@ -139,7 +140,7 @@ struct DetailTagView: View {
             //TODO: 루트추가
             shortsUploadOptionView(iconImageName: IconName.route.literal, title: "루트 추가") {
                 Button {
-                    videoTagStore.send(.addRoute)
+                    videoTagStore.send(.addGymRoutes)
                 } label: {
                     customLabel(text: "루트추가")
                 }
