@@ -16,7 +16,9 @@ struct AddVideoTagReducer {
     struct State: Equatable {
         @Presents var destination: Destination.State?
         
-        var bottomSheetHeight: CGFloat = 0
+        var screenSize: CGSize?
+        var sheetHeight: CGFloat = 400
+        
         var selectedVideoThumbnail: UIImage
         var selectedVideoURL: URL
         var discription: String = ""
@@ -43,6 +45,8 @@ struct AddVideoTagReducer {
     }
     
     enum Action: BindableAction {
+        case readSize(CGSize)
+        
         case userAddedDiscriptions(String)
         case soundMuteButtonTapped
         case acessStateChangedButtonTapped
@@ -73,6 +77,12 @@ struct AddVideoTagReducer {
         
         Reduce { state, action in
             switch action {
+            case .readSize(let size):
+                state.screenSize = size
+                state.sheetHeight = size.height * (3 / 5)
+                
+                return .none
+                
             case .userAddedDiscriptions(let texts):
                 state.discription = texts
                 return .none

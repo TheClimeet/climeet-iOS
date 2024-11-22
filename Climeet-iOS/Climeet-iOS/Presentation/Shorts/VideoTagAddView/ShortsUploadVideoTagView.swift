@@ -22,8 +22,7 @@ enum IconName: String {
 
 struct ShortsUploadVideoTagView: View {
     @Bindable var videoTagStore: StoreOf<AddVideoTagReducer>
-    @State private var isPresented: Bool = false
-
+    
     private struct Const {
         private static let figmaWidth: CGFloat = 375
         private static let figmaHeight: CGFloat = 889
@@ -75,6 +74,9 @@ struct ShortsUploadVideoTagView: View {
                     .padding(.top, proxy.size.height * Const.shortsOptionTopPaddingProportion)
             }
         }
+        .onReadSize({ size in
+            videoTagStore.send(.readSize(size))
+        })
         .navigationBarTitle(Const.navigationTitleLiteral,
                             displayMode: .inline)
         .navigationBarBackButtonHidden()
@@ -87,25 +89,43 @@ struct ShortsUploadVideoTagView: View {
                         .buttonStyle(PlainButtonStyle())
                         .accessibility(identifier: "다음")
                 }
-
             }
         }
-        .sheet(item: $videoTagStore.scope(state: \.destination?.changeAccessState,
-                                          action: \.destination.changeAccessState), content: { store in
-            UploadShortsAcessSelectView(store: store)
-            
-                //TODO: 시트 높이 조정 필요
-                .presentationDetents([.height(400)])
+        .sheet(item: $videoTagStore.scope(
+            state: \.destination?.changeAccessState,
+            action: \.destination.changeAccessState),
+               content: { store in
+            VStack {
+                Spacer(minLength: 20)
+                UploadShortsAcessSelectView(store: store)
+                    .presentationDetents([.height(videoTagStore.sheetHeight)])
+            }
+            .background(.climeetBackground)
         })
-        .sheet(item: $videoTagStore.scope(state: \.destination?.searchGym,
-                                          action: \.destination.searchGym), content: { store in
+        
+        .sheet(item: $videoTagStore.scope(
+            state: \.destination?.searchGym,
+            action: \.destination.searchGym),
+               content: { store in
             SearchView(store: store)
         })
-        .sheet(item: $videoTagStore.scope(state: \.destination?.addRoute,
-                                          action: \.destination.addRoute), content: { store in
-            RouteSelectionView(store: store)
-        })
-
+        
+        .sheet(
+            item: $videoTagStore.scope(
+                state: \.destination?.addRoute,
+                action: \.destination.addRoute
+            ),
+            content: { store in
+                VStack {
+                   // ClimeetNavigationBar(gymName: store.gymName, store: store)
+                    RouteSelectionView(store: store)
+                }
+                .background(.climeetBackground)
+                .presentationDetents([.height(videoTagStore.sheetHeight)])
+                .padding([.leading, .trailing], 28)
+            }
+        )
+        
         .background(.climeetBackground)
     }
 }
@@ -137,7 +157,6 @@ struct DetailTagView: View {
                 }
             }
             
-            //TODO: 루트추가
             shortsUploadOptionView(iconImageName: IconName.route.literal, title: "루트 추가") {
                 Button {
                     videoTagStore.send(.addGymRoutes)
@@ -180,6 +199,34 @@ extension ShortsUploadVideoTagView {
     }
 }
 
+struct ClimeetNavigationBar: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var gymName: String
+    
+    var body: some View {
+        ZStack {
+            HStack {
+                Button(action: {
+                    dismiss()
+                }) {
+                    Image(systemName: "chevron.left")
+                        .foregroundColor(.white)
+                        .font(.system(size: 18, weight: .medium))
+                        .padding(.leading, 16)
+                }
+                
+                Spacer()
+            }
+            
+            Text(gymName)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.text08)
+        }
+        .frame(height: 44)
+        .background(Color.black)
+    }
+}
+
 #Preview {
     ShortsUploadVideoTagView(
         videoTagStore: Store(
@@ -188,6 +235,6 @@ extension ShortsUploadVideoTagView {
                 selectedVideoURL: URL(string: "")!
             )
         ) {
-        AddVideoTagReducer()
-    })
+            AddVideoTagReducer()
+        })
 }
