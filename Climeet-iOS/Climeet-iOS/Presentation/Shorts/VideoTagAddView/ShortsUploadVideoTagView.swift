@@ -67,7 +67,6 @@ struct ShortsUploadVideoTagView: View {
                                    dividerWidth: 341)
                 
                 DetailTagView(videoTagStore: videoTagStore)
-                
                     .frame(width: proxy.size.width * Const.textFieldWidthProportion)
                     .padding(.leading, proxy.size.width * Const.shortsOptionLeftPaddingProportion)
                     .padding(.trailing, proxy.size.width * Const.shortsOptionLeftPaddingProportion)
@@ -98,7 +97,7 @@ struct ShortsUploadVideoTagView: View {
             VStack {
                 Spacer(minLength: 20)
                 UploadShortsAcessSelectView(store: store)
-                    .presentationDetents([.height(videoTagStore.sheetHeight)])
+                    .presentationDetents([.height(videoTagStore.privacySheetHeight)])
             }
             .background(.climeetBackground)
         })
@@ -108,6 +107,7 @@ struct ShortsUploadVideoTagView: View {
             action: \.destination.searchGym),
                content: { store in
             SearchView(store: store)
+                .presentationDetents([.height(videoTagStore.sheetHeight)])
         })
         
         .sheet(
@@ -116,16 +116,12 @@ struct ShortsUploadVideoTagView: View {
                 action: \.destination.addRoute
             ),
             content: { store in
-                VStack {
-                   // ClimeetNavigationBar(gymName: store.gymName, store: store)
-                    RouteSelectionView(store: store)
-                }
-                .background(.climeetBackground)
-                .presentationDetents([.height(videoTagStore.sheetHeight)])
-                .padding([.leading, .trailing], 28)
+                ShortsGymRoutesView(store: store)
+                    .presentationBackground(Color.climeetBackground)
+                    .presentationDetents([.height(videoTagStore.sheetHeight)])
+                    .padding([.leading, .trailing], 28)
             }
         )
-        
         .background(.climeetBackground)
     }
 }
@@ -161,7 +157,12 @@ struct DetailTagView: View {
                 Button {
                     videoTagStore.send(.addGymRoutes)
                 } label: {
-                    customLabel(text: "루트추가")
+                    if let sectorName = videoTagStore.selectedRoute?.sectorName,
+                       let climeetDifficultyName = videoTagStore.selectedRoute?.climeetDifficultyName {
+                        customLabel(text: sectorName + " | " + climeetDifficultyName)
+                    } else {
+                        customLabel(text: "")
+                    }
                 }
             }
         }
@@ -199,42 +200,90 @@ extension ShortsUploadVideoTagView {
     }
 }
 
-struct ClimeetNavigationBar: View {
+struct ShortsGymRoutesView: View {
+    @Bindable var store: StoreOf<RouteSelectionReducer>
     @Environment(\.dismiss) private var dismiss
-    @Binding var gymName: String
     
     var body: some View {
-        ZStack {
-            HStack {
-                Button(action: {
-                    dismiss()
-                }) {
-                    Image(systemName: "chevron.left")
-                        .foregroundColor(.white)
-                        .font(.system(size: 18, weight: .medium))
-                        .padding(.leading, 16)
+        ScrollView {
+            VStack {
+                if let gymName = store.selectedGym?.name {
+                    Spacer(minLength: 20)
+                    ClimeetNavigationBar(gymName: gymName)
+                    Spacer(minLength: 20)
+                    
+                    RouteSelectionView(store: store)
+                        .padding(.all, 10)
+                        .background(.text08)
+                        .clipShape(RoundedRectangle(cornerRadius: 15))
+                    
+                    HStack(spacing: 10) {
+                        ShortsDefaultButton(title: "취소",
+                                            foregroundColor: .white,
+                                            backgroundColor: .text065) {
+                            dismiss()
+                        }
+                        
+                        ShortsDefaultButton(title: "적용하기",
+                                            foregroundColor: .black,
+                                            backgroundColor: .climeetMain) {
+                            if store.isSelectionDone {
+                                dismiss()
+                            }
+                        }
+                    }
+                    .padding(.top, 20)
                 }
-                
-                Spacer()
             }
-            
-            Text(gymName)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.text08)
         }
-        .frame(height: 44)
-        .background(Color.black)
+        .scrollIndicators(.hidden)
     }
 }
 
+struct ClimeetNavigationBar: View {
+    @Environment(\.dismiss) private var dismiss
+    let gymName: String
+    
+    var body: some View {
+        HStack {
+            Button(action: {
+                dismiss()
+            }) {
+                Image("Back")
+                    .foregroundColor(.white)
+            }
+
+            HStack {
+                Spacer()
+                Image(systemName: "map")
+                    .foregroundColor(.white)
+                Text(gymName)
+                    .foregroundColor(.white)
+                    .font(.climeetFontParagraph4())
+                Spacer()
+            }
+            .padding([.leading, .top, .bottom])
+            .background(.text08)
+            .frame(height: 35)
+            
+            Spacer()
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 15))
+    }
+}
+
+//#Preview {
+//    ShortsUploadVideoTagView(
+//        videoTagStore: Store(
+//            initialState: AddVideoTagReducer.State(
+//                selectedVideoThumbnail: UIImage(),
+//                selectedVideoURL: URL(string: "")!
+//            )
+//        ) {
+//            AddVideoTagReducer()
+//        })
+//}
+
 #Preview {
-    ShortsUploadVideoTagView(
-        videoTagStore: Store(
-            initialState: AddVideoTagReducer.State(
-                selectedVideoThumbnail: UIImage(),
-                selectedVideoURL: URL(string: "")!
-            )
-        ) {
-            AddVideoTagReducer()
-        })
+    ClimeetNavigationBar(gymName: "홍성 클라이밍")
 }

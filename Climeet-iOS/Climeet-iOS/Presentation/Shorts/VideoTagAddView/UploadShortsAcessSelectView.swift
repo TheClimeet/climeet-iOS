@@ -54,18 +54,11 @@ struct UploadShortsAcessSelectView: View {
                 }
                 .padding(.horizontal, 16)
                 
-                Button(action: {
+                ShortsDefaultButton(title: "선택완료",
+                                    foregroundColor: .text08,
+                                    backgroundColor: .climeetMain) {
                     store.send(.submitSelection)
-                }, label: {
-                    Text("선택완료")
-                    //TODO: Figma 글꼴 없데이트되면 추가하기
-                        .font(.climeetFontTitle4())
-                        .foregroundStyle(.text08)
-                })
-                .frame(height: 41)
-                .frame(maxWidth: .infinity)
-                .background(.climeetMain)
-                .cornerRadius(5)
+                }
                 .padding()
             }
         }

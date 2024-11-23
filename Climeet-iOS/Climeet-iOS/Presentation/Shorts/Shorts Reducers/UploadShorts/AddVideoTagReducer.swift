@@ -18,6 +18,7 @@ struct AddVideoTagReducer {
         
         var screenSize: CGSize?
         var sheetHeight: CGFloat = 400
+        var privacySheetHeight: CGFloat = 400
         
         var selectedVideoThumbnail: UIImage
         var selectedVideoURL: URL
@@ -29,6 +30,7 @@ struct AddVideoTagReducer {
         var gym: Gym?
         var gymName: String = ""
         var gymRoutes: GymRoutes?
+        var selectedRoute: FilteredRoute?
         
         static func == (lhs: State, rhs: State) -> Bool {
             return lhs.isMuted == rhs.isMuted &&
@@ -79,8 +81,9 @@ struct AddVideoTagReducer {
             switch action {
             case .readSize(let size):
                 state.screenSize = size
-                state.sheetHeight = size.height * (3 / 5)
-                
+                state.sheetHeight = size.height * (4 / 5)
+                state.privacySheetHeight = size.height * (3 / 5)
+
                 return .none
                 
             case .userAddedDiscriptions(let texts):
@@ -190,6 +193,19 @@ struct AddVideoTagReducer {
                 
             case .routesResponse(let gymRoutes):
                 state.gymRoutes = gymRoutes
+                return .none
+                
+            case let .destination(
+                .presented(
+                    .addRoute(
+                        .delegate(
+                            .selectedRoute(selectedRoute)
+                        )
+                    )
+                )
+            ):
+                state.selectedRoute = selectedRoute
+                print(selectedRoute)
                 return .none
                 
             case .binding(_):
