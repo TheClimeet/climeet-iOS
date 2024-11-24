@@ -47,6 +47,8 @@ struct AddVideoTagReducer {
     }
     
     enum Action: BindableAction {
+        typealias imageUrl = String
+        
         case readSize(CGSize)
         
         case userAddedDiscriptions(String)
@@ -59,13 +61,14 @@ struct AddVideoTagReducer {
         case searchGymRoutes
         case routesResponse(GymRoutes)
         
-        case generateShortsModel(String)
+        case generateShortsModel(imageUrl)
         case startUploading
         case showErrorSheet
         
         case binding(BindingAction<State>)
         case destination(PresentationAction<Destination.Action>)
         case delegate(Delegation)
+        
         enum Delegation {
             case shortsData(Shorts)
         }
@@ -100,30 +103,34 @@ struct AddVideoTagReducer {
                         guard let imageData = image.jpegData(compressionQuality: 1.0) else {
                             throw AppError.imageConvertingError("Image JPEG 압축 중 에러 발생")
                         }
-                        let response = try await s3Client.file(.init(file: imageData))
-                        guard let url = response.imgURL else {
+
+                        let imageResponse = try await s3Client.file(.init(file: imageData))
+                        guard let imageUrl = imageResponse.imgUrl else {
                             throw AppError.dataParsingError("imgURL 언래핑 중 에러 발생")
                         }
                         
-                        await send(.generateShortsModel(url))
+                        await send(.generateShortsModel(imageUrl))
                     } catch let error {
                         Log.error("NetworkError", "in startUploading: \(error)")
                     }
                 })
                 
-            case let .generateShortsModel(urlString):
+            case let .generateShortsModel(imageUrl):
                 guard let shortsVideoData = convertVideoToData(videoURL: state.selectedVideoURL) else {
                     return .send(.showErrorSheet)
                 }
                 
-                //TODO: Route 추가되면 수정
-                let reqeust = ShortsRequest(climbingGymId: 0,
-                                            routeId: 0, sectorId: 0,
-                                            thumbnailImageUrl: urlString,
+                let request = ShortsRequest(climbingGymId: state.gym?.gymId ?? 0,
+                                            routeId: state.selectedRoute?.routeId ?? 0,
+                                            sectorId: state.selectedRoute?.sectorId ?? 0,
+                                            thumbnailImageUrl: imageUrl,
                                             description: state.discription,
                                             shortsVisibility: state.acessState.literalForServer,
                                             soundEnabled: state.isMuted)
-                let shorts = Shorts(video: shortsVideoData, createShortsRequest: reqeust)
+                
+                let shorts = Shorts(video: shortsVideoData,
+                                    createShortsRequest: request)
+                
                 return .send(.delegate(.shortsData(shorts)))
                 
                 //MARK: For Access State

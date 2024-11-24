@@ -7,10 +7,7 @@
 
 import Foundation
 
-//TODO: 타입 선언 수정  
-protocol MultipartFormable { }
-
-struct Shorts: Encodable, Equatable, MultipartFormable {
+struct Shorts: Encodable, Equatable {
     let video: Data
     let createShortsRequest: ShortsRequest
     
@@ -27,9 +24,4 @@ struct ShortsRequest: Encodable, Equatable {
     let description: String
     let shortsVisibility: String
     let soundEnabled: Bool
-}
-     
-//MARK: S3에 이미지, 동영상 등의 파일 올려서 URL링크 get하기 위한 모델
-struct S3FileModel: MultipartFormable {
-    let file: Data
 }

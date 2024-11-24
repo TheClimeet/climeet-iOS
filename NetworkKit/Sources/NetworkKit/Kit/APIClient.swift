@@ -6,7 +6,7 @@ public final class APIClient: APIProtocol, @unchecked Sendable {
     public static let shared = APIClient()
     private var tokenRefresher: TokenRefreshable?
     private var isConfigured = false
-
+    
     private init() { }
     
     private lazy var session: Session = {
@@ -62,6 +62,56 @@ public final class APIClient: APIProtocol, @unchecked Sendable {
             )
         }
     }
+    
+    public func uploadFile<T>(_ endpoint: any Endpoint, decode: T.Type) async throws -> T where T : Decodable {
+        do {
+            let result = try await self.session.upload(multipartFormData: { multipartFormData in
+                if let data = endpoint.body?["data"] as? Data {
+                    multipartFormData.append(data,
+                                             withName: "file",
+                                             fileName: "file.jpg",
+                                             mimeType: "image/jpeg")
+                }
+            }, with: endpoint.asMultiPartFormDataURLRequest()).serializingData(automaticallyCancelling: true).response
+            return try self.manageResponse(data: result.data, response: result.response)
+        } catch let error as APIError {
+            throw error
+        } catch {
+            throw APIError(
+                errorCode: "ERROR",
+                message: "Unknown API error \(error.localizedDescription)"
+            )
+        }
+    }
+    
+    public func uploadShorts<T>(_ endpoint: any Endpoint, decode: T.Type) async throws -> T where T : Decodable {
+        do {
+            let result = try await self.session.upload(multipartFormData: { multipartFormData in
+                if let video = endpoint.body?["video"] as? Data {
+                    multipartFormData.append(video,
+                                             withName: "video",
+                                             fileName: "video.mp4",
+                                             mimeType: "video/mp4")
+                    
+                    if let request = endpoint.body?["createShortsRequest"] as? [String: Any],
+                       let jsonData = try? JSONSerialization.data(withJSONObject: request)  {
+                        
+                        multipartFormData.append(jsonData,
+                                                 withName: "createShortsRequest",
+                                                 mimeType: "application/json")
+                    }
+                }
+            }, with: endpoint.asMultiPartFormDataURLRequest()).serializingData(automaticallyCancelling: true).response
+            return try self.manageResponse(data: result.data, response: result.response)
+        } catch let error as APIError {
+            throw error
+        } catch {
+            throw APIError(
+                errorCode: "ERROR",
+                message: "Unknown API error \(error.localizedDescription)"
+            )
+        }
+    }
 }
 
 extension APIClient {
@@ -83,6 +133,13 @@ extension APIClient {
         switch response.statusCode {
         case 200...299:
             do {
+                // String 타입인 경우 특별 처리
+                if T.self == String.self {
+                    if let stringValue = String(data: data, encoding: .utf8) {
+                        return stringValue as! T
+                    }
+                }
+                
                 return try JSONDecoder().decode(T.self, from: data)
             } catch {
                 debugPrint("‼️", error)

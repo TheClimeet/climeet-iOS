@@ -113,7 +113,7 @@ extension ShortsEndPoint: Endpoint {
         case .upload(let param):
             return [
                 "video": param.video,
-                "createShortsRequest": param.createShortsRequest
+                "createShortsRequest": param.createShortsRequest.toDictionary()
             ]
         }
     }
