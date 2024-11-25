@@ -106,11 +106,12 @@ struct ShortsDeckReducer {
                 return .run { [page = state.page] send in
                     do {
                         let response = try await shortsClient.popularShorts(.init(page: page, size: self.size))
-                        //TODO: - 서버 optional 값 확인하여 반영
+
                         let shortsDeckItems = response.result.compactMap {
                             $0.toEntity()
                         }
                         
+                        //MARK: 테스트 시에는  response.page 대신 1 assign
                         let result = ShortsDeck(page: response.page, hasNext: response.hasNext, result: shortsDeckItems)
                         
                         await send(.fetchResult(result))
