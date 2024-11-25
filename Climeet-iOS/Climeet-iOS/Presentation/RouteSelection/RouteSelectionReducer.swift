@@ -22,8 +22,6 @@ struct RouteSelectionReducer {
         var selectedFilteredRoute = FilteredRoute()
         
         var filteredRoutesResponse = [FilteredRoute]() // 응답결과값
-        
-        var isSelectionDone: Bool = false
     }
     
     enum Action {
