@@ -97,13 +97,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		041DA0452CF41CA800CFDC31 /* Recovered References */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = "Recovered References";
-			sourceTree = "<group>";
-		};
 		0489EE9A2C2EA18D00BFC55B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -121,7 +114,6 @@
 				604B97AC2CC394F7005EDD29 /* Climeet-iOSUITests */,
 				B94EC2232BD13CBB00DC3FDB /* Products */,
 				0489EE9A2C2EA18D00BFC55B /* Frameworks */,
-				041DA0452CF41CA800CFDC31 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
