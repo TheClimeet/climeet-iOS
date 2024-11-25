@@ -53,9 +53,9 @@ final class PhotoViewController: UIViewController, ShortsCustomGalleryDelegate {
     // MARK: Property
 //    private let albumService: AlbumService = MyAlbumService()
     private let photoService: PhotoService = MyPhotoService()
-    private var selectedIndexArray = [Int]() // Index: count
-    private var selectedIndex = Int() // Index: count
-    private var prevIndex: Int? = Int() // Index: count
+    private var selectedIndexArray = [Int]()
+    private var selectedIndex = Int()
+    private var prevIndex: Int? = Int()
     
    // private var albums = [PHFetchResult<PHAsset>]()
     private var viewModel: CustomGalleryViewModel?
@@ -94,6 +94,7 @@ final class PhotoViewController: UIViewController, ShortsCustomGalleryDelegate {
             let prevInfo = viewModel.dataSource[prevIndex]
             viewModel.dataSource[prevIndex] = .init(phAsset: prevInfo.phAsset,
                                                     videoThumbnail: prevInfo.videoThumbnail,
+                                                    duration: prevInfo.duration,
                                                     selectedOrder: .none,
                                                     localIdentifier: prevInfo.localIdentifier)
             prevIndexPath = IndexPath(row: selectedIndex, section: 0)
@@ -129,35 +130,39 @@ extension PhotoViewController: UICollectionViewDataSource {
                                                             for: indexPath) as? PhotoCell else { return UICollectionViewCell() }
         
         guard let viewModel = self.viewModel else {
-            return UICollectionViewCell()
+            return cell
         }
         
         let imageInfo = viewModel.dataSource[indexPath.item]
         let phAsset = imageInfo.phAsset
         let imageSize = CGSize(width: Const.cellSize.width * Const.scale,
                                height: Const.cellSize.height * Const.scale)
+        let duration = convertTimeIntervalToString(phAsset.duration) ?? ""
         
-        //TODO: Prioirity Inversion 해결하기
-        let group = DispatchGroup()
-        
-        group.enter()
         photoService.fetchVideo(phAsset: phAsset,
                                 size: imageSize,
                                 contentMode: .aspectFit) { [weak cell] image in
             DispatchQueue.main.async {
                 cell?.prepare(info: .init(phAsset: phAsset,
                                           videoThumbnail: image,
+                                          duration: duration,
                                           selectedOrder: imageInfo.selectedOrder,
                                           localIdentifier: phAsset.localIdentifier))
                 imageInfo.videoThumbnail = image
+                imageInfo.duration = duration
             }
-           
         }
-        group.leave()
         
         cell.prepare(info: viewModel.dataSource[indexPath.item])
         
         return cell
+    }
+    
+    private func convertTimeIntervalToString(_ timeInterval: TimeInterval) -> String? {
+        let formatter: DateComponentsFormatter = .init()
+        formatter.allowedUnits = [.minute, .second]
+        formatter.zeroFormattingBehavior = .pad
+        return formatter.string(from: timeInterval)
     }
 }
 
@@ -175,6 +180,7 @@ extension PhotoViewController: UICollectionViewDelegate {
         if case .selected = info.selectedOrder {
             viewModel.dataSource[indexPath.item] = .init(phAsset: info.phAsset,
                                                          videoThumbnail: info.videoThumbnail,
+                                                         duration: info.duration,
                                                          selectedOrder: .none,
                                                          localIdentifier: info.localIdentifier)
             selectedIndex = indexPath.item
@@ -191,7 +197,7 @@ extension PhotoViewController: UICollectionViewDelegate {
             let current = viewModel.dataSource[selectedIndex]
             
             viewModel.dataSource[selectedIndex] = .init(phAsset: current.phAsset,
-                                                        videoThumbnail: current.videoThumbnail,
+                                                        videoThumbnail: current.videoThumbnail, duration: current.duration,
                                                         selectedOrder: .selected(selectedIndex),
                                                         localIdentifier: current.localIdentifier)
             

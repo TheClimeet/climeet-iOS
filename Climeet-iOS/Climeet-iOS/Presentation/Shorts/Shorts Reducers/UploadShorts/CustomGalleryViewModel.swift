@@ -56,10 +56,18 @@ final class CustomGalleryViewModel: ObservableObject {
         self.photoService.convertAlbumToPHAssets(album: album) { [weak self] phAssets in
             self?.dataSource = phAssets.map { .init(phAsset: $0,
                                                     videoThumbnail: nil,
+                                                    duration: self?.convertTimeIntervalToString($0.duration),
                                                     selectedOrder: .none,
                                                     localIdentifier: $0.localIdentifier) }
 
             self?.delegate?.informAlbumsDownload()
         }
+    }
+    
+    private func convertTimeIntervalToString(_ timeInterval: TimeInterval) -> String? {
+        let formatter: DateComponentsFormatter = .init()
+        formatter.allowedUnits = [.minute, .second]
+        formatter.zeroFormattingBehavior = .pad
+        return formatter.string(from: timeInterval)
     }
 }
