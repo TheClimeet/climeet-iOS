@@ -99,7 +99,7 @@ extension ShortsEndPoint: Endpoint {
     var headers: Alamofire.HTTPHeaders? {
         switch self {
         case .upload:
-            return .applicationJSON
+            return nil
         default:
             return nil
         }
@@ -113,10 +113,9 @@ extension ShortsEndPoint: Endpoint {
         case .upload(let param):
             return [
                 "video": param.video,
-                "createShortsRequest": param.createShortsRequest
+                "createShortsRequest": param.createShortsRequest.toDictionary()
             ]
         }
     }
-    
     var token: String? { KeyChain.shared.refreshToken }
 }

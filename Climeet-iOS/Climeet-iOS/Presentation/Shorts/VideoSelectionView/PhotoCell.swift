@@ -69,7 +69,6 @@ final class PhotoCell: UICollectionViewCell {
         layer.masksToBounds = true // 주의: 이 값을 안 주면 이미지가 셀의 다른 영역을 침범하는 영향을 주는 것
         contentView.addSubview(imageView)
         imageView.addSubview(highlightedView)
-//        highlightedView.addSubview(orderLabel)
         
         NSLayoutConstraint.activate([
             imageView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -81,9 +80,6 @@ final class PhotoCell: UICollectionViewCell {
             highlightedView.leadingAnchor.constraint(equalTo: imageView.leadingAnchor),
             highlightedView.trailingAnchor.constraint(equalTo: imageView.trailingAnchor),
             highlightedView.bottomAnchor.constraint(equalTo: imageView.bottomAnchor),
-            
-//            orderLabel.leadingAnchor.constraint(equalTo: highlightedView.leadingAnchor, constant: 4),
-//            orderLabel.topAnchor.constraint(equalTo: highlightedView.topAnchor, constant: 4)
         ])
     }
     
@@ -97,7 +93,6 @@ final class PhotoCell: UICollectionViewCell {
         
         if case .selected(_) = info?.selectedOrder {
             highlightedView.isHidden = false
-//            orderLabel.text = String(order)
         } else {
             highlightedView.isHidden = true
         }

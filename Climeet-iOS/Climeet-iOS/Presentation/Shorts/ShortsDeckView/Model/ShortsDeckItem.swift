@@ -7,30 +7,31 @@
 
 import Foundation
 
-//TODO: DTO 역할 분리
-struct ShortsDeck: Decodable, Equatable, Hashable {
+struct ShortsDeck {
     let page: Int
     let hasNext: Bool
     let result: [ShortsDeckItem]
 }
 
-struct ShortsDeckItem: Decodable, Equatable, Hashable {        
+struct ShortsDeckItem: Hashable, Identifiable {
+    let id = UUID()
+    
     let shortsId: Int
     let thumbnailImageUrl: String
-    let gymName: String
-    let gymDifficultyName: String
-    let gymDifficultyColor: String
+    let gymName: String?
+    let gymDifficultyName: String?
+    let gymDifficultyColor: String?
     let isManager: Bool
     let shortsDetailInfo: ShortsDetailInfo
 }
 
-struct ShortsDetailInfo: Decodable, Equatable, Hashable {
+struct ShortsDetailInfo: Hashable {
     let userShortsSimpleInfo: UserShortsSimpleInfo
     let shortsId: Int
-    let gymName: String
-    let sectorName: String
-    let gymId: Int
-    let sectorId: Int
+    let gymName: String?
+    let sectorName: String?
+    let gymId: Int?
+    let sectorId: Int?
     let videoUrl: String
     let likeCount: Int
     let commentCount: Int
@@ -38,15 +39,15 @@ struct ShortsDetailInfo: Decodable, Equatable, Hashable {
     let shareCount: Int
     let isLiked: Bool
     let isBookmarked: Bool
-    let description: String
+    let description: String?
     let routeImageUrl: String?
-    let gymDifficultyName: String
-    let gymDifficultyColor: String
+    let gymDifficultyName: String?
+    let gymDifficultyColor: String?
     let isSoundEnabled: Bool
 }
 
-struct UserShortsSimpleInfo: Decodable, Equatable, Hashable {
+struct UserShortsSimpleInfo: Hashable {
     let userId: Int
-    let profileImgUrl: String
+    let profileImgUrl: String?
     let profileName: String
 }

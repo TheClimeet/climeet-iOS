@@ -21,7 +21,7 @@ extension S3Client: DependencyKey {
         },
         file: { param in
             let endpoint = S3EndPoint.upload(data: param.file)
-            return try await APIClient.shared.upload(endpoint, decode: S3DTO.File.Response.self)
+            return try await APIClient.shared.uploadImageFile(endpoint, decode: S3DTO.File.Response.self)
         }
     )
 }

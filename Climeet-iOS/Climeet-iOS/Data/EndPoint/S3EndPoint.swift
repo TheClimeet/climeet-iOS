@@ -34,7 +34,7 @@ extension S3EndPoint: Endpoint {
     var headers: Alamofire.HTTPHeaders? {
         switch self {
         case .retoolUpload, .upload:
-            return .applicationJSON
+            return nil
         }
     }
     

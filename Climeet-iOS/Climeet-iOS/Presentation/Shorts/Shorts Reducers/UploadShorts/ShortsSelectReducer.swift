@@ -60,6 +60,7 @@ struct ShortsSelectReducer {
                 return .none
                 
             case .path(.element(id: _, action: .videoTagView(.delegate(.shortsData(let shorts))))):
+                print(shorts)
                 state.path.append(.uploadView(ShortsPostingReducer.State(shorts: shorts)))
                 return .none
                 

@@ -9,9 +9,8 @@ import SwiftUI
 import DesignSystem
 
 struct FloorSegmentedControl: View {
-    
     @Binding var selectedIndex: Int
-    @State private var frames = Array<CGRect>(repeating: .zero, count: 20)
+    @State private var frames = Array<CGRect>(repeating: .zero, count: 2) 
     
     private let titles: [String] = ["1층", "2층"]
     private let selectedItemColor: Color = .climeetMain
@@ -20,48 +19,49 @@ struct FloorSegmentedControl: View {
     private let defaultItemFontColor: Color = .levelWhite
     
     var body: some View {
-        VStack {
+        GeometryReader { geometry in // GeometryReader 추가
             ZStack {
+                Capsule()
+                    .fill(backgroundColor)
+                
+                Capsule()
+                    .fill(selectedItemColor)
+                    .frame(width: geometry.size.width / CGFloat(titles.count) - 10)
+                    .offset(x: calculateOffset(geometry: geometry))
+                
                 HStack(spacing: 10) {
-                    ForEach(self.titles.indices, id: \.self) { index in
-                        Text(self.titles[index])
-                            .font(.climeetFontParagraph4())
-                            .foregroundColor(
-                                selectedIndex == index ? selectedItemFontColor
-                                : defaultItemFontColor
-                            )
-                            .onTapGesture {
+                    ForEach(titles.indices, id: \.self) { index in
+                        Button(action: {
+                            withAnimation(.spring()) {
                                 selectedIndex = index
                             }
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 31)
-                            .background {
-                                GeometryReader { geometry in
-                                    Color.clear.onAppear {
-                                        self.setFrame(index: index, frame: geometry.frame(in: .global))
-                                    }
-                                }
-                            }
+                        }) {
+                            Text(titles[index])
+                                .font(.climeetFontParagraph4())
+                                .foregroundColor(
+                                    selectedIndex == index ? selectedItemFontColor
+                                    : defaultItemFontColor
+                                )
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 31)
                     }
                 }
-                .background(alignment: .leading) {
-                    Capsule()
-                        .fill(selectedItemColor)
-                        .frame(width: self.frames[selectedIndex].width, height: 31)
-                        .offset(x: self.frames[selectedIndex].minX - self.frames[0].minX)
-                }
             }
-            .background(backgroundColor)
-            .animation(.spring(), value: selectedIndex)
         }
-        .cornerRadius(100)
+        .frame(height: 31)
+        .clipShape(Capsule())
     }
     
-    private func setFrame(index: Int, frame: CGRect) {
-        self.frames[index] = frame
+    private func calculateOffset(geometry: GeometryProxy) -> CGFloat {
+        let buttonWidth = geometry.size.width / CGFloat(titles.count)
+        let offset = CGFloat(selectedIndex) * buttonWidth
+        return offset - geometry.size.width / 2 + buttonWidth / 2
     }
 }
 
 //#Preview {
-//    FloorSegmentedControl()
+//    @Previewable @State var selectedIndex: Int = 2
+//    
+//    FloorSegmentedControl(selectedIndex: $selectedIndex)
 //}

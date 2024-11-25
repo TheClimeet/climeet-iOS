@@ -143,11 +143,14 @@ extension PhotoViewController: UICollectionViewDataSource {
         photoService.fetchVideo(phAsset: phAsset,
                                 size: imageSize,
                                 contentMode: .aspectFit) { [weak cell] image in
-            cell?.prepare(info: .init(phAsset: phAsset,
-                                      videoThumbnail: image,
-                                      selectedOrder: imageInfo.selectedOrder,
-                                      localIdentifier: phAsset.localIdentifier))
-            imageInfo.videoThumbnail = image
+            DispatchQueue.main.async {
+                cell?.prepare(info: .init(phAsset: phAsset,
+                                          videoThumbnail: image,
+                                          selectedOrder: imageInfo.selectedOrder,
+                                          localIdentifier: phAsset.localIdentifier))
+                imageInfo.videoThumbnail = image
+            }
+           
         }
         group.leave()
         

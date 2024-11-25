@@ -66,7 +66,7 @@ struct RouteSelectionReducer {
                 state.selectedSector = sector
                 state.selectedDifficulty = Difficulty()
                 state.selectedFilteredRoute = FilteredRoute()
-                
+
                 return .run { send in
                     await send(.requestFilteredRoutes)
                 }

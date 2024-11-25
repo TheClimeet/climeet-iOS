@@ -22,7 +22,7 @@ struct ShortsDeckView: View {
             ScrollView {
                 ShortsDeckAddFollowView()
                 LazyVGrid(columns: columns, spacing: 0) {
-                    ForEach(store.shortsDeckItems, id: \.self) { item in
+                    ForEach(store.shortsDeckItems, id: \.id) { item in
                         Button(action: {
                             store.send(.tapShortsItem)
                         }, label: {
@@ -38,8 +38,8 @@ struct ShortsDeckView: View {
                         })
                     }
                     .padding(.horizontal, 0)
+                    
                 }
-                
                 switch store.fetchingStatus {
                 case .isLoading:
                     ProgressView()
@@ -95,38 +95,52 @@ struct ShortsDeckView: View {
         }
     }
     
-    private func GymInfoView(gymName: String,
-                             gymDifficultyColor: String) -> some View {
-        let gymDifficultyColor = convertHexadecimal(gymDifficultyColor)
-        return HStack(spacing: 4) {
-            Text(gymName)
-                .font(.system(size: 12, weight: .light))
-                .foregroundColor(.white)
-                .padding(.vertical, 4)
-                .padding(.leading, 7)
+    private func GymInfoView(gymName: String?,
+                             gymDifficultyColor: String?) -> some View {
+        
+        if let gymName = gymName,
+           let difficultyColor = gymDifficultyColor {
+            let gymDifficultyColor = convertHexadecimal(difficultyColor)
             
-            Circle()
-                .fill(gymDifficultyColor)
-                .frame(width: 14, height: 14)
-                .padding(.trailing, 7)
+            return HStack(spacing: 4) {
+                Text(gymName)
+                    .font(.system(size: 12, weight: .light))
+                    .foregroundColor(.white)
+                    .padding(.vertical, 4)
+                    .padding(.leading, 7)
+                
+                Circle()
+                    .fill(gymDifficultyColor)
+                    .frame(width: 14, height: 14)
+                    .padding(.trailing, 7)
+            }
+            .background(Color.black.opacity(0.6))
+            .cornerRadius(13)
+            .padding(.horizontal, 7)
+            .padding(.vertical, 10)
+        } else {
+            return Rectangle()
+                .foregroundStyle(.clear)
         }
-        .background(Color.black.opacity(0.6))
-        .cornerRadius(13)
-        .padding(.horizontal, 7)
-        .padding(.vertical, 10)
+        
     }
     
-    private func DifficultyView(colorHexadecimal: String,
-                                difficulty: String) -> some View {
-        let hexadecimal = convertHexadecimal(colorHexadecimal)
-        return ZStack {
-            Circle()
-                .stroke(hexadecimal, lineWidth: 1.5)
-                .frame(width: 30, height: 30)
-            Text(difficulty)
-                .foregroundColor(hexadecimal)
-                .font(.system(size: 13, weight: .medium))
-                .lineLimit(1)
+    private func DifficultyView(colorHexadecimal: String?,
+                                difficulty: String?) -> some View {
+        if let colorHexadecimal = colorHexadecimal, let difficulty = difficulty {
+            let hexadecimal = convertHexadecimal(colorHexadecimal)
+            return ZStack {
+                Circle()
+                    .stroke(hexadecimal, lineWidth: 1.5)
+                    .frame(width: 30, height: 30)
+                Text(difficulty)
+                    .foregroundColor(hexadecimal)
+                    .font(.system(size: 13, weight: .medium))
+                    .lineLimit(1)
+            }
+        } else {
+            return Rectangle()
+                .foregroundStyle(.clear)
         }
     }
     

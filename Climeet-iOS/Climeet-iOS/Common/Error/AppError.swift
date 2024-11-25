@@ -12,6 +12,7 @@ enum AppError: Error, Equatable {
     case urlConvertingError(String)
     case unknownError(String)
     case imageConvertingError(String)
+    case videoConvertingError(String)
     case dataParsingError(String)
 }
 

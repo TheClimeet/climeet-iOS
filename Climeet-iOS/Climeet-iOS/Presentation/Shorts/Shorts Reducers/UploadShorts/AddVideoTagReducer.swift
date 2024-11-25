@@ -16,26 +16,25 @@ struct AddVideoTagReducer {
     struct State: Equatable {
         @Presents var destination: Destination.State?
         
-        var bottomSheetHeight: CGFloat = 0
+        var screenSize: CGSize?
+        var sheetHeight: CGFloat = 400
+        var privacySheetHeight: CGFloat = 400
+        
         var selectedVideoThumbnail: UIImage
         var selectedVideoURL: URL
         var discription: String = ""
         var isMuted: Bool = true
         var acessState: RevealState = .world
         
-        //MARK: For Search Climbing Gym (gymName property because SwiftUI Compiler error)
+        //MARK: For Search Gym and Routes
         var gym: Gym?
         var gymName: String = ""
-        
-        //TODO: Routes 목록 가지는 프로퍼티 생성 필요
-        
-        //TODO: Route 리듀서 및 뷰 완성되면 추후 수정 필요
-        var climbingRoute = ""
+        var gymRoutes: GymRoutes?
+        var selectedRoute: FilteredRoute?
         
         static func == (lhs: State, rhs: State) -> Bool {
             return lhs.isMuted == rhs.isMuted &&
             lhs.acessState == rhs.acessState &&
-            lhs.climbingRoute == rhs.climbingRoute &&
             lhs.discription == rhs.discription
         }
     }
@@ -44,31 +43,38 @@ struct AddVideoTagReducer {
     enum Destination {
         case changeAccessState(AccessStateReducer)
         case searchGym(SearchReducer)
-        //TODO: Route 리듀서 연결
-        //case addRoute(//RouteReducer)
+        case addRoute(ShortsGymRoutesReducer)
     }
     
     enum Action: BindableAction {
+        typealias imageUrl = String
+        
+        case readSize(CGSize)
+        
         case userAddedDiscriptions(String)
         case soundMuteButtonTapped
         case acessStateChangedButtonTapped
+        
+        //MARK: For Gym and Routes
         case addClimbingGym
+        case addGymRoutes
+        case searchGymRoutes
+        case routesResponse(GymRoutes)
         
-        //TODO: addRoute View 연결하기
-        case addRoute
-        case generateShortsModel(String)
+        case generateShortsModel(imageUrl)
         case startUploading
-        
         case showErrorSheet
         
         case binding(BindingAction<State>)
         case destination(PresentationAction<Destination.Action>)
         case delegate(Delegation)
+        
         enum Delegation {
             case shortsData(Shorts)
         }
     }
     
+    @Dependency(\.routeVersionClient) var routeVersionClient
     @Dependency(\.s3Client) var s3Client
     
     var body: some ReducerOf<Self> {
@@ -76,6 +82,13 @@ struct AddVideoTagReducer {
         
         Reduce { state, action in
             switch action {
+            case .readSize(let size):
+                state.screenSize = size
+                state.sheetHeight = size.height * (4 / 5)
+                state.privacySheetHeight = size.height * (3 / 5)
+
+                return .none
+                
             case .userAddedDiscriptions(let texts):
                 state.discription = texts
                 return .none
@@ -90,30 +103,34 @@ struct AddVideoTagReducer {
                         guard let imageData = image.jpegData(compressionQuality: 1.0) else {
                             throw AppError.imageConvertingError("Image JPEG 압축 중 에러 발생")
                         }
-                        let response = try await s3Client.file(.init(file: imageData))
-                        guard let url = response.imgURL else {
+
+                        let imageResponse = try await s3Client.file(.init(file: imageData))
+                        guard let imageUrl = imageResponse.imgUrl else {
                             throw AppError.dataParsingError("imgURL 언래핑 중 에러 발생")
                         }
                         
-                        await send(.generateShortsModel(url))
+                        await send(.generateShortsModel(imageUrl))
                     } catch let error {
                         Log.error("NetworkError", "in startUploading: \(error)")
                     }
                 })
                 
-            case let .generateShortsModel(urlString):
+            case let .generateShortsModel(imageUrl):
                 guard let shortsVideoData = convertVideoToData(videoURL: state.selectedVideoURL) else {
                     return .send(.showErrorSheet)
                 }
                 
-                //TODO: Route 추가되면 수정
-                let reqeust = ShortsRequest(climbingGymId: 0,
-                                            routeId: 0, sectorId: 0,
-                                            thumbnailImageUrl: urlString,
+                let request = ShortsRequest(climbingGymId: state.gym?.gymId ?? 0,
+                                            routeId: state.selectedRoute?.routeId ?? 0,
+                                            sectorId: state.selectedRoute?.sectorId ?? 0,
+                                            thumbnailImageUrl: imageUrl,
                                             description: state.discription,
                                             shortsVisibility: state.acessState.literalForServer,
                                             soundEnabled: state.isMuted)
-                let shorts = Shorts(video: shortsVideoData, createShortsRequest: reqeust)
+                
+                let shorts = Shorts(video: shortsVideoData,
+                                    createShortsRequest: request)
+                
                 return .send(.delegate(.shortsData(shorts)))
                 
                 //MARK: For Access State
@@ -152,9 +169,57 @@ struct AddVideoTagReducer {
             ):
                 state.gym = gym
                 state.gymName = gym.name
+                
+                return .run { send in
+                    await send(.searchGymRoutes)
+                }
+            
+                //MARK: For Search Gym Routes
+            case .searchGymRoutes:
+                return .run { [selectedGym = state.gym] send in
+                    guard let gymID = selectedGym?.gymId else { return }
+                    
+                    Log.network("[RouteSelectionReducer.swift]", "암장 특정 루트버전 필터링 키 불러오기 - 1101")
+                    
+                    let response = try await routeVersionClient.gymVersionKey(gymID, nil)
+                    let result = GymRoutes(from: response)
+                    
+                    await send(.routesResponse(result))
+                }
+                
+            case .routesResponse(let gymRoutes):
+                state.gymRoutes = gymRoutes
+                return .none
+            
+            case .addGymRoutes:
+                guard state.gym != nil else {
+                    return .none
+                }
+                
+                let childReducerState = RouteSelectionReducer.State(selectedGym: state.gym, gymRoutes: state.gymRoutes)
+                
+                let reducer = ShortsGymRoutesReducer.State(
+                    selectedGym: state.gym, gymRoutes: state.gymRoutes,
+                    routeSelector: childReducerState
+                )
+                
+                state.destination = .addRoute(reducer)
+                return .none
+            
+                //루트선택 결과 전달
+            case let .destination(
+                .presented(
+                    .addRoute(
+                        .delegate(
+                            .selectedRoute(selectedRoute)
+                        )
+                    )
+                )
+            ):
+                state.selectedRoute = selectedRoute
+                print(selectedRoute)
                 return .none
                 
-                //TODO: GymID 이용해서 route 받아오기
             case .binding(_):
                 return .none
                 

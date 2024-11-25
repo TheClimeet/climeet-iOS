@@ -23,9 +23,6 @@ extension ShortsDTO.Shorts {
         func toEntity() -> ShortsDeckItem? {
             guard let shortsID,
                   let thumbnailImageURL,
-                  let gymName,
-                  let gymDifficultyName,
-                  let gymDifficultyColor,
                   let isManager,
                   let detailInfo = shortsDetailInfo?.toEntity() else {
                 return nil
@@ -69,10 +66,6 @@ extension ShortsDTO.Shorts {
         func toEntity() -> ShortsDetailInfo? {
             guard let simpleInfo = userShortsSimpleInfo?.toEntity(),
                   let shortsID,
-                  let gymName,
-                  let sectorName,
-                  let gymID,
-                  let sectorID,
                   let videoURL,
                   let likeCount,
                   let commentCount,
@@ -80,11 +73,8 @@ extension ShortsDTO.Shorts {
                   let shareCount,
                   let isLiked,
                   let isBookmarked,
-                  let description,
-                  let routeImageURL,
-                  let gymDifficultyName,
-                  let gymDifficultyColor,
                   let isSoundEnabled else { return nil }
+            
             return ShortsDetailInfo(
                 userShortsSimpleInfo: simpleInfo,
                 shortsId: shortsID,
@@ -121,7 +111,6 @@ extension ShortsDTO.Shorts {
         
         func toEntity() -> UserShortsSimpleInfo? {
             guard let userID,
-                  let profileImgURL,
                   let profileName else { return nil }
             
             return UserShortsSimpleInfo(

@@ -13,6 +13,6 @@ extension S3DTO.File {
     }
     
     struct Response: Decodable {
-        let imgURL: String?
+        let imgUrl: String?
     }
 }

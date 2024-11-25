@@ -77,7 +77,7 @@ extension ShortsClient: DependencyKey {
         },
         upload: { param in
             let endPoint = ShortsEndPoint.upload(param)
-            return try await APIClient.shared.upload(endPoint, decode: String.self)
+            return try await APIClient.shared.uploadShorts(endPoint, decode: String.self)
         }
     )
 }
