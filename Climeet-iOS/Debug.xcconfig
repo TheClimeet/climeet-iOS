@@ -1,0 +1,15 @@
+#include "./Shared.xcconfig"
+
+// 카카오 네이티브 앱 키
+KAKAO_APP_KEY = 81affb629596104a544a5e867a430754
+
+// 네이버 네이티브 앱 키
+NAVER_CLIENT_SECRET = pzJQzFskv2
+NAVER_CLIENT_ID = CLd7qxBLgtgn3cupxlQX
+
+// BASE_URL
+BASE_URL = https:/$()/www.testclimeet.shop
+
+// TEST_TOKEN
+CLIMBER_TOKEN = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxK2NsaW1iZXIiLCJpYXQiOjE3MTk4ODc0MTV9.EviGJxAU0PcNeY8o6TnOf2fTe003nrII5fd_3M8Edek
+MASTER_TOKEN = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxK21hbmFnZXIiLCJpYXQiOjE3MTk4ODcyMTV9.bEOo-ruDzlAfejbI5s987S0g1vjQKlmE6kPdydQHacQ
