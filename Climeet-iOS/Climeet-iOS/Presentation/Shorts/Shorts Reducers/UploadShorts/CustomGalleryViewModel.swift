@@ -44,6 +44,11 @@ final class CustomGalleryViewModel: ObservableObject {
         }
     }
     
+    func refreshAlbums() {
+        self.loadAlbums()
+        self.delegate?.informAlbumsDownload()
+    }
+    
     private func assignAlbums() {
         guard currentAlbumIndex < albums.count else { return }
         let album = albums[currentAlbumIndex]
@@ -53,7 +58,7 @@ final class CustomGalleryViewModel: ObservableObject {
                                                     videoThumbnail: nil,
                                                     selectedOrder: .none,
                                                     localIdentifier: $0.localIdentifier) }
-            //TODO: 여기서 이미지변환 같이 하기 시도 -> 실패 여전히 priority inversion
+
             self?.delegate?.informAlbumsDownload()
         }
     }

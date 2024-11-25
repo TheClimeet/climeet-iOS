@@ -51,7 +51,7 @@ final class PhotoViewController: UIViewController, ShortsCustomGalleryDelegate {
     }()
     
     // MARK: Property
-    private let albumService: AlbumService = MyAlbumService()
+//    private let albumService: AlbumService = MyAlbumService()
     private let photoService: PhotoService = MyPhotoService()
     private var selectedIndexArray = [Int]() // Index: count
     private var selectedIndex = Int() // Index: count
@@ -136,7 +136,8 @@ extension PhotoViewController: UICollectionViewDataSource {
         let phAsset = imageInfo.phAsset
         let imageSize = CGSize(width: Const.cellSize.width * Const.scale,
                                height: Const.cellSize.height * Const.scale)
-        //TODO: Prioirity Inversion 해결하기 
+        
+        //TODO: Prioirity Inversion 해결하기
         let group = DispatchGroup()
         
         group.enter()

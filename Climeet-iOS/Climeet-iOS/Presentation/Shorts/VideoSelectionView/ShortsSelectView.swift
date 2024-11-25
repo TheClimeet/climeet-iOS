@@ -11,7 +11,7 @@ import ComposableArchitecture
 struct ShortsSelectView: View {
     
     //MARK: ViewModel for UICollectioVIewController
-    @ObservedObject private var viewModel = CustomGalleryViewModel()
+    @ObservedObject private var viewModel: CustomGalleryViewModel
     @Bindable var store: StoreOf<ShortsSelectReducer>
     
     private enum Const {
@@ -22,11 +22,20 @@ struct ShortsSelectView: View {
         static let cancelIcon = "uploadCancelIcon"
     }
     
-    private let service = MyPhotoAuthService()
+    private let photoService: PhotoAuthService
     private let thumbnailWidthProportion: CGFloat = 189 / 375
     private let thumbnailHeightProportion: CGFloat = 416 / 894
     private let screenWidth = UIScreen.main.bounds.width
     private let screenHeight = UIScreen.main.bounds.height
+    
+    init(viewModel: CustomGalleryViewModel = CustomGalleryViewModel(), store: StoreOf<ShortsSelectReducer>) {
+        self.viewModel = viewModel
+        self.store = store
+        self.photoService = MyPhotoAuthService()
+        photoService.didChangeSelectedPhotos {
+            viewModel.refreshAlbums()
+        }
+    }
     
     var body: some View {
         NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
@@ -71,13 +80,8 @@ struct ShortsSelectView: View {
             
             //TODO: Shorts 버튼 누르면 권한 요청하거나 온보딩 화면에서 요청하도록 추후 위치 옮기기
             .onAppear(perform: {
-                service.requestAuthorization { result in
-                    switch result {
-                    case .success():
-                        print("success")
-                    case .failure(let errror):
-                        print(errror)
-                    }
+                photoService.requestAuthorization {
+
                 }
             })
         } destination: { store in
