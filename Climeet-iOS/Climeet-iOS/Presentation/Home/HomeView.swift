@@ -6,8 +6,11 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
 
 struct HomeView: View {
+    @Bindable var store: StoreOf<HomeReducer>
+    
     var body: some View {
         ZStack {
             Color.climeetBackground
@@ -15,19 +18,19 @@ struct HomeView: View {
             
             ScrollView {
                 VStack(spacing: 0) {
-                    HomeHeader()
+                    HomeHeaderView()
                         .padding(.vertical, 30)
-                    Banner()
+                    BannerView(store: store.scope(state: \.banner, action: \.banner))
                         .padding(.bottom, 48)
-                    HomeGymShortcut()
+                    HomeGymShortcutView(store: store.scope(state: \.shortcut, action: \.shortcut))
                         .padding(.bottom, 48)
-                    BestClimber()
+                    HomeBestClimberView(store: store.scope(state: \.bestClimber, action: \.bestClimber))
                         .padding(.bottom, 48)
-                    WeeklyPopularShorts()
+                    WeeklyPopularShortsView()
                         .padding(.bottom, 48)
-                    WeeklyPopularGym()
+                    WeeklyPopularGymView()
                         .padding(.bottom, 48)
-                    WeeklyPopularRout()
+                    WeeklyPopularRoutView()
                         .padding(.bottom, 120)
                 }
             }
@@ -37,5 +40,8 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView()
+    let store = StoreOf<HomeReducer>(initialState: HomeReducer.State()) {
+        HomeReducer()
+    }
+    HomeView(store: store)
 }

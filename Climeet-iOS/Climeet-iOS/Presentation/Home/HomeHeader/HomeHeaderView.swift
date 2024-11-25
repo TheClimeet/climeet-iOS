@@ -1,5 +1,5 @@
 //
-//  HomeHeader.swift
+//  HomeHeaderView.swift
 //  Climeet-iOS
 //
 //  Created by 권승용 on 9/24/24.
@@ -8,7 +8,7 @@
 import SwiftUI
 import DesignSystem
 
-struct HomeHeader: View {
+struct HomeHeaderView: View {
     var body: some View {
         HStack(spacing: 0) {
             Text("클밋")
@@ -28,6 +28,6 @@ struct HomeHeader: View {
 #Preview {
     ZStack {
         Color.climeetBackground
-        HomeHeader()
+        HomeHeaderView()
     }
 }

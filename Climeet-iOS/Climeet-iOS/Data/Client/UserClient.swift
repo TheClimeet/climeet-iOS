@@ -83,6 +83,104 @@ extension UserClient: DependencyKey {
             return try await APIClient.shared.request(endPoint, decode: UserDTO.RefreshToken.Response.self)
         }
     )
+    
+    static var previewValue: UserClient = .init(
+        usersNotification: { param in
+            let endPoint = UserEndPoint.usersNotification(param)
+            return try await APIClient.shared.request(endPoint, decode: UserDTO.UsersNotification.Response.self)
+        },
+        usersAccounts: {
+            let endPoint = UserEndPoint.usersAccounts
+            return try await APIClient.shared.request(endPoint, decode: UserDTO.UsersAccounts.Response.self)
+        },
+        profile: { userID in
+            let endPoint = UserEndPoint.profile(userID: userID)
+            return try await APIClient.shared.request(endPoint, decode: UserDTO.Profile.Response.self)
+        },
+        homeGyms: { userID in
+            var result = UserDTO.HomeGyms.Response()
+            if userID == nil {
+                result = [
+                    UserDTO.HomeGyms.ResponseElement(
+                        gymID: 0,
+                        gymProfileURL: "https://picsum.photos/200/300",
+                        gymName: "firstGym",
+                        followerCount: 1234
+                    ),
+                    UserDTO.HomeGyms.ResponseElement(
+                        gymID: 1,
+                        gymProfileURL: "https://picsum.photos/200/300",
+                        gymName: "secondGym",
+                        followerCount: 1234
+                    ),
+                    UserDTO.HomeGyms.ResponseElement(
+                        gymID: 3,
+                        gymProfileURL: "https://picsum.photos/200/300",
+                        gymName: "thirdGym",
+                        followerCount: 1234
+                    ),
+                    UserDTO.HomeGyms.ResponseElement(
+                        gymID: 4,
+                        gymProfileURL: "https://picsum.photos/200/300",
+                        gymName: "fourthGym",
+                        followerCount: 1234
+                    ),
+                    UserDTO.HomeGyms.ResponseElement(
+                        gymID: 5,
+                        gymProfileURL: "https://picsum.photos/200/300",
+                        gymName: "fifthGym",
+                        followerCount: 1234
+                    ),
+                    UserDTO.HomeGyms.ResponseElement(
+                        gymID: 6,
+                        gymProfileURL: "https://picsum.photos/200/300",
+                        gymName: "sixthGym",
+                        followerCount: 1234
+                    ),
+                ]
+            } else {
+                result = [
+                    UserDTO.HomeGyms.ResponseElement(
+                        gymID: 0,
+                        gymProfileURL: "https://picsum.photos/200/300",
+                        gymName: "firstGym",
+                        followerCount: 1234
+                    )]
+            }
+            return result
+        },
+        gymFollowing: {
+            let endPoint = UserEndPoint.gymFollowing
+            return try await APIClient.shared.request(endPoint, decode: UserDTO.GymFollowing.Response.self)
+        },
+        followers: { param in
+            let endPoint = UserEndPoint.followers(param)
+            return try await APIClient.shared.request(endPoint, decode: UserDTO.Followers.Response.self)
+        },
+        climberFollowing: {
+            let endPoint = UserEndPoint.climberFollowing
+            return try await APIClient.shared.request(endPoint, decode: UserDTO.ClimberFollowing.Response.self)
+        },
+        profileName: { name in
+            let endPoint = UserEndPoint.profileName(name: name)
+            let response = try await APIClient.shared.request(endPoint, decode: String.self)
+            return !response.isEmpty
+        },
+        profileImage: { imageURL in
+            let endPoint = UserEndPoint.profileImage(imageURL: imageURL)
+            let response = try await APIClient.shared.request(endPoint, decode: String.self)
+            return !response.isEmpty
+        },
+        userFCMToken: { token in
+            let endPoint = UserEndPoint.usersFCMToken(token: token)
+            let response = try await APIClient.shared.request(endPoint, decode: String.self)
+            return !response.isEmpty
+        },
+        refreshToken: {
+            let endPoint = UserEndPoint.refreshToken
+            return try await APIClient.shared.request(endPoint, decode: UserDTO.RefreshToken.Response.self)
+        }
+    )
 }
 
 extension DependencyValues {

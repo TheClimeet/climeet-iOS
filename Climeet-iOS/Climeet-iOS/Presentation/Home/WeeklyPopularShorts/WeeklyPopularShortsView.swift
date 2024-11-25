@@ -1,5 +1,5 @@
 //
-//  WeeklyPopularShorts.swift
+//  WeeklyPopularShortsView.swift
 //  Climeet-iOS
 //
 //  Created by 권승용 on 9/24/24.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct WeeklyPopularShorts: View {
+struct WeeklyPopularShortsView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
@@ -42,6 +42,6 @@ struct WeeklyPopularShorts: View {
 }
 
 #Preview {
-    WeeklyPopularShorts()
+    WeeklyPopularShortsView()
         .background(Color.climeetBackground)
 }

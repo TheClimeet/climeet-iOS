@@ -19,6 +19,10 @@ enum MainTab {
 struct MainTabView: View {
     @State private var selectedTab: MainTab = .home
     
+    private let homeStore = Store(initialState: HomeReducer.State(), reducer: {
+        HomeReducer()
+    })
+    
     private let shortsDeckStore = Store(initialState: ShortsDeckReducer.State(), reducer: {
         ShortsDeckReducer()
     })
@@ -34,7 +38,7 @@ struct MainTabView: View {
     private let searchStore = Store(initialState: SearchReducer.State(), reducer: {
         SearchReducer()
     })
-    
+
     private let activityCalendarStore = Store(
         initialState: ActivityCalendarReducer.State(), reducer: {
             ActivityCalendarReducer()
@@ -45,7 +49,7 @@ struct MainTabView: View {
             VStack(spacing: 0) {
                 switch selectedTab {
                 case .home:
-                    HomeView()
+                    HomeView(store: homeStore)
                 case .shorts:
                     ShortsDeckView(store: shortsDeckStore)
                 case .upload:

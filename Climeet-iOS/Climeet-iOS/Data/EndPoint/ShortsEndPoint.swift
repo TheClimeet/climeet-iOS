@@ -117,6 +117,5 @@ extension ShortsEndPoint: Endpoint {
             ]
         }
     }
-
     var token: String? { KeyChain.shared.refreshToken }
 }

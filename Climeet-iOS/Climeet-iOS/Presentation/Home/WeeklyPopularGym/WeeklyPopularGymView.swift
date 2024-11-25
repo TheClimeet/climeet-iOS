@@ -1,5 +1,5 @@
 //
-//  WeeklyPopularGym.swift
+//  WeeklyPopularGymView.swift
 //  Climeet-iOS
 //
 //  Created by 권승용 on 9/24/24.
@@ -21,7 +21,7 @@ enum SortBy {
     }
 }
 
-struct WeeklyPopularGym: View {
+struct WeeklyPopularGymView: View {
     @State private var selectedTab: SortBy = .follower
     
     var body: some View {
@@ -123,6 +123,6 @@ struct GymIcon: View {
 }
 
 #Preview {
-    WeeklyPopularGym()
+    WeeklyPopularGymView()
         .background(Color.climeetBackground)
 }
