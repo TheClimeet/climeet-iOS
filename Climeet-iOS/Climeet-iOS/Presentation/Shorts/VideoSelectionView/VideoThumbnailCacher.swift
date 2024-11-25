@@ -8,8 +8,10 @@
 import Foundation
 import UIKit
 
+
 actor VideoThumbnailCacher {
     static let shared = VideoThumbnailCacher()
+   
     
     private let cache: NSCache<NSString, UIImage> = {
         let cache = NSCache<NSString, UIImage>()
@@ -26,7 +28,7 @@ actor VideoThumbnailCacher {
         cache.setObject(image, forKey: cacheKey)
     }
     
-    func image(forKey key: String) -> UIImage? {
+    func loadImage(forKey key: String) -> UIImage? {
         let cacheKey = NSString(string: key)
         return cache.object(forKey: cacheKey)
     }

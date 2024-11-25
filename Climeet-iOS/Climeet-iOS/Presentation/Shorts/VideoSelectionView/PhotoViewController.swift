@@ -51,13 +51,13 @@ final class PhotoViewController: UIViewController, ShortsCustomGalleryDelegate {
     }()
     
     // MARK: Property
-//    private let albumService: AlbumService = MyAlbumService()
+    private let albumService: AlbumService = MyAlbumService()
     private let photoService: PhotoService = MyPhotoService()
     private var selectedIndexArray = [Int]()
     private var selectedIndex = Int()
     private var prevIndex: Int? = Int()
     
-   // private var albums = [PHFetchResult<PHAsset>]()
+    private var albums = [PHFetchResult<PHAsset>]()
     private var viewModel: CustomGalleryViewModel?
     
     func injectViewModel(_ vm: CustomGalleryViewModel) {
@@ -125,9 +125,11 @@ extension PhotoViewController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView,
-                        cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+                       cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PhotoCell.id,
-                                                            for: indexPath) as? PhotoCell else { return UICollectionViewCell() }
+                                                           for: indexPath) as? PhotoCell else {
+            return UICollectionViewCell()
+        }
         
         guard let viewModel = self.viewModel else {
             return cell
@@ -136,24 +138,34 @@ extension PhotoViewController: UICollectionViewDataSource {
         let imageInfo = viewModel.dataSource[indexPath.item]
         let phAsset = imageInfo.phAsset
         let imageSize = CGSize(width: Const.cellSize.width * Const.scale,
-                               height: Const.cellSize.height * Const.scale)
-        let duration = convertTimeIntervalToString(phAsset.duration) ?? ""
+                              height: Const.cellSize.height * Const.scale)
         
-        photoService.fetchVideo(phAsset: phAsset,
-                                size: imageSize,
-                                contentMode: .aspectFit) { [weak cell] image in
-            DispatchQueue.main.async {
-                cell?.prepare(info: .init(phAsset: phAsset,
-                                          videoThumbnail: image,
-                                          duration: duration,
-                                          selectedOrder: imageInfo.selectedOrder,
-                                          localIdentifier: phAsset.localIdentifier))
-                imageInfo.videoThumbnail = image
-                imageInfo.duration = duration
+        cell.prepare(info: imageInfo)
+        
+        Task { @MainActor in
+            let currentIndexPath = indexPath
+            
+            if let thumbnail = await photoService.fetchVideo(
+                phAsset: phAsset,
+                size: imageSize,
+                contentMode: .aspectFit
+            ) {
+                guard let cell = collectionView.cellForItem(at: currentIndexPath) as? PhotoCell,
+                      currentIndexPath == collectionView.indexPath(for: cell) else {
+                    return
+                }
+                
+                imageInfo.videoThumbnail = thumbnail
+                
+                cell.prepare(info: .init(
+                    phAsset: phAsset,
+                    videoThumbnail: thumbnail,
+                    duration: imageInfo.duration,
+                    selectedOrder: imageInfo.selectedOrder,
+                    localIdentifier: phAsset.localIdentifier
+                ))
             }
         }
-        
-        cell.prepare(info: viewModel.dataSource[indexPath.item])
         
         return cell
     }

@@ -17,7 +17,7 @@ enum SelectionOrder: Equatable {
 class PhotoCellInfo {
     let phAsset: PHAsset
     var videoThumbnail: UIImage?
-    var duration: String?
+    let duration: String?
     let selectedOrder: SelectionOrder
     let localIdentifier: String
     

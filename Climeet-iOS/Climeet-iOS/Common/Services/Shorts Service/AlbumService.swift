@@ -31,31 +31,31 @@ final class MyAlbumService: AlbumService {
             albums.append(.init(fetchResult: standardFetchResult, albumName: mediaType.title))
             
             // 3. smart 앨범을 query로 이미지 가져오기
-//            let smartAlbums = PHAssetCollection.fetchAssetCollections(
-//                with: .smartAlbum,
-//                subtype: .any,
-//                options: PHFetchOptions()
-//            )
-//
-//            smartAlbums.enumerateObjects { [weak self] phAssetCollection, index, pointer in
-//                guard let self, index <= smartAlbums.count - 1 else {
-//                    pointer.pointee = true
-//                    return
-//                }
-//
-//                // 값을 빠르게 받아오지 못하는 경우
-//                if phAssetCollection.estimatedAssetCount == NSNotFound {
-//                    // 쿼리를 날려서 가져오기
-//                    let fetchOptions = PHFetchOptions()
-//                    fetchOptions.predicate = self.getPredicate(mediaType: mediaType)
-//                    fetchOptions.sortDescriptors = self.getSortDescriptors
-//
-//                    DispatchQueue.global(qos: .userInitiated).async {
-//                        let fetchResult = PHAsset.fetchAssets(in: phAssetCollection, options: fetchOptions)
-//                        albums.append(.init(fetchResult: fetchResult, albumName: mediaType.title))
-//                    }
-//                }
-//            }
+            let smartAlbums = PHAssetCollection.fetchAssetCollections(
+                with: .smartAlbum,
+                subtype: .any,
+                options: PHFetchOptions()
+            )
+
+            smartAlbums.enumerateObjects { [weak self] phAssetCollection, index, pointer in
+                guard let self, index <= smartAlbums.count - 1 else {
+                    pointer.pointee = true
+                    return
+                }
+
+                // 값을 빠르게 받아오지 못하는 경우
+                if phAssetCollection.estimatedAssetCount == NSNotFound {
+                    // 쿼리를 날려서 가져오기
+                    let fetchOptions = PHFetchOptions()
+                    fetchOptions.predicate = self.getPredicate(mediaType: mediaType)
+                    fetchOptions.sortDescriptors = self.getSortDescriptors
+
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        let fetchResult = PHAsset.fetchAssets(in: phAssetCollection, options: fetchOptions)
+                        albums.append(.init(fetchResult: fetchResult, albumName: mediaType.title))
+                    }
+                }
+            }
         }
     }
     

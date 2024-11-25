@@ -11,15 +11,17 @@ import Photos
 protocol PhotoService {
     func convertAlbumToPHAssets(album: PHFetchResult<PHAsset>,
                                 completion: @escaping ([PHAsset]) -> Void)
-    func fetchVideo(phAsset: PHAsset, size: CGSize,
-                    contentMode: PHImageContentMode,
-                    completion: @escaping (UIImage) -> Void
-    )
+    func fetchVideo(
+        phAsset: PHAsset,
+        size: CGSize,
+        contentMode: PHImageContentMode
+    ) async -> UIImage?
 }
 
 final class MyPhotoService: NSObject, PhotoService {
     private let imageManager = PHCachingImageManager()
-    private let cacher = NSCache<NSString, UIImage>()
+   // private let cacher = NSCache<NSString, UIImage>()
+    private let cacher = VideoThumbnailCacher.shared
     
     weak var delegate: PHPhotoLibraryChangeObserver?
     
@@ -52,37 +54,43 @@ final class MyPhotoService: NSObject, PhotoService {
     func fetchVideo(
         phAsset: PHAsset,
         size: CGSize,
-        contentMode: PHImageContentMode,
-        completion: @escaping (UIImage) -> Void
-    ) {
-        let cacheKey = NSString(string: phAsset.localIdentifier)
-        if let cachedThumbnail = cacher.object(forKey: cacheKey) {
-            completion(cachedThumbnail)
+        contentMode: PHImageContentMode
+    ) async -> UIImage? {
+        let cacheKey = phAsset.localIdentifier
+        
+        if let cachedThumbnail = await VideoThumbnailCacher.shared.loadImage(forKey: cacheKey) {
+            return cachedThumbnail
         }
         
-        let options = PHVideoRequestOptions()
-        options.isNetworkAccessAllowed = false
-        options.deliveryMode = .fastFormat
-        
-        imageManager.requestAVAsset(forVideo: phAsset,
-                                    options: options) { asset, _, _ in
-            guard let avAsset = asset else {
-                return
-            }
+        return await withCheckedContinuation { continuation in
+            let options = PHVideoRequestOptions()
+            options.isNetworkAccessAllowed = false
+            options.deliveryMode = .fastFormat
             
-            let assetImageGenerator = AVAssetImageGenerator(asset: avAsset)
-            assetImageGenerator.appliesPreferredTrackTransform = true
-            
-            do {
-                let cgImage = try assetImageGenerator.copyCGImage(at: .zero, actualTime: nil)
-                let thumbnailImage = UIImage(cgImage: cgImage)
+            imageManager.requestAVAsset(forVideo: phAsset,
+                                      options: options) { asset, _, _ in
+                guard let avAsset = asset else {
+                    continuation.resume(returning: nil)
+                    return
+                }
                 
-                completion(thumbnailImage)
-                self.cacher.setObject(thumbnailImage, forKey: cacheKey)
-            } catch(let error) {
-                print(error)
+                let assetImageGenerator = AVAssetImageGenerator(asset: avAsset)
+                assetImageGenerator.appliesPreferredTrackTransform = true
+                
+                do {
+                    let cgImage = try assetImageGenerator.copyCGImage(at: .zero, actualTime: nil)
+                    let thumbnailImage = UIImage(cgImage: cgImage)
+                    
+                    // actor의 메서드를 Task 내에서 호출
+                    Task {
+                        await VideoThumbnailCacher.shared.setImage(thumbnailImage, forKey: cacheKey)
+                    }
+                    
+                    continuation.resume(returning: thumbnailImage)
+                } catch {
+                    continuation.resume(returning: nil)
+                }
             }
-            
         }
     }
 }
