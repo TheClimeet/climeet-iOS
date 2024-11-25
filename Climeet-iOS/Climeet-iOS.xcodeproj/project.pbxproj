@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 70;
+	objectVersion = 71;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -36,7 +36,6 @@
 /* Begin PBXFileReference section */
 		0453294E2C5B8E3400BBE289 /* Climeet-iOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Climeet-iOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0489EEF92C3BE58E00BFC55B /* Climeet-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Climeet-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		04ED90042CD3A519009B59A0 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		04ED90052CD3A519009B59A0 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		B94EC2222BD13CBB00DC3FDB /* Climeet-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Climeet-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B94EC2412BD1473E00DC3FDB /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
@@ -47,7 +46,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Debug.xcconfig,
-				Release.xcconfig,
 				Shared.xcconfig,
 			);
 			target = B94EC2212BD13CBB00DC3FDB /* Climeet-iOS */;
@@ -99,6 +97,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		041DA0452CF41CA800CFDC31 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		0489EE9A2C2EA18D00BFC55B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -116,6 +121,7 @@
 				604B97AC2CC394F7005EDD29 /* Climeet-iOSUITests */,
 				B94EC2232BD13CBB00DC3FDB /* Products */,
 				0489EE9A2C2EA18D00BFC55B /* Frameworks */,
+				041DA0452CF41CA800CFDC31 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -338,6 +344,8 @@
 /* Begin XCBuildConfiguration section */
 		045329572C5B8E3400BBE289 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 604B958E2CC394EF005EDD29 /* XCConfig */;
+			baseConfigurationReferenceRelativePath = Debug.xcconfig;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -382,6 +390,8 @@
 		};
 		0489EF002C3BE58E00BFC55B /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 604B958E2CC394EF005EDD29 /* XCConfig */;
+			baseConfigurationReferenceRelativePath = Debug.xcconfig;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -547,7 +557,8 @@
 		};
 		B94EC2312BD13CBD00DC3FDB /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 04ED90042CD3A519009B59A0 /* Debug.xcconfig */;
+			baseConfigurationReferenceAnchor = 604B958E2CC394EF005EDD29 /* XCConfig */;
+			baseConfigurationReferenceRelativePath = Debug.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

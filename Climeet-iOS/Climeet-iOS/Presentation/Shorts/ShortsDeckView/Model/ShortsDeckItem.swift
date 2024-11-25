@@ -13,8 +13,9 @@ struct ShortsDeck {
     let result: [ShortsDeckItem]
 }
 
-//TODO: DTO 역할 분리
-struct ShortsDeckItem: Hashable {
+struct ShortsDeckItem: Hashable, Identifiable {
+    let id = UUID()
+    
     let shortsId: Int
     let thumbnailImageUrl: String
     let gymName: String?

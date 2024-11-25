@@ -277,7 +277,7 @@ struct ClimeetNavigationBar: View {
 //        videoTagStore: Store(
 //            initialState: AddVideoTagReducer.State(
 //                selectedVideoThumbnail: UIImage(),
-//                selectedVideoURL: URL(string: "")!
+//                selectedVideoURL: URL(string: "")
 //            )
 //        ) {
 //            AddVideoTagReducer()
