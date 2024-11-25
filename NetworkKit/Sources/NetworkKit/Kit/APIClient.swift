@@ -63,7 +63,7 @@ public final class APIClient: APIProtocol, @unchecked Sendable {
         }
     }
     
-    public func uploadFile<T>(_ endpoint: any Endpoint, decode: T.Type) async throws -> T where T : Decodable {
+    public func uploadImageFile<T>(_ endpoint: any Endpoint, decode: T.Type) async throws -> T where T : Decodable {
         do {
             let result = try await self.session.upload(multipartFormData: { multipartFormData in
                 if let data = endpoint.body?["data"] as? Data {
