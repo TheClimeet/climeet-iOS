@@ -35,14 +35,6 @@ struct RouteSelectionReducer {
         case requestFilteredRoutes
         case routesResponse(GymRoutes)
         case filteredRouteResponse([FilteredRoute])
-        
-        case doneSelection
-        case inSelection
-        
-        case delegate(Delegate)
-        enum Delegate {
-            case selectedRoute(FilteredRoute)
-        }
     }
     
     @Dependency(\.routeVersionClient) var routeVersionClient
@@ -70,7 +62,6 @@ struct RouteSelectionReducer {
                 
                 return .run { send in
                     await send(.requestFilteredRoutes)
-                    await send(.inSelection)
                 }
                 
             case .sectorChangeButtonTapped(let sector):
@@ -79,7 +70,6 @@ struct RouteSelectionReducer {
                 state.selectedFilteredRoute = FilteredRoute()
 
                 return .run { send in
-                    await send(.inSelection)
                     await send(.requestFilteredRoutes)
                 }
                 
@@ -88,7 +78,6 @@ struct RouteSelectionReducer {
                 state.selectedFilteredRoute = FilteredRoute()
                 
                 return .run { send in
-                    await send(.inSelection)
                     await send(.requestFilteredRoutes)
                 }
                 
@@ -141,35 +130,14 @@ struct RouteSelectionReducer {
                 
             case .filteredRouteChangeButtonTapped(let filteredRoute):
                 state.selectedFilteredRoute = filteredRoute
-                
-                return .run { [selectedRoute = state.selectedFilteredRoute] send in
-                    if let _ = selectedRoute.climeetDifficultyName,
-                       let _ = selectedRoute.sectorName,
-                        let _ = selectedRoute.sectorId,
-                       let _ = selectedRoute.routeId {
-                        await send(.delegate(.selectedRoute(selectedRoute)))
-                        await send(.doneSelection)
-                        print(selectedRoute)
-                    }
-                }
-                
-            case .doneSelection :
-                state.isSelectionDone = true
                 return .none
-            
-            case .inSelection:
-                state.isSelectionDone = false
-                return .none
-            
+                
             case .routesResponse(let gymRoutes):
                 state.gymRoutes = gymRoutes
                 return .none
                 
             case let .filteredRouteResponse(filteredRoutes):
                 state.filteredRoutesResponse = filteredRoutes
-                return .none
-                
-            case .delegate(_):
                 return .none
             }
         }

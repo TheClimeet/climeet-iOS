@@ -201,7 +201,7 @@ extension ShortsUploadVideoTagView {
 }
 
 struct ShortsGymRoutesView: View {
-    @Bindable var store: StoreOf<RouteSelectionReducer>
+    @Bindable var store: StoreOf<ShortsGymRoutesReducer>
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -212,10 +212,12 @@ struct ShortsGymRoutesView: View {
                     ClimeetNavigationBar(gymName: gymName)
                     Spacer(minLength: 20)
                     
-                    RouteSelectionView(store: store)
-                        .padding(.all, 10)
-                        .background(.text08)
-                        .clipShape(RoundedRectangle(cornerRadius: 15))
+                    RouteSelectionView(store: store.scope(
+                        state: \.routeSelector, action: \.routeSelector)
+                    )
+                    .padding(.all, 10)
+                    .background(.text08)
+                    .clipShape(RoundedRectangle(cornerRadius: 15))
                     
                     HStack(spacing: 10) {
                         ShortsDefaultButton(title: "취소",
@@ -252,7 +254,7 @@ struct ClimeetNavigationBar: View {
                 Image("Back")
                     .foregroundColor(.white)
             }
-
+            
             HStack {
                 Spacer()
                 Image(systemName: "map")

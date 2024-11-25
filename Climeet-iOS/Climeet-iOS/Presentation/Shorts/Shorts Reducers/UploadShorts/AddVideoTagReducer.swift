@@ -43,7 +43,7 @@ struct AddVideoTagReducer {
     enum Destination {
         case changeAccessState(AccessStateReducer)
         case searchGym(SearchReducer)
-        case addRoute(RouteSelectionReducer)
+        case addRoute(ShortsGymRoutesReducer)
     }
     
     enum Action: BindableAction {
@@ -175,17 +175,6 @@ struct AddVideoTagReducer {
                 }
             
                 //MARK: For Search Gym Routes
-            case .addGymRoutes:
-                guard state.gym != nil else {
-                    return .none
-                }
-                
-                let reducer = RouteSelectionReducer.State(selectedGym: state.gym,
-                                                          gymRoutes: state.gymRoutes)
-                
-                state.destination = .addRoute(reducer)
-                return .none
-            
             case .searchGymRoutes:
                 return .run { [selectedGym = state.gym] send in
                     guard let gymID = selectedGym?.gymId else { return }
@@ -201,7 +190,23 @@ struct AddVideoTagReducer {
             case .routesResponse(let gymRoutes):
                 state.gymRoutes = gymRoutes
                 return .none
+            
+            case .addGymRoutes:
+                guard state.gym != nil else {
+                    return .none
+                }
                 
+                let childReducerState = RouteSelectionReducer.State(selectedGym: state.gym, gymRoutes: state.gymRoutes)
+                
+                let reducer = ShortsGymRoutesReducer.State(
+                    selectedGym: state.gym, gymRoutes: state.gymRoutes,
+                    routeSelector: childReducerState
+                )
+                
+                state.destination = .addRoute(reducer)
+                return .none
+            
+                //루트선택 결과 전달
             case let .destination(
                 .presented(
                     .addRoute(
