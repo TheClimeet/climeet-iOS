@@ -63,35 +63,31 @@ final class MyPhotoService: NSObject, PhotoService {
         
         return await withCheckedContinuation { continuation in
                 let options = PHVideoRequestOptions()
-                options.isNetworkAccessAllowed = false
+                options.isNetworkAccessAllowed = true
                 options.deliveryMode = .fastFormat
                 options.version = .current
-                
-                print("Requesting asset for identifier: \(phAsset.localIdentifier)")
-                print("Asset type: \(phAsset.mediaType.rawValue)")
-                print("Asset duration: \(phAsset.duration)")
                 
                 imageManager.requestAVAsset(forVideo: phAsset, options: options) { asset, _, info in
 
                     if let info = info {
-                        print("Request info: \(info)")
+                        Log.info("Request info: \(info)")
                     }
                     
                     if let error = info?[PHImageErrorKey] as? Error {
-                        print("Asset request error: \(error)")
+                        Log.error("Asset request error: \(error)")
                         continuation.resume(returning: nil)
                         return
                     }
                     
                     guard let avAsset = asset else {
-                        print("No asset returned for identifier: \(phAsset.localIdentifier)")
+                        Log.error("No asset returned for identifier: \(phAsset.localIdentifier)")
                         continuation.resume(returning: nil)
                         return
                     }
                     
                     let assetImageGenerator = AVAssetImageGenerator(asset: avAsset)
                     assetImageGenerator.appliesPreferredTrackTransform = true
-                    assetImageGenerator.maximumSize = size // 적절한 크기 설정
+                    assetImageGenerator.maximumSize = size
                     
                     do {
                         let cgImage = try assetImageGenerator.copyCGImage(at: .zero, actualTime: nil)
@@ -103,7 +99,8 @@ final class MyPhotoService: NSObject, PhotoService {
                         
                         continuation.resume(returning: thumbnailImage)
                     } catch {
-                        print("Thumbnail generation error: \(error)")
+                        Log.error("Thumbnail generation error: \(error)")
+
                         continuation.resume(returning: nil)
                     }
                 }
