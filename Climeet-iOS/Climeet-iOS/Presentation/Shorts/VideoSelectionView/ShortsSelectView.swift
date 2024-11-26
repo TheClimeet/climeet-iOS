@@ -85,6 +85,7 @@ struct ShortsSelectView: View {
 
                 }
             })
+            
         } destination: { store in
             switch store.case {
             case .videoTagView(let store):

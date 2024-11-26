@@ -128,11 +128,11 @@ final class PhotoCell: UICollectionViewCell {
     }
     
     private func resetCellContents() {
-        self.imageView.image = nil
-        highlightedView.isHidden = true
-        durationLabel.isHidden = true
-        
         currentTask?.cancel()
         currentTask = nil
+        
+        imageView.image = nil
+        highlightedView.isHidden = true
+        durationLabel.isHidden = true
     }
 }

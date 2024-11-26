@@ -10,32 +10,30 @@ import SwiftUI
 import Photos
 
 final class CustomGalleryViewModel: ObservableObject {
-    private(set) var dataSource = [PhotoCellInfo]()
     var delegate: ShortsCustomGalleryDelegate?
-
+    
     @Published private(set) var selectedVideoThumbnail: UIImage?
     @Published private(set) var selectedVideoIdentifier: String?
     @Published private(set) var selectedVideoURL: URL?
     
+    //MARK: Batches
+    private let batchSize = 16
+    private var currentPage = 0
+    private var hasMoreItems: Bool = false
+    private var currentPHAssets: [PHAsset] = []
+    private var currentLoadedImageCount = 0
+
+    private(set) var dataSource = [PhotoCellInfo]()
     private var selectedIndex: Int?
     private var prevIndex: Int?
-    
+
+    //MARK: Load User Photos Property
     private let photoService: PhotoService = MyPhotoService()
-    private var selectedVideoFileURL: URL?
     private let albumService: AlbumService = MyAlbumService()
+    
     private var albums = [PHFetchResult<PHAsset>]()
     private var currentAlbumIndex = 0 {
         didSet { assignAlbums() }
-    }
-
-    func loadAlbums() {
-        albumService.getAlbums(mediaType: .video) { [weak self] albumInfos in
-            self?.albums = albumInfos.map({ info in
-                info.album
-            })
-            
-            self?.assignAlbums()
-        }
     }
     
     func refreshAlbums() {
@@ -43,26 +41,83 @@ final class CustomGalleryViewModel: ObservableObject {
         self.delegate?.informAlbumsDownload()
     }
     
-    private func assignAlbums() {
-        guard currentAlbumIndex < albums.count else { return }
-        let album = albums[currentAlbumIndex]
-        
-        self.photoService.convertAlbumToPHAssets(album: album) { [weak self] phAssets in
-            self?.dataSource = phAssets.map { .init(phAsset: $0,
-                                                    videoThumbnail: nil,
-                                                    duration: self?.convertTimeIntervalToString($0.duration),
-                                                    selectedOrder: .none,
-                                                    localIdentifier: $0.localIdentifier) }
-            
-            self?.delegate?.informAlbumsDownload()
+    func bringVisibleCellCount() -> Int {
+        return dataSource.count
+    }
+    
+    func loadAlbums() {
+        albumService.getAlbums(mediaType: .video) { [weak self] albumInfos in
+            self?.albums = albumInfos.map({ $0.album })
+            self?.assignAlbums()
         }
     }
     
+    private func assignAlbums() {
+        guard currentAlbumIndex < albums.count else { return }
+        self.photoService.convertAlbumToPHAssets(album: albums[currentAlbumIndex]) { [weak self] phAssets in
+            guard let self = self else { return }
+            self.currentPHAssets = phAssets
+            self.loadInitialBatch()
+        }
+    }
+    
+    private func loadInitialBatch() {
+        self.currentPage = 0
+        dataSource.removeAll()
+        self.hasMoreItems = true
+        loadNextBatch()
+    }
+
+    func loadNextBatch() {
+        guard currentLoadedImageCount == 0,
+              hasMoreItems,
+              !currentPHAssets.isEmpty else {
+            return
+        }
+        
+        let startIndex = currentPage * batchSize
+        let endIndex = min(startIndex + batchSize, currentPHAssets.count)
+        
+        guard startIndex < currentPHAssets.count else {
+            hasMoreItems = false
+            return
+        }
+        
+        currentLoadedImageCount = endIndex - startIndex
+        Log.info("Starting to load \(currentLoadedImageCount) images")
+
+        let batchAssets = Array(currentPHAssets[startIndex..<endIndex])
+        let newItems: [PhotoCellInfo] = batchAssets.map { asset in
+                .init(phAsset: asset,
+                      duration: convertTimeIntervalToString(asset.duration),
+                      selectedOrder: .none,
+                      localIdentifier: asset.localIdentifier)
+        }
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.dataSource.append(contentsOf: newItems)
+            self?.currentPage += 1
+            self?.delegate?.informAlbumsDownload()
+            self?.delegate?.updateScrollState(isEnabled: false)
+        }
+    }
+
     private func convertTimeIntervalToString(_ timeInterval: TimeInterval) -> String? {
-        let formatter: DateComponentsFormatter = .init()
+        let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.minute, .second]
         formatter.zeroFormattingBehavior = .pad
         return formatter.string(from: timeInterval)
+    }
+    
+    func imageLoadingCompleted() {
+        currentLoadedImageCount -= 1
+        print("Image loaded, remaining: \(currentLoadedImageCount)")
+        
+        if currentLoadedImageCount <= 0 {
+            currentLoadedImageCount = 0
+            delegate?.updateScrollState(isEnabled: true)
+            print("All images loaded, scroll enabled")
+        }
     }
     
     @MainActor
@@ -103,7 +158,10 @@ final class CustomGalleryViewModel: ObservableObject {
         notifyUIUpdate(for: updatingIndexPaths)
     }
     
-    // 개별 셀 상태 업데이트
+    private func notifyUIUpdate(for indexPaths: [IndexPath]) {
+        delegate?.updateCells(at: indexPaths)
+    }
+    
     private func updateCell(at index: Int, withOrder order: SelectionOrder) {
         guard index < dataSource.count else { return }
         let current = dataSource[index]
@@ -117,13 +175,11 @@ final class CustomGalleryViewModel: ObservableObject {
         )
     }
     
-    // 선택된 비디오 정보 설정
     private func setSelectedVideoInfo(_ info: PhotoCellInfo) {
         selectedVideoThumbnail = info.videoThumbnail
         selectedVideoIdentifier = info.localIdentifier
     }
     
-    // 비디오 URL 요청
     private func requestVideoURL(for info: PhotoCellInfo) {
         let options = PHVideoRequestOptions()
         options.isNetworkAccessAllowed = false
@@ -136,22 +192,5 @@ final class CustomGalleryViewModel: ObservableObject {
                 }
             }
         }
-    }
-    
-    // UI 업데이트 통지
-    private func notifyUIUpdate(for indexPaths: [IndexPath]) {
-        delegate?.updateCells(at: indexPaths)
-    }
-    
-    // 모든 선택 해제
-    func clearSelection() {
-        guard let prevIndex = prevIndex,
-              prevIndex < dataSource.count else { return }
-        
-        updateCell(at: prevIndex, withOrder: .none)
-        self.prevIndex = nil
-        self.selectedIndex = nil
-        
-        notifyUIUpdate(for: [IndexPath(item: prevIndex, section: 0)])
     }
 }
