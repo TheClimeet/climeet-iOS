@@ -60,7 +60,8 @@ struct ShortsSelectView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        store.send(.tapNextButton(viewModel.selectedVideoThumbnail, viewModel.bringSelectedVideoURL()))
+                        store.send(.tapNextButton(viewModel.selectedVideoThumbnail,
+                                                  viewModel.selectedVideoURL))
                     } label: {
                         Text(Const.next)
                             .foregroundStyle(.climeetMain)

@@ -1,6 +1,6 @@
 //
 //  PhotoCell.swift
-//  
+//
 //
 //  Created by mac on 6/18/24.
 //
@@ -34,6 +34,7 @@ class PhotoCellInfo {
 
 final class PhotoCell: UICollectionViewCell {
     static let id = "PhotoCell"
+    var currentTask: Task<Void, Never>?
     
     private let imageView: UIImageView = {
         let imageView = UIImageView()
@@ -62,16 +63,16 @@ final class PhotoCell: UICollectionViewCell {
     }()
     
     private let durationLabel: UILabel = {
-           let label = UILabel()
-           label.textColor = .white
-           label.font = .systemFont(ofSize: 12, weight: .medium)
-           label.translatesAutoresizingMaskIntoConstraints = false
-           label.backgroundColor = .black.withAlphaComponent(0.6)
-           label.textAlignment = .center
-           label.layer.cornerRadius = 4
-           label.clipsToBounds = true
-           return label
-       }()
+        let label = UILabel()
+        label.textColor = .white
+        label.font = .systemFont(ofSize: 12, weight: .medium)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.backgroundColor = .black.withAlphaComponent(0.6)
+        label.textAlignment = .center
+        label.layer.cornerRadius = 4
+        label.clipsToBounds = true
+        return label
+    }()
     
     // MARK: Initializer
     @available(*, unavailable)
@@ -85,50 +86,53 @@ final class PhotoCell: UICollectionViewCell {
         contentView.addSubview(imageView)
         imageView.addSubview(highlightedView)
         imageView.addSubview(durationLabel)
-
+        
         NSLayoutConstraint.activate([
-                   imageView.topAnchor.constraint(equalTo: contentView.topAnchor),
-                   imageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-                   imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-                   imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-                   
-                   highlightedView.topAnchor.constraint(equalTo: imageView.topAnchor),
-                   highlightedView.leadingAnchor.constraint(equalTo: imageView.leadingAnchor),
-                   highlightedView.trailingAnchor.constraint(equalTo: imageView.trailingAnchor),
-                   highlightedView.bottomAnchor.constraint(equalTo: imageView.bottomAnchor),
-                   
-                   durationLabel.bottomAnchor.constraint(equalTo: imageView.bottomAnchor, constant: -2),
-                   durationLabel.trailingAnchor.constraint(equalTo: imageView.trailingAnchor, constant: -2),
-                   durationLabel.heightAnchor.constraint(equalToConstant: 20),
-                   durationLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 40)
-               ])
+            imageView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            imageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            
+            highlightedView.topAnchor.constraint(equalTo: imageView.topAnchor),
+            highlightedView.leadingAnchor.constraint(equalTo: imageView.leadingAnchor),
+            highlightedView.trailingAnchor.constraint(equalTo: imageView.trailingAnchor),
+            highlightedView.bottomAnchor.constraint(equalTo: imageView.bottomAnchor),
+            
+            durationLabel.bottomAnchor.constraint(equalTo: imageView.bottomAnchor, constant: -2),
+            durationLabel.trailingAnchor.constraint(equalTo: imageView.trailingAnchor, constant: -2),
+            durationLabel.heightAnchor.constraint(equalToConstant: 20),
+            durationLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 40)
+        ])
     }
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        prepare(info: nil)
+        resetCellContents()
     }
     
-    func prepare(info: PhotoCellInfo?) {
-           imageView.image = info?.videoThumbnail
-           
-           if let duration = info?.duration {
-               durationLabel.text = duration
-               durationLabel.isHidden = false
-           } else {
-               durationLabel.isHidden = true
-           }
-           
-           if case .selected(_) = info?.selectedOrder {
-               highlightedView.isHidden = false
-           } else {
-               highlightedView.isHidden = true
-           }
-       }
-       
-       private func resetCellContents() {
-           self.imageView.image = nil
-           highlightedView.isHidden = true
-           durationLabel.isHidden = true
-       }
+    func configure(info: PhotoCellInfo?) {
+        imageView.image = info?.videoThumbnail
+        
+        if let duration = info?.duration {
+            durationLabel.text = duration
+            durationLabel.isHidden = false
+        } else {
+            durationLabel.isHidden = true
+        }
+        
+        if case .selected(_) = info?.selectedOrder {
+            highlightedView.isHidden = false
+        } else {
+            highlightedView.isHidden = true
+        }
+    }
+    
+    private func resetCellContents() {
+        self.imageView.image = nil
+        highlightedView.isHidden = true
+        durationLabel.isHidden = true
+        
+        currentTask?.cancel()
+        currentTask = nil
+    }
 }

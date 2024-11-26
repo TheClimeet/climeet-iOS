@@ -20,7 +20,6 @@ protocol PhotoService {
 
 final class MyPhotoService: NSObject, PhotoService {
     private let imageManager = PHCachingImageManager()
-   // private let cacher = NSCache<NSString, UIImage>()
     private let cacher = VideoThumbnailCacher.shared
     
     weak var delegate: PHPhotoLibraryChangeObserver?
@@ -63,35 +62,52 @@ final class MyPhotoService: NSObject, PhotoService {
         }
         
         return await withCheckedContinuation { continuation in
-            let options = PHVideoRequestOptions()
-            options.isNetworkAccessAllowed = false
-            options.deliveryMode = .fastFormat
-            
-            imageManager.requestAVAsset(forVideo: phAsset,
-                                      options: options) { asset, _, _ in
-                guard let avAsset = asset else {
-                    continuation.resume(returning: nil)
-                    return
-                }
+                let options = PHVideoRequestOptions()
+                options.isNetworkAccessAllowed = false
+                options.deliveryMode = .fastFormat
+                options.version = .current
                 
-                let assetImageGenerator = AVAssetImageGenerator(asset: avAsset)
-                assetImageGenerator.appliesPreferredTrackTransform = true
+                print("Requesting asset for identifier: \(phAsset.localIdentifier)")
+                print("Asset type: \(phAsset.mediaType.rawValue)")
+                print("Asset duration: \(phAsset.duration)")
                 
-                do {
-                    let cgImage = try assetImageGenerator.copyCGImage(at: .zero, actualTime: nil)
-                    let thumbnailImage = UIImage(cgImage: cgImage)
-                    
-                    // actor의 메서드를 Task 내에서 호출
-                    Task {
-                        await VideoThumbnailCacher.shared.setImage(thumbnailImage, forKey: cacheKey)
+                imageManager.requestAVAsset(forVideo: phAsset, options: options) { asset, _, info in
+
+                    if let info = info {
+                        print("Request info: \(info)")
                     }
                     
-                    continuation.resume(returning: thumbnailImage)
-                } catch {
-                    continuation.resume(returning: nil)
+                    if let error = info?[PHImageErrorKey] as? Error {
+                        print("Asset request error: \(error)")
+                        continuation.resume(returning: nil)
+                        return
+                    }
+                    
+                    guard let avAsset = asset else {
+                        print("No asset returned for identifier: \(phAsset.localIdentifier)")
+                        continuation.resume(returning: nil)
+                        return
+                    }
+                    
+                    let assetImageGenerator = AVAssetImageGenerator(asset: avAsset)
+                    assetImageGenerator.appliesPreferredTrackTransform = true
+                    assetImageGenerator.maximumSize = size // 적절한 크기 설정
+                    
+                    do {
+                        let cgImage = try assetImageGenerator.copyCGImage(at: .zero, actualTime: nil)
+                        let thumbnailImage = UIImage(cgImage: cgImage)
+                        
+                        Task { [weak self] in
+                            await self?.cacher.setImage(thumbnailImage, forKey: cacheKey)
+                        }
+                        
+                        continuation.resume(returning: thumbnailImage)
+                    } catch {
+                        print("Thumbnail generation error: \(error)")
+                        continuation.resume(returning: nil)
+                    }
                 }
             }
-        }
     }
 }
 

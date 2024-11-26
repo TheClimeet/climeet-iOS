@@ -8,11 +8,13 @@
 import UIKit
 import Photos
 
-protocol ShortsCustomGalleryDelegate {
+protocol ShortsCustomGalleryDelegate: AnyObject {
     func informAlbumsDownload()
+    func updateCells(at indexPaths: [IndexPath])
 }
 
-final class PhotoViewController: UIViewController, ShortsCustomGalleryDelegate {
+
+final class PhotoViewController: UIViewController {
     private enum Const {
         static let numberOfColumns = 4.0
         static let cellSpace = 1.0
@@ -54,9 +56,6 @@ final class PhotoViewController: UIViewController, ShortsCustomGalleryDelegate {
     private let albumService: AlbumService = MyAlbumService()
     private let photoService: PhotoService = MyPhotoService()
     private var selectedIndexArray = [Int]()
-    private var selectedIndex = Int()
-    private var prevIndex: Int? = Int()
-    
     private var albums = [PHFetchResult<PHAsset>]()
     private var viewModel: CustomGalleryViewModel?
     
@@ -75,38 +74,13 @@ final class PhotoViewController: UIViewController, ShortsCustomGalleryDelegate {
         setupUI()
         self.viewModel?.delegate = self
     }
-        
-    override func viewDidDisappear(_ animated: Bool) {
-        guard let viewModel = self.viewModel else {
-            return
-        }
-        
-        if viewModel.dataSource.count != .zero {
-            removeUserSelection(viewModel)
-        }
-    }
     
     //MARK: Private Methods
-    private func removeUserSelection(_ viewModel: CustomGalleryViewModel) {
-        let prevIndexPath: IndexPath
-        
-        if let prevIndex = prevIndex {
-            let prevInfo = viewModel.dataSource[prevIndex]
-            viewModel.dataSource[prevIndex] = .init(phAsset: prevInfo.phAsset,
-                                                    videoThumbnail: prevInfo.videoThumbnail,
-                                                    duration: prevInfo.duration,
-                                                    selectedOrder: .none,
-                                                    localIdentifier: prevInfo.localIdentifier)
-            prevIndexPath = IndexPath(row: selectedIndex, section: 0)
-            update(indexPaths: prevIndexPath)
-        }
-    }
-    
     private func setupUI() {
         view.backgroundColor = .white
         collectionView.dataSource = self
         collectionView.delegate = self
-
+        
         view.addSubview(collectionView)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -114,7 +88,7 @@ final class PhotoViewController: UIViewController, ShortsCustomGalleryDelegate {
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ]) 
+        ])
     }
 }
 
@@ -125,9 +99,9 @@ extension PhotoViewController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView,
-                       cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+                        cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PhotoCell.id,
-                                                           for: indexPath) as? PhotoCell else {
+                                                            for: indexPath) as? PhotoCell else {
             return UICollectionViewCell()
         }
         
@@ -137,13 +111,17 @@ extension PhotoViewController: UICollectionViewDataSource {
         
         let imageInfo = viewModel.dataSource[indexPath.item]
         let phAsset = imageInfo.phAsset
+        print(phAsset.localIdentifier, "phAsset------------------")
         let imageSize = CGSize(width: Const.cellSize.width * Const.scale,
-                              height: Const.cellSize.height * Const.scale)
+                               height: Const.cellSize.height * Const.scale)
         
-        cell.prepare(info: imageInfo)
+        cell.configure(info: imageInfo)
         
-        Task { @MainActor in
+        cell.currentTask?.cancel()
+        
+        cell.currentTask = Task { @MainActor in
             let currentIndexPath = indexPath
+            print(phAsset.localIdentifier, "collectionView-------phAsset------------------")
             
             if let thumbnail = await photoService.fetchVideo(
                 phAsset: phAsset,
@@ -157,7 +135,7 @@ extension PhotoViewController: UICollectionViewDataSource {
                 
                 imageInfo.videoThumbnail = thumbnail
                 
-                cell.prepare(info: .init(
+                cell.configure(info: .init(
                     phAsset: phAsset,
                     videoThumbnail: thumbnail,
                     duration: imageInfo.duration,
@@ -178,74 +156,19 @@ extension PhotoViewController: UICollectionViewDataSource {
     }
 }
 
+extension PhotoViewController: ShortsCustomGalleryDelegate {
+    func updateCells(at indexPaths: [IndexPath]) {
+        collectionView.performBatchUpdates {
+            collectionView.reloadItems(at: indexPaths)
+        }
+    }
+}
+
 extension PhotoViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView,
                         didSelectItemAt indexPath: IndexPath) {
-        guard let viewModel = self.viewModel else {
-            return
-        }
-        
-        let info = viewModel.dataSource[indexPath.item]
-        let updatingIndexPath: IndexPath
-        
-        //이미 선택된 사진인경우
-        if case .selected = info.selectedOrder {
-            viewModel.dataSource[indexPath.item] = .init(phAsset: info.phAsset,
-                                                         videoThumbnail: info.videoThumbnail,
-                                                         duration: info.duration,
-                                                         selectedOrder: .none,
-                                                         localIdentifier: info.localIdentifier)
-            selectedIndex = indexPath.item
-            updatingIndexPath = IndexPath(row: selectedIndex, section: 0)
-            update(indexPaths: updatingIndexPath)
-        } else {
-            //이미 다른 선택 사진이 있는 경우 이전 선택 cell 초기화
-            if prevIndex != nil {
-                removeUserSelection(viewModel)
-            }
-            
-            //선택된 사진 없는 경우
-            selectedIndex = indexPath.item
-            let current = viewModel.dataSource[selectedIndex]
-            
-            viewModel.dataSource[selectedIndex] = .init(phAsset: current.phAsset,
-                                                        videoThumbnail: current.videoThumbnail, duration: current.duration,
-                                                        selectedOrder: .selected(selectedIndex),
-                                                        localIdentifier: current.localIdentifier)
-            
-            let updatingIndexPath = IndexPath(row: selectedIndex, section: 0)
-            update(indexPaths: updatingIndexPath)
-            prevIndex = selectedIndex
-            
-            //뷰모델에 선택한 사진 전달.
-            deliverSelectedInfo(current)
-            
-            //뷰모델에 선택한 사진의 url 전달하기
-            deliverSelectedVideoURL(current)
-        }
-    }
-    
-    private func deliverSelectedVideoURL(_ cellInfo: PhotoCellInfo) {
-        let options = PHVideoRequestOptions()
-        options.isNetworkAccessAllowed = false
-        
-        PHImageManager.default().requestAVAsset(forVideo: cellInfo.phAsset, options: options) { [weak self] (avAsset, _, _) in
-            if let urlAsset = avAsset as? AVURLAsset {
-                self?.viewModel?.setSelectedVideoURL(urlAsset.url)
-            }
-        }
-    }
-    
-    private func deliverSelectedInfo(_ selectedCellInfo: PhotoCellInfo) {
-        self.viewModel?.selectedVideoThumbnail = selectedCellInfo.videoThumbnail
-        self.viewModel?.selectedVideoIdentifier = selectedCellInfo.localIdentifier
-    }
-    
-    private func update(indexPaths: IndexPath) {
-        DispatchQueue.main.async { [weak collectionView] in
-            collectionView?.performBatchUpdates {
-                collectionView?.reloadItems(at: [indexPaths])
-            }
+        Task {
+            viewModel?.handleCellSelection(at: indexPath)
         }
     }
 }
