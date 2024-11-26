@@ -17,9 +17,7 @@ struct CustomGallery: UIViewControllerRepresentable {
     
     func makeUIViewController(context: Context) -> PhotoViewController {
         let vc = PhotoViewController()
-        vc.injectViewModel(viewModel)
-        viewModel.loadAlbums()
-        
+        vc.injectViewModel(viewModel)        
         return vc
     }
     

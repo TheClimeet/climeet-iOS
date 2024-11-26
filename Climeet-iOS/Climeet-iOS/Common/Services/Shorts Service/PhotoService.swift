@@ -14,7 +14,15 @@ protocol PhotoService {
     func fetchVideo(
         phAsset: PHAsset,
         size: CGSize,
-        contentMode: PHImageContentMode
+        contentMode: PHImageContentMode,
+        deliveryMode: PHVideoRequestOptionsDeliveryMode
+    ) async -> UIImage?
+    
+    func fetchHighQualityImage(
+        phAsset: PHAsset,
+        size: CGSize,
+        contentMode: PHImageContentMode,
+        deliveryMode: PHVideoRequestOptionsDeliveryMode 
     ) async -> UIImage?
 }
 
@@ -50,61 +58,88 @@ final class MyPhotoService: NSObject, PhotoService {
         }
     }
     
+    func fetchHighQualityImage(
+        phAsset: PHAsset,
+        size: CGSize,
+        contentMode: PHImageContentMode,
+        deliveryMode: PHVideoRequestOptionsDeliveryMode = .highQualityFormat
+    ) async -> UIImage? {
+        return await withCheckedContinuation { continuation in
+            let options = generateVideoRequestOptions(deliveryMode, true)
+            imageManager.requestAVAsset(forVideo: phAsset, options: options) { [weak self] asset, _, info in
+                guard let avAsset = asset else {
+                    Log.error("No asset returned for identifier: \(phAsset.localIdentifier)")
+                    continuation.resume(returning: UIImage())
+                    return
+                }
+                
+                self?.convertAVAssetToUIImage(avAsset: avAsset, convertSize: size,
+                                              cacheKey: nil, continuation)
+            }
+        }
+    }
+    
+    private func generateVideoRequestOptions(_ deliveryMode: PHVideoRequestOptionsDeliveryMode,
+                                             _ isiColudAllowed: Bool) -> PHVideoRequestOptions {
+        let options = PHVideoRequestOptions()
+        options.isNetworkAccessAllowed = isiColudAllowed
+        options.deliveryMode = deliveryMode
+        options.version = .current
+        return options
+    }
+    
     func fetchVideo(
         phAsset: PHAsset,
         size: CGSize,
-        contentMode: PHImageContentMode
+        contentMode: PHImageContentMode,
+        deliveryMode: PHVideoRequestOptionsDeliveryMode
     ) async -> UIImage? {
         let cacheKey = phAsset.localIdentifier
         
-        if let cachedThumbnail = await VideoThumbnailCacher.shared.loadImage(forKey: cacheKey) {
+        if let cachedThumbnail = await cacher.loadImage(forKey: cacheKey) {
             return cachedThumbnail
         }
         
         return await withCheckedContinuation { continuation in
-                let options = PHVideoRequestOptions()
-                options.isNetworkAccessAllowed = true
-                options.deliveryMode = .fastFormat
-                options.version = .current
-                
-                imageManager.requestAVAsset(forVideo: phAsset, options: options) { asset, _, info in
-
-                    if let info = info {
-                        Log.info("Request info: \(info)")
-                    }
-                    
-                    if let error = info?[PHImageErrorKey] as? Error {
-                        Log.error("Asset request error: \(error)")
-                        continuation.resume(returning: nil)
-                        return
-                    }
-                    
+            let options = generateVideoRequestOptions(deliveryMode, true)
+                imageManager.requestAVAsset(forVideo: phAsset, options: options) { [weak self] asset, _, info in
                     guard let avAsset = asset else {
                         Log.error("No asset returned for identifier: \(phAsset.localIdentifier)")
-                        continuation.resume(returning: nil)
+                        continuation.resume(returning: UIImage())
                         return
                     }
                     
-                    let assetImageGenerator = AVAssetImageGenerator(asset: avAsset)
-                    assetImageGenerator.appliesPreferredTrackTransform = true
-                    assetImageGenerator.maximumSize = size
-                    
-                    do {
-                        let cgImage = try assetImageGenerator.copyCGImage(at: .zero, actualTime: nil)
-                        let thumbnailImage = UIImage(cgImage: cgImage)
-                        
-                        Task { [weak self] in
-                            await self?.cacher.setImage(thumbnailImage, forKey: cacheKey)
-                        }
-                        
-                        continuation.resume(returning: thumbnailImage)
-                    } catch {
-                        Log.error("Thumbnail generation error: \(error)")
-
-                        continuation.resume(returning: nil)
-                    }
+                    self?.convertAVAssetToUIImage(avAsset: avAsset, convertSize: size,
+                                                  cacheKey: cacheKey, continuation)
                 }
             }
+    }
+
+    
+    private func convertAVAssetToUIImage(avAsset: AVAsset, convertSize: CGSize, cacheKey: String?,
+                                         _ continuation: (CheckedContinuation<UIImage?, Never>)) {
+        let assetImageGenerator = AVAssetImageGenerator(asset: avAsset)
+        assetImageGenerator.appliesPreferredTrackTransform = true
+        assetImageGenerator.maximumSize = convertSize
+        
+        do {
+            let cgImage = try assetImageGenerator.copyCGImage(at: .zero, actualTime: nil)
+            let thumbnailImage = UIImage(cgImage: cgImage)
+            cacheImage(cacheKey, thumbnailImage)
+            continuation.resume(returning: thumbnailImage)
+        } catch {
+            Log.error("Thumbnail generation error: \(error)")
+
+            continuation.resume(returning: nil)
+        }
+    }
+    
+    private func cacheImage(_ cacheKey: String?, _ thumbnailImage: UIImage) {
+        if let cacheKey = cacheKey {
+            Task { [weak self] in
+                await self?.cacher.setImage(thumbnailImage, forKey: cacheKey)
+            }
+        }
     }
 }
 

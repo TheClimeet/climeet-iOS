@@ -69,10 +69,11 @@ final class PhotoViewController: UIViewController {
         setupUI()
         setupViewModel()
     }
+
+    //MARK: Private Methods
     private func setupCollectionView() {
         collectionView.dataSource = self
         collectionView.delegate = self
-        //        collectionView.prefetchDataSource = self  // 프리페칭 설정 추가
     }
     
     //MARK: Private Methods
@@ -103,17 +104,6 @@ final class PhotoViewController: UIViewController {
     
     private func setupViewModel() {
         self.viewModel?.delegate = self
-        
-//        viewModel?.onBatchLoadingStateChanged = { [weak self] isLoading in
-//            DispatchQueue.main.async {
-//                self?.collectionView.isScrollEnabled = !isLoading
-//                if isLoading {
-//                    self?.loadingIndicator.startAnimating()
-//                } else {
-//                    self?.loadingIndicator.stopAnimating()
-//                }
-//            }
-//        }
     }
 }
 
@@ -147,7 +137,8 @@ extension PhotoViewController: UICollectionViewDataSource {
                if let thumbnail = await photoService.fetchVideo(
                    phAsset: phAsset,
                    size: imageSize,
-                   contentMode: .aspectFit
+                   contentMode: .aspectFit,
+                   deliveryMode: .fastFormat
                ) {
                    guard let cell = collectionView.cellForItem(at: indexPath) as? PhotoCell,
                          indexPath == collectionView.indexPath(for: cell) else {
@@ -210,18 +201,8 @@ extension PhotoViewController: UICollectionViewDelegate {
         let contentHeight = scrollView.contentSize.height
         let screenHeight = scrollView.frame.size.height
         
-        if offsetY > contentHeight - screenHeight {
+        if offsetY > contentHeight - (screenHeight * 1.2) {
             viewModel?.loadNextBatch()
         }
     }
 }
-
-// 프리페칭을 위한 DataSourcePrefetching 구현
-//extension PhotoViewController: UICollectionViewDataSourcePrefetching {
-//    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
-//        if let lastIndexPath = indexPaths.last,
-//           lastIndexPath.item >= (viewModel?.bringVisibleCellCount() ?? 0) - 5 {
-//            viewModel?.loadNextBatch()
-//        }
-//    }
-//}

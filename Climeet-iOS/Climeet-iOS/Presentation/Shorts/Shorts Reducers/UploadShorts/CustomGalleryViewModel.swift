@@ -36,6 +36,10 @@ final class CustomGalleryViewModel: ObservableObject {
         didSet { assignAlbums() }
     }
     
+    init() {
+        loadAlbums()
+    }
+    
     func refreshAlbums() {
         self.loadAlbums()
         self.delegate?.informAlbumsDownload()
@@ -45,7 +49,7 @@ final class CustomGalleryViewModel: ObservableObject {
         return dataSource.count
     }
     
-    func loadAlbums() {
+    private func loadAlbums() {
         albumService.getAlbums(mediaType: .video) { [weak self] albumInfos in
             self?.albums = albumInfos.map({ $0.album })
             self?.assignAlbums()
@@ -148,8 +152,10 @@ final class CustomGalleryViewModel: ObservableObject {
             updatingIndexPaths.append(indexPath)
             
             // 선택된 비디오 정보 업데이트
-            setSelectedVideoInfo(info)
-            requestVideoURL(for: info)
+            Task {
+                await setSelectedVideoInfo(info)
+                requestVideoURL(for: info)
+            }
             
             prevIndex = selectedIndex
         }
@@ -175,14 +181,31 @@ final class CustomGalleryViewModel: ObservableObject {
         )
     }
     
-    private func setSelectedVideoInfo(_ info: PhotoCellInfo) {
-        selectedVideoThumbnail = info.videoThumbnail
-        selectedVideoIdentifier = info.localIdentifier
+    private let selectedImageSize: CGSize = {
+        let screenWidth = UIScreen.main.bounds.width
+        let screenHeight = UIScreen.main.bounds.height
+        let width = screenWidth * (189.0 / 375.0)  // thumbnailWidthProportion
+        let height = screenHeight * (416.0 / 894.0) // thumbnailHeightProportion
+        return CGSize(width: width * 3, height: height * 3)
+    }()
+    
+    private func setSelectedVideoInfo(_ info: PhotoCellInfo) async {
+        if let highQualityThumbnail = await photoService.fetchHighQualityImage(
+            phAsset: info.phAsset,
+            size: selectedImageSize,
+            contentMode: .aspectFit,
+            deliveryMode: .highQualityFormat
+        ) {
+            Task { @MainActor in
+                selectedVideoThumbnail = highQualityThumbnail
+                selectedVideoIdentifier = info.localIdentifier
+            }
+        }
     }
     
     private func requestVideoURL(for info: PhotoCellInfo) {
         let options = PHVideoRequestOptions()
-        options.isNetworkAccessAllowed = false
+        options.isNetworkAccessAllowed = true
         
         PHImageManager.default().requestAVAsset(forVideo: info.phAsset,
                                                 options: options) { [weak self] (avAsset, _, _) in

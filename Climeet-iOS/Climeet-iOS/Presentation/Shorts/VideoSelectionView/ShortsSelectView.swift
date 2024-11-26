@@ -28,7 +28,8 @@ struct ShortsSelectView: View {
     private let screenWidth = UIScreen.main.bounds.width
     private let screenHeight = UIScreen.main.bounds.height
     
-    init(viewModel: CustomGalleryViewModel = CustomGalleryViewModel(), store: StoreOf<ShortsSelectReducer>) {
+    init(viewModel: CustomGalleryViewModel = CustomGalleryViewModel(),
+         store: StoreOf<ShortsSelectReducer>) {
         self.viewModel = viewModel
         self.store = store
         self.photoService = MyPhotoAuthService()
@@ -41,7 +42,8 @@ struct ShortsSelectView: View {
         NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
             GeometryReader { proxy in
                 VStack(alignment: .center) {
-                    selectedImageView(viewModel: self.viewModel, size: proxy.size)
+                    selectedImageView(self.viewModel.selectedVideoThumbnail,
+                                      size: proxy.size)
                     HStack {
                         moveToUserGalleryButton(viewModel: self.viewModel)
                         Spacer()
@@ -99,10 +101,10 @@ struct ShortsSelectView: View {
 }
 
 extension ShortsSelectView {
-    private func selectedImageView(viewModel: CustomGalleryViewModel, size: CGSize) -> some View {
+    private func selectedImageView(_ uiImage: UIImage?, size: CGSize) -> some View {
         var image: Image
         
-        if let uiImage = viewModel.selectedVideoThumbnail {
+        if let uiImage = uiImage {
             image = Image(uiImage: uiImage)
         } else {
             image = Image(Const.plcaeHolder)
