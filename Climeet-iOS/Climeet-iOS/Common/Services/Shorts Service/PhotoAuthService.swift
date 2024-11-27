@@ -52,6 +52,10 @@ final class MyPhotoAuthService: NSObject, PhotoAuthService {
         changeHandler = completion
     }
     
+    func requestAuthorization() {
+        
+    }
+    
     func requestAuthorization(completion: @escaping () -> Void) {
         //TODO: 권한처리세분화
         guard authorizationStatus != .denied else {

@@ -54,10 +54,7 @@ final class PhotoViewController: UIViewController {
     
     private typealias DataSource = UICollectionViewDiffableDataSource<PhotoSection, PhotoCellInfo>
     private typealias Snapshot = NSDiffableDataSourceSnapshot<PhotoSection, PhotoCellInfo>
-    
     private var dataSource: DataSource!
-    
-    
     
     // MARK: Property
     private let albumService: AlbumService = MyAlbumService()
@@ -66,8 +63,13 @@ final class PhotoViewController: UIViewController {
     private var albums = [PHFetchResult<PHAsset>]()
     private var viewModel: CustomGalleryViewModel?
     
-    func injectViewModel(_ vm: CustomGalleryViewModel) {
-        self.viewModel = vm
+    init(viewModel: CustomGalleryViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     override func viewDidLoad() {
@@ -102,7 +104,6 @@ final class PhotoViewController: UIViewController {
                         contentMode: .aspectFit,
                         deliveryMode: .fastFormat
                     ) {
-                        // 셀이 여전히 표시 중인지 확인
                         guard let visibleCell = collectionView.cellForItem(at: indexPath) as? PhotoCell,
                               visibleCell == cell else {
                             self.viewModel?.imageLoadingCompleted()
@@ -126,7 +127,6 @@ final class PhotoViewController: UIViewController {
                       height: Const.cellSize.height * Const.scale)
     }
     
-    //MARK: Private Methods
     private func setupUI() {
         view.backgroundColor = .white
         view.addSubview(collectionView)
@@ -157,77 +157,33 @@ final class PhotoViewController: UIViewController {
     }
 }
 
-extension PhotoViewController: UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView,
-                        numberOfItemsInSection section: Int) -> Int {
-        let count = viewModel?.bringVisibleCellCount()
-        return count ?? 0
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PhotoCell.id,
-                                                            for: indexPath) as? PhotoCell else {
-            return UICollectionViewCell()
-        }
-        
-        guard let viewModel = self.viewModel,
-              indexPath.item < viewModel.bringVisibleCellCount() else {
-            return cell
-        }
-        
-        let imageInfo = viewModel.dataSource[indexPath.item]
-        let phAsset = imageInfo.phAsset
-        let imageSize = CGSize(width: Const.cellSize.width * Const.scale,
-                               height: Const.cellSize.height * Const.scale)
-        
-        cell.configure(info: imageInfo)
-        cell.currentTask?.cancel()
-        
-        cell.currentTask = Task { @MainActor in
-            if let thumbnail = await photoService.fetchVideo(
-                phAsset: phAsset,
-                size: imageSize,
-                contentMode: .aspectFit,
-                deliveryMode: .fastFormat
-            ) {
-                guard let cell = collectionView.cellForItem(at: indexPath) as? PhotoCell,
-                      indexPath == collectionView.indexPath(for: cell) else {
-                    viewModel.imageLoadingCompleted()
-                    return
-                }
-                
-                imageInfo.videoThumbnail = thumbnail
-                
-                cell.configure(info: .init(
-                    phAsset: phAsset,
-                    videoThumbnail: thumbnail,
-                    duration: imageInfo.duration,
-                    selectedOrder: imageInfo.selectedOrder,
-                    localIdentifier: phAsset.localIdentifier
-                ))
-                
-                viewModel.imageLoadingCompleted()
-            } else {
-                viewModel.imageLoadingCompleted()
-            }
-        }
-        
-        return cell
-    }
-}
-
 extension PhotoViewController: ShortsCustomGalleryDelegate {
     func updateItems(_ items: [PhotoCellInfo]) {
         var snapshot = Snapshot()
         snapshot.appendSections([.main])
-        snapshot.appendItems(items)
-        dataSource.apply(snapshot, animatingDifferences: true)
+        
+        if let existingItems = dataSource?.snapshot().itemIdentifiers {
+            snapshot.appendItems(existingItems)
+            let newItems = items.filter { !existingItems.contains($0) }
+            snapshot.appendItems(newItems)
+        } else {
+            snapshot.appendItems(items)
+        }
+        
+        dataSource?.apply(snapshot, animatingDifferences: false)
     }
     
     func updateCells(at indexPaths: [IndexPath]) {
-        collectionView.performBatchUpdates {
-            collectionView.reloadItems(at: indexPaths)
+        guard var snapshot = dataSource?.snapshot() else { return }
+        
+        let itemsToReload = indexPaths.compactMap { indexPath -> PhotoCellInfo? in
+            guard let viewModel = self.viewModel,
+                  indexPath.item < viewModel.dataSource.count else { return nil }
+            return viewModel.dataSource[indexPath.item]
         }
+        
+        snapshot.reloadItems(itemsToReload)
+        dataSource?.apply(snapshot, animatingDifferences: false)
     }
     
     func updateScrollState(isEnabled: Bool) {
@@ -248,7 +204,6 @@ extension PhotoViewController: UICollectionViewDelegate {
         }
     }
     
-    // n 스크롤링
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height

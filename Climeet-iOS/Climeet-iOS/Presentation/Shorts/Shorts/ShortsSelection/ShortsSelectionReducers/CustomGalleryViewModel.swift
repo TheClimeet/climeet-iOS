@@ -30,7 +30,8 @@ final class CustomGalleryViewModel: ObservableObject {
     //MARK: Load User Photos Property
     private let photoService: PhotoService = MyPhotoService()
     private let albumService: AlbumService = MyAlbumService()
-    
+    private let photoAuthService: PhotoAuthService = MyPhotoAuthService()
+
     private var albums = [PHFetchResult<PHAsset>]()
     private var currentAlbumIndex = 0 {
         didSet { assignAlbums() }
@@ -38,11 +39,16 @@ final class CustomGalleryViewModel: ObservableObject {
     
     init() {
         loadAlbums()
+        photoAuthService.didChangeSelectedPhotos {
+            self.loadAlbums()
+        }
     }
     
-    func refreshAlbums() {
-        self.loadAlbums()
-        //        self.delegate?.informAlbumsDownload()
+    func requestPhotoAuthrization() {
+        //TODO: 내부 구현
+        photoAuthService.requestAuthorization {
+            
+        }
     }
     
     func bringVisibleCellCount() -> Int {
@@ -160,7 +166,7 @@ final class CustomGalleryViewModel: ObservableObject {
             
             prevIndex = selectedIndex
         }
-        
+
         // UI 업데이트 알림
         notifyUIUpdate(for: updatingIndexPaths)
     }

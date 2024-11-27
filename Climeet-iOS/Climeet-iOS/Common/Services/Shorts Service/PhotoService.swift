@@ -100,15 +100,6 @@ final class MyPhotoService: NSObject, PhotoService {
         }
     }
     
-    private func generateVideoRequestOptions(_ deliveryMode: PHVideoRequestOptionsDeliveryMode,
-                                             _ isiColudAllowed: Bool) -> PHVideoRequestOptions {
-        let options = PHVideoRequestOptions()
-        options.isNetworkAccessAllowed = isiColudAllowed
-        options.deliveryMode = deliveryMode
-        options.version = .current
-        return options
-    }
-    
     func fetchVideo(
         phAsset: PHAsset,
         size: CGSize,
@@ -123,7 +114,8 @@ final class MyPhotoService: NSObject, PhotoService {
         
         return await withCheckedContinuation { continuation in
             let options = generateVideoRequestOptions(deliveryMode, true)
-                imageManager.requestAVAsset(forVideo: phAsset, options: options) { [weak self] asset, _, info in
+                imageManager.requestAVAsset(forVideo: phAsset,
+                                            options: options) { [weak self] asset, _, info in
                     guard let avAsset = asset else {
                         Log.error("No asset returned for identifier: \(phAsset.localIdentifier)")
                         continuation.resume(returning: UIImage())
@@ -135,7 +127,15 @@ final class MyPhotoService: NSObject, PhotoService {
                 }
             }
     }
-
+    
+    private func generateVideoRequestOptions(_ deliveryMode: PHVideoRequestOptionsDeliveryMode,
+                                             _ isiColudAllowed: Bool) -> PHVideoRequestOptions {
+        let options = PHVideoRequestOptions()
+        options.isNetworkAccessAllowed = isiColudAllowed
+        options.deliveryMode = deliveryMode
+        options.version = .current
+        return options
+    }
     
     private func convertAVAssetToUIImage(avAsset: AVAsset, convertSize: CGSize, cacheKey: String?,
                                          _ continuation: (CheckedContinuation<UIImage?, Never>)) {
