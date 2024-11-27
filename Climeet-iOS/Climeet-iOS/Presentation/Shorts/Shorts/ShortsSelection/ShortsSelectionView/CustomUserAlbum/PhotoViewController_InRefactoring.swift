@@ -1,0 +1,299 @@
+////
+////  PhotoViewController.swift
+////
+////
+////  Created by mac on 6/18/24.
+////
+//
+//import UIKit
+//import Photos
+//import ComposableArchitecture
+//import SwiftUI
+//import Combine
+//
+//protocol ShortsCustomGalleryDelegate_New: AnyObject {
+//    func updateItems(_ items: [PhotoCellInfo])
+//    func updateCells(at indexPaths: [IndexPath])
+//    func updateScrollState(isEnabled: Bool)
+//}
+//
+//final class PhotoViewController_New: UIViewController {
+//    @Bindable var store: StoreOf<CustomAlbumReducer>
+//    
+//    private typealias DataSource = UICollectionViewDiffableDataSource<PhotoSection, PhotoCellInfo>
+//    private typealias Snapshot = NSDiffableDataSourceSnapshot<PhotoSection, PhotoCellInfo>
+//    private var dataSource: DataSource!
+//    
+//    required init?(coder: NSCoder) {
+//        fatalError("init(coder:) has not been implemented")
+//    }
+//    
+//    init(_ store: StoreOf<CustomAlbumReducer>) {
+//
+//        self.store = store
+//        super.init()
+//
+//    }
+//    
+//    private var cancellables: Set<AnyCancellable> = []
+//    
+//    private enum Const {
+//        static let numberOfColumns = 4.0
+//        static let cellSpace = 1.0
+//        static let length = (UIScreen.main.bounds.size.width - cellSpace * (numberOfColumns - 1)) / numberOfColumns
+//        static let cellSize = CGSize(width: length, height: length)
+//        static let scale = UIScreen.main.scale
+//    }
+//    
+//    private func setupBindings() {
+//        store.publisher.dataSource
+//            .removeDuplicates()
+//            .receive(on: DispatchQueue.main)
+//            .sink { [weak self] items in
+//                self?.updateDataSource(items)
+//            }
+//            .store(in: &cancellables)
+//        
+//        store.publisher.currentLoadedImageCount
+//            .removeDuplicates()
+//            .receive(on: DispatchQueue.main)
+//            .sink { [weak self] count in
+//                //self?.updateLoadingState(count == 0)
+//            }
+//            .store(in: &cancellables)
+//    }
+//    private func updateDataSource(_ items: [PhotoCellInfo]) {
+//        var snapshot = Snapshot()
+//        snapshot.appendSections([.main])
+//        snapshot.appendItems(items)
+//        dataSource.apply(snapshot, animatingDifferences: true)
+//    }
+//    // MARK: UI
+//    private let submitButton: UIButton = {
+//        let button = UIButton(type: .system)
+//        button.setTitle("완료", for: .normal)
+//        button.setTitleColor(.blue, for: .normal)
+//        button.setTitleColor(.systemBlue, for: [.normal, .highlighted])
+//        return button
+//    }()
+//    
+//    private let collectionView: UICollectionView = {
+//        let layout = UICollectionViewFlowLayout()
+//        layout.scrollDirection = .vertical
+//        layout.minimumLineSpacing = 1
+//        layout.minimumInteritemSpacing = 0
+//        layout.itemSize = Const.cellSize
+//        
+//        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+//        collectionView.isScrollEnabled = true
+//        collectionView.showsHorizontalScrollIndicator = false
+//        collectionView.showsVerticalScrollIndicator = true
+//        collectionView.contentInset = .zero
+//        collectionView.backgroundColor = UIColor(.climeetBackground)
+//        collectionView.clipsToBounds = true
+//        collectionView.register(PhotoCell.self,
+//                                forCellWithReuseIdentifier: PhotoCell.id)
+//        
+//        return collectionView
+//    }()
+//    
+//    // MARK: Property
+//    private let albumService: AlbumService = MyAlbumService()
+//    private let photoService: PhotoService = MyPhotoService()
+//    private var selectedIndexArray = [Int]()
+//    private var albums = [PHFetchResult<PHAsset>]()
+//    private var viewModel: CustomGalleryViewModel?
+//    
+//    func injectViewModel(_ vm: CustomGalleryViewModel) {
+//        self.viewModel = vm
+//    }
+//    
+//    override func viewDidLoad() {
+//        super.viewDidLoad()
+//        setupBindings()
+//        setupCollectionView()
+//        setupUI()
+//    }
+//    
+//    //MARK: Private Methods
+//    private func setupCollectionView() {
+//        collectionView.delegate = self
+//        
+//        dataSource = DataSource(
+//            collectionView: collectionView,
+//            cellProvider: { [weak self] (collectionView, indexPath, item) -> UICollectionViewCell? in
+//                guard let cell = collectionView.dequeueReusableCell(
+//                    withReuseIdentifier: PhotoCell.id,
+//                    for: indexPath
+//                ) as? PhotoCell else {
+//                    return UICollectionViewCell()
+//                }
+//                
+//                cell.configure(info: item)
+//                cell.currentTask?.cancel()
+//                
+//                cell.currentTask = Task { @MainActor in
+//                    guard let self = self else { return }
+//                    if let thumbnail = await self.photoService.fetchVideo(
+//                        phAsset: item.phAsset,
+//                        size: self.calculateImageSize(),
+//                        contentMode: .aspectFit,
+//                        deliveryMode: .fastFormat
+//                    ) {
+//                        // 셀이 여전히 표시 중인지 확인
+//                        guard let visibleCell = collectionView.cellForItem(at: indexPath) as? PhotoCell,
+//                              visibleCell == cell else {
+//                            self.viewModel?.imageLoadingCompleted()
+//                            return
+//                        }
+//                        
+//                        item.videoThumbnail = thumbnail
+//                        cell.configure(info: item)
+//                        self.viewModel?.imageLoadingCompleted()
+//                    } else {
+//                        self.viewModel?.imageLoadingCompleted()
+//                    }
+//                }
+//                
+//                return cell
+//            })
+//    }
+//    
+//    private func calculateImageSize() -> CGSize {
+//        return CGSize(width: Const.cellSize.width * Const.scale,
+//                      height: Const.cellSize.height * Const.scale)
+//    }
+//    
+//    //MARK: Private Methods
+//    private func setupUI() {
+//        view.backgroundColor = .white
+//        view.addSubview(collectionView)
+//        view.addSubview(loadingIndicator)
+//        
+//        collectionView.translatesAutoresizingMaskIntoConstraints = false
+//        NSLayoutConstraint.activate([
+//            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+//            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+//            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+//            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+//            
+//            loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+//            loadingIndicator.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
+//        ])
+//    }
+//    
+//    private let loadingIndicator: UIActivityIndicatorView = {
+//        let indicator = UIActivityIndicatorView(style: .medium)
+//        indicator.hidesWhenStopped = true
+//        indicator.color = .white
+//        indicator.translatesAutoresizingMaskIntoConstraints = false
+//        return indicator
+//    }()
+//    
+//    //    private func setupViewModel() {
+//    //        self.viewModel?.delegate = self
+//    //    }
+//}
+//
+//extension PhotoViewController_New: UICollectionViewDataSource {
+//    func collectionView(_ collectionView: UICollectionView,
+//                        numberOfItemsInSection section: Int) -> Int {
+//        let count = store.dataSource.count
+//        return count ?? 0
+//    }
+//    
+//    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+//        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PhotoCell.id,
+//                                                            for: indexPath) as? PhotoCell else {
+//            return UICollectionViewCell()
+//        }
+//        
+//        guard let viewModel = self.viewModel,
+//              indexPath.item < viewModel.bringVisibleCellCount() else {
+//            return cell
+//        }
+//        
+//        let imageInfo = viewModel.dataSource[indexPath.item]
+//        let phAsset = imageInfo.phAsset
+//        let imageSize = CGSize(width: Const.cellSize.width * Const.scale,
+//                               height: Const.cellSize.height * Const.scale)
+//        
+//        cell.configure(info: imageInfo)
+//        cell.currentTask?.cancel()
+//        
+//        cell.currentTask = Task { @MainActor in
+//            if let thumbnail = await photoService.fetchVideo(
+//                phAsset: phAsset,
+//                size: imageSize,
+//                contentMode: .aspectFit,
+//                deliveryMode: .fastFormat
+//            ) {
+//                guard let cell = collectionView.cellForItem(at: indexPath) as? PhotoCell,
+//                      indexPath == collectionView.indexPath(for: cell) else {
+//                    viewModel.imageLoadingCompleted()
+//                    return
+//                }
+//                
+//                imageInfo.videoThumbnail = thumbnail
+//                
+//                cell.configure(info: .init(
+//                    phAsset: phAsset,
+//                    videoThumbnail: thumbnail,
+//                    duration: imageInfo.duration,
+//                    selectedOrder: imageInfo.selectedOrder,
+//                    localIdentifier: phAsset.localIdentifier
+//                ))
+//                
+//                viewModel.imageLoadingCompleted()
+//            } else {
+//                viewModel.imageLoadingCompleted()
+//            }
+//        }
+//        
+//        return cell
+//    }
+//}
+//
+//extension PhotoViewController_New: ShortsCustomGalleryDelegate {
+//    func updateItems(_ items: [PhotoCellInfo]) {
+//        var snapshot = Snapshot()
+//        snapshot.appendSections([.main])
+//        snapshot.appendItems(items)
+//        dataSource.apply(snapshot, animatingDifferences: true)
+//    }
+//    
+//    func updateCells(at indexPaths: [IndexPath]) {
+//        collectionView.performBatchUpdates {
+//            collectionView.reloadItems(at: indexPaths)
+//        }
+//    }
+//    
+//    func updateScrollState(isEnabled: Bool) {
+//        collectionView.isScrollEnabled = isEnabled
+//        if isEnabled {
+//            loadingIndicator.stopAnimating()
+//        } else {
+//            loadingIndicator.startAnimating()
+//        }
+//    }
+//}
+//
+//extension PhotoViewController_New: UICollectionViewDelegate {
+//    func collectionView(_ collectionView: UICollectionView,
+//                        didSelectItemAt indexPath: IndexPath) {
+//        Task {
+//            viewModel?.handleCellSelection(at: indexPath)
+//        }
+//    }
+//    
+//    // n 스크롤링
+//    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+//        let offsetY = scrollView.contentOffset.y
+//        let contentHeight = scrollView.contentSize.height
+//        let screenHeight = scrollView.frame.size.height
+//        
+//        if offsetY > contentHeight - (screenHeight) {
+//            viewModel?.loadNextBatch()
+//        }
+//    }
+//}

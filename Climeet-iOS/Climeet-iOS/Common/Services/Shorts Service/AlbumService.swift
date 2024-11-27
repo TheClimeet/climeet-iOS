@@ -11,10 +11,70 @@ import UIKit
 
 protocol AlbumService {
     func getAlbums(mediaType: MediaType, completion: @escaping ([AlbumInfo]) -> Void)
+    
+    func getAlbums_New(mediaType: MediaType) async -> [AlbumInfo]
 }
 
 //TODO: 추후 Repository패턴 등 이용하여 앱 시작 시 사용자 앨범 비동기적으로 가져오는 작업 필요
 final class MyAlbumService: AlbumService {
+    func getAlbums_New(mediaType: MediaType) async -> [AlbumInfo] {
+        return await withCheckedContinuation { continuation in
+            DispatchQueue.global().async { [weak self] in
+                guard let self else {
+                    continuation.resume(returning: [])
+                    return
+                }
+                
+                // 0. albums 변수 선언
+                var albums = [AlbumInfo]()
+                
+                // 1. query 설정
+                let fetchOptions = PHFetchOptions()
+                fetchOptions.predicate = self.getPredicate(mediaType: mediaType)
+                fetchOptions.sortDescriptors = self.getSortDescriptors
+                
+                // 2. standard 앨범을 query로 이미지 가져오기
+                let standardFetchResult = PHAsset.fetchAssets(with: fetchOptions)
+                albums.append(.init(fetchResult: standardFetchResult, albumName: mediaType.title))
+                
+                // 3. smart 앨범을 query로 이미지 가져오기
+                let smartAlbums = PHAssetCollection.fetchAssetCollections(
+                    with: .smartAlbum,
+                    subtype: .any,
+                    options: PHFetchOptions()
+                )
+                
+                let group = DispatchGroup()
+                
+                smartAlbums.enumerateObjects { phAssetCollection, index, pointer in
+                    guard index <= smartAlbums.count - 1 else {
+                        pointer.pointee = true
+                        return
+                    }
+                    
+                    // 값을 빠르게 받아오지 못하는 경우
+                    if phAssetCollection.estimatedAssetCount == NSNotFound {
+                        group.enter()
+                        // 쿼리를 날려서 가져오기
+                        let fetchOptions = PHFetchOptions()
+                        fetchOptions.predicate = self.getPredicate(mediaType: mediaType)
+                        fetchOptions.sortDescriptors = self.getSortDescriptors
+                        
+                        DispatchQueue.global(qos: .userInitiated).async {
+                            let fetchResult = PHAsset.fetchAssets(in: phAssetCollection, options: fetchOptions)
+                            albums.append(.init(fetchResult: fetchResult, albumName: mediaType.title))
+                            group.leave()
+                        }
+                    }
+                }
+                
+                group.notify(queue: .global()) {
+                    continuation.resume(returning: albums)
+                }
+            }
+        }
+    }
+    
     func getAlbums(mediaType: MediaType, completion: @escaping ([AlbumInfo]) -> Void) {
         DispatchQueue.global().async { [weak self] in
             // 0. albums 변수 선언

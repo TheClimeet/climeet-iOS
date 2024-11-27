@@ -11,6 +11,9 @@ import Photos
 protocol PhotoService {
     func convertAlbumToPHAssets(album: PHFetchResult<PHAsset>,
                                 completion: @escaping ([PHAsset]) -> Void)
+    
+    func convertAlbumToPHAssets_new(album: PHFetchResult<PHAsset>) async -> [PHAsset]
+    
     func fetchVideo(
         phAsset: PHAsset,
         size: CGSize,
@@ -27,6 +30,24 @@ protocol PhotoService {
 }
 
 final class MyPhotoService: NSObject, PhotoService {
+    func convertAlbumToPHAssets_new(album: PHFetchResult<PHAsset>) async -> [PHAsset] {
+        return await withCheckedContinuation { continuation in
+            DispatchQueue.global().async {
+                var phAssets = [PHAsset]()
+                
+                // PHAsset을 순회하며 배열에 추가
+                album.enumerateObjects { asset, _, _ in
+                    phAssets.append(asset)
+                }
+                
+                // 메인 스레드에서 completion 호출
+                DispatchQueue.main.async {
+                    continuation.resume(returning: phAssets)
+                }
+            }
+        }
+    }
+    
     private let imageManager = PHCachingImageManager()
     private let cacher = VideoThumbnailCacher.shared
     
