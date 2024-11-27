@@ -22,11 +22,11 @@ final class CustomGalleryViewModel: ObservableObject {
     private var hasMoreItems: Bool = false
     private var currentPHAssets: [PHAsset] = []
     private var currentLoadedImageCount = 0
-
+    
     private(set) var dataSource = [PhotoCellInfo]()
     private var selectedIndex: Int?
     private var prevIndex: Int?
-
+    
     //MARK: Load User Photos Property
     private let photoService: PhotoService = MyPhotoService()
     private let albumService: AlbumService = MyAlbumService()
@@ -42,7 +42,7 @@ final class CustomGalleryViewModel: ObservableObject {
     
     func refreshAlbums() {
         self.loadAlbums()
-        self.delegate?.informAlbumsDownload()
+        //        self.delegate?.informAlbumsDownload()
     }
     
     func bringVisibleCellCount() -> Int {
@@ -71,11 +71,12 @@ final class CustomGalleryViewModel: ObservableObject {
         self.hasMoreItems = true
         loadNextBatch()
     }
-
+    
     func loadNextBatch() {
         guard currentLoadedImageCount == 0,
               hasMoreItems,
               !currentPHAssets.isEmpty else {
+            print("모든 에셋이 다 로드 되었음 - 더 이상 불러올 이미지가 없음")
             return
         }
         
@@ -84,12 +85,12 @@ final class CustomGalleryViewModel: ObservableObject {
         
         guard startIndex < currentPHAssets.count else {
             hasMoreItems = false
+            print("startInde가 현재 에셋의 인덱스보다 큼")
             return
         }
         
         currentLoadedImageCount = endIndex - startIndex
-        Log.info("Starting to load \(currentLoadedImageCount) images")
-
+        
         let batchAssets = Array(currentPHAssets[startIndex..<endIndex])
         let newItems: [PhotoCellInfo] = batchAssets.map { asset in
                 .init(phAsset: asset,
@@ -99,13 +100,13 @@ final class CustomGalleryViewModel: ObservableObject {
         }
         
         DispatchQueue.main.async { [weak self] in
-            self?.dataSource.append(contentsOf: newItems)
-            self?.currentPage += 1
-            self?.delegate?.informAlbumsDownload()
-            self?.delegate?.updateScrollState(isEnabled: false)
+            guard let self = self else { return }
+            self.dataSource.append(contentsOf: newItems)
+            self.currentPage += 1
+            self.delegate?.updateItems(self.dataSource)
         }
     }
-
+    
     private func convertTimeIntervalToString(_ timeInterval: TimeInterval) -> String? {
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.minute, .second]

@@ -14,16 +14,26 @@ enum SelectionOrder: Equatable {
     case selected(Int)
 }
 
-class PhotoCellInfo {
+enum PhotoSection {
+    case main
+}
+
+class PhotoCellInfo: Hashable {
     let phAsset: PHAsset
     var videoThumbnail: UIImage?
     let duration: String?
     let selectedOrder: SelectionOrder
     let localIdentifier: String
     
-    init(phAsset: PHAsset, videoThumbnail: UIImage? = nil,
-         duration: String?, selectedOrder: SelectionOrder,
-         localIdentifier: String) {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(localIdentifier)
+    }
+    
+    static func == (lhs: PhotoCellInfo, rhs: PhotoCellInfo) -> Bool {
+        return lhs.localIdentifier == rhs.localIdentifier
+    }
+    
+    init(phAsset: PHAsset, videoThumbnail: UIImage? = nil, duration: String?, selectedOrder: SelectionOrder, localIdentifier: String) {
         self.phAsset = phAsset
         self.videoThumbnail = videoThumbnail
         self.duration = duration

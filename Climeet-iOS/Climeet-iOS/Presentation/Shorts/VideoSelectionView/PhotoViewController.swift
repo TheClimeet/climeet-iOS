@@ -9,7 +9,7 @@ import UIKit
 import Photos
 
 protocol ShortsCustomGalleryDelegate: AnyObject {
-    func informAlbumsDownload()
+    func updateItems(_ items: [PhotoCellInfo])
     func updateCells(at indexPaths: [IndexPath])
     func updateScrollState(isEnabled: Bool)
 }
@@ -52,6 +52,13 @@ final class PhotoViewController: UIViewController {
         return collectionView
     }()
     
+    private typealias DataSource = UICollectionViewDiffableDataSource<PhotoSection, PhotoCellInfo>
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<PhotoSection, PhotoCellInfo>
+    
+    private var dataSource: DataSource!
+    
+    
+    
     // MARK: Property
     private let albumService: AlbumService = MyAlbumService()
     private let photoService: PhotoService = MyPhotoService()
@@ -62,18 +69,61 @@ final class PhotoViewController: UIViewController {
     func injectViewModel(_ vm: CustomGalleryViewModel) {
         self.viewModel = vm
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCollectionView()
         setupUI()
         setupViewModel()
     }
-
+    
     //MARK: Private Methods
     private func setupCollectionView() {
-        collectionView.dataSource = self
         collectionView.delegate = self
+        
+        dataSource = DataSource(
+            collectionView: collectionView,
+            cellProvider: { [weak self] (collectionView, indexPath, item) -> UICollectionViewCell? in
+                guard let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: PhotoCell.id,
+                    for: indexPath
+                ) as? PhotoCell else {
+                    return UICollectionViewCell()
+                }
+                
+                cell.configure(info: item)
+                cell.currentTask?.cancel()
+                
+                cell.currentTask = Task { @MainActor in
+                    guard let self = self else { return }
+                    if let thumbnail = await self.photoService.fetchVideo(
+                        phAsset: item.phAsset,
+                        size: self.calculateImageSize(),
+                        contentMode: .aspectFit,
+                        deliveryMode: .fastFormat
+                    ) {
+                        // 셀이 여전히 표시 중인지 확인
+                        guard let visibleCell = collectionView.cellForItem(at: indexPath) as? PhotoCell,
+                              visibleCell == cell else {
+                            self.viewModel?.imageLoadingCompleted()
+                            return
+                        }
+                        
+                        item.videoThumbnail = thumbnail
+                        cell.configure(info: item)
+                        self.viewModel?.imageLoadingCompleted()
+                    } else {
+                        self.viewModel?.imageLoadingCompleted()
+                    }
+                }
+                
+                return cell
+            })
+    }
+    
+    private func calculateImageSize() -> CGSize {
+        return CGSize(width: Const.cellSize.width * Const.scale,
+                      height: Const.cellSize.height * Const.scale)
     }
     
     //MARK: Private Methods
@@ -115,66 +165,69 @@ extension PhotoViewController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-           guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PhotoCell.id,
-                                                             for: indexPath) as? PhotoCell else {
-               return UICollectionViewCell()
-           }
-           
-           guard let viewModel = self.viewModel,
-                 indexPath.item < viewModel.bringVisibleCellCount() else {
-               return cell
-           }
-           
-           let imageInfo = viewModel.dataSource[indexPath.item]
-           let phAsset = imageInfo.phAsset
-           let imageSize = CGSize(width: Const.cellSize.width * Const.scale,
-                                height: Const.cellSize.height * Const.scale)
-           
-           cell.configure(info: imageInfo)
-           cell.currentTask?.cancel()
-           
-           cell.currentTask = Task { @MainActor in
-               if let thumbnail = await photoService.fetchVideo(
-                   phAsset: phAsset,
-                   size: imageSize,
-                   contentMode: .aspectFit,
-                   deliveryMode: .fastFormat
-               ) {
-                   guard let cell = collectionView.cellForItem(at: indexPath) as? PhotoCell,
-                         indexPath == collectionView.indexPath(for: cell) else {
-                       viewModel.imageLoadingCompleted()
-                       return
-                   }
-                   
-                   imageInfo.videoThumbnail = thumbnail
-                   
-                   cell.configure(info: .init(
-                       phAsset: phAsset,
-                       videoThumbnail: thumbnail,
-                       duration: imageInfo.duration,
-                       selectedOrder: imageInfo.selectedOrder,
-                       localIdentifier: phAsset.localIdentifier
-                   ))
-                   
-                   viewModel.imageLoadingCompleted()
-               } else {
-                   viewModel.imageLoadingCompleted()
-               }
-           }
-           
-           return cell
-       }
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PhotoCell.id,
+                                                            for: indexPath) as? PhotoCell else {
+            return UICollectionViewCell()
+        }
+        
+        guard let viewModel = self.viewModel,
+              indexPath.item < viewModel.bringVisibleCellCount() else {
+            return cell
+        }
+        
+        let imageInfo = viewModel.dataSource[indexPath.item]
+        let phAsset = imageInfo.phAsset
+        let imageSize = CGSize(width: Const.cellSize.width * Const.scale,
+                               height: Const.cellSize.height * Const.scale)
+        
+        cell.configure(info: imageInfo)
+        cell.currentTask?.cancel()
+        
+        cell.currentTask = Task { @MainActor in
+            if let thumbnail = await photoService.fetchVideo(
+                phAsset: phAsset,
+                size: imageSize,
+                contentMode: .aspectFit,
+                deliveryMode: .fastFormat
+            ) {
+                guard let cell = collectionView.cellForItem(at: indexPath) as? PhotoCell,
+                      indexPath == collectionView.indexPath(for: cell) else {
+                    viewModel.imageLoadingCompleted()
+                    return
+                }
+                
+                imageInfo.videoThumbnail = thumbnail
+                
+                cell.configure(info: .init(
+                    phAsset: phAsset,
+                    videoThumbnail: thumbnail,
+                    duration: imageInfo.duration,
+                    selectedOrder: imageInfo.selectedOrder,
+                    localIdentifier: phAsset.localIdentifier
+                ))
+                
+                viewModel.imageLoadingCompleted()
+            } else {
+                viewModel.imageLoadingCompleted()
+            }
+        }
+        
+        return cell
+    }
 }
 
 extension PhotoViewController: ShortsCustomGalleryDelegate {
+    func updateItems(_ items: [PhotoCellInfo]) {
+        var snapshot = Snapshot()
+        snapshot.appendSections([.main])
+        snapshot.appendItems(items)
+        dataSource.apply(snapshot, animatingDifferences: true)
+    }
+    
     func updateCells(at indexPaths: [IndexPath]) {
         collectionView.performBatchUpdates {
             collectionView.reloadItems(at: indexPaths)
         }
-    }
-    
-    func informAlbumsDownload() {
-        collectionView.reloadData()
     }
     
     func updateScrollState(isEnabled: Bool) {
@@ -185,7 +238,6 @@ extension PhotoViewController: ShortsCustomGalleryDelegate {
             loadingIndicator.startAnimating()
         }
     }
-    
 }
 
 extension PhotoViewController: UICollectionViewDelegate {
@@ -196,12 +248,13 @@ extension PhotoViewController: UICollectionViewDelegate {
         }
     }
     
+    // n 스크롤링
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         let screenHeight = scrollView.frame.size.height
         
-        if offsetY > contentHeight - (screenHeight * 1.2) {
+        if offsetY > contentHeight - (screenHeight) {
             viewModel?.loadNextBatch()
         }
     }
