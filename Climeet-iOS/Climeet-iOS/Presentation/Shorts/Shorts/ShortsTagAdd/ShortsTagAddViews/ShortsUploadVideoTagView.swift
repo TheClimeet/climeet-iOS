@@ -21,7 +21,7 @@ enum IconName: String {
 }
 
 struct ShortsUploadVideoTagView: View {
-    @Bindable var videoTagStore: StoreOf<AddVideoTagReducer>
+    @Bindable var videoTagStore: StoreOf<ShortsTagAddReducer>
     
     private struct Const {
         private static let figmaWidth: CGFloat = 375
@@ -127,7 +127,7 @@ struct ShortsUploadVideoTagView: View {
 }
 
 struct DetailTagView: View {
-    @Bindable var videoTagStore: StoreOf<AddVideoTagReducer>
+    @Bindable var videoTagStore: StoreOf<ShortsTagAddReducer>
     
     var body: some View {
         VStack(alignment: .leading, spacing: 29) {

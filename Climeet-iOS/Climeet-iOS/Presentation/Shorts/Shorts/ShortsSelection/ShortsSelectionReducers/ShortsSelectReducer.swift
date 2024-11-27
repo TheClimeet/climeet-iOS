@@ -22,7 +22,7 @@ struct ShortsSelectReducer {
     
     @Reducer(state: .equatable)
     enum Path {
-        case videoTagView(AddVideoTagReducer)
+        case videoTagView(ShortsTagAddReducer)
         case uploadView(ShortsPostingReducer)
     }
     
@@ -51,7 +51,7 @@ struct ShortsSelectReducer {
                 }
                 
                 state.path.append(
-                    .videoTagView(AddVideoTagReducer.State(selectedVideoThumbnail: image, selectedVideoURL: url))
+                    .videoTagView(ShortsTagAddReducer.State(selectedVideoThumbnail: image, selectedVideoURL: url))
                 )
                 
                 return .none

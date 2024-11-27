@@ -1,5 +1,5 @@
 //
-//  ShortsUploadVideoTagReducer.swift
+//  ShortsTagAddReducer.swift
 //  Climeet-iOS
 //
 //  Created by mac on 6/28/24.
@@ -11,7 +11,7 @@ import UIKit
 import Alamofire
 
 @Reducer
-struct AddVideoTagReducer {
+struct ShortsTagAddReducer {
     @ObservableState
     struct State: Equatable {
         @Presents var destination: Destination.State?
@@ -246,7 +246,7 @@ struct AddVideoTagReducer {
     }
 }
 
-extension AddVideoTagReducer {
+extension ShortsTagAddReducer {
     private func convertVideoToData(videoURL: URL) -> Data? {
         do {
             let videoData = try Data(contentsOf: videoURL)
