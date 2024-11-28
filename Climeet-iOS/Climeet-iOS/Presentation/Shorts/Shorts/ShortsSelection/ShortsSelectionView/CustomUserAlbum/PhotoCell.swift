@@ -11,7 +11,7 @@ import Photos
 
 enum SelectionOrder: Equatable {
     case none
-    case selected(Int)
+    case selected
 }
 
 enum PhotoSection {
@@ -19,6 +19,8 @@ enum PhotoSection {
 }
 
 class PhotoCellInfo: Hashable {
+    let id: String
+    
     let phAsset: PHAsset
     var videoThumbnail: UIImage?
     let duration: String?
@@ -26,14 +28,17 @@ class PhotoCellInfo: Hashable {
     let localIdentifier: String
     
     func hash(into hasher: inout Hasher) {
-        hasher.combine(localIdentifier)
+        hasher.combine(id)
     }
     
     static func == (lhs: PhotoCellInfo, rhs: PhotoCellInfo) -> Bool {
-        return lhs.localIdentifier == rhs.localIdentifier
+        return lhs.id == rhs.id
     }
     
-    init(phAsset: PHAsset, videoThumbnail: UIImage? = nil, duration: String?, selectedOrder: SelectionOrder, localIdentifier: String) {
+    init(phAsset: PHAsset, videoThumbnail: UIImage? = nil,
+         duration: String?, selectedOrder: SelectionOrder,
+         localIdentifier: String) {
+        self.id = phAsset.localIdentifier
         self.phAsset = phAsset
         self.videoThumbnail = videoThumbnail
         self.duration = duration
@@ -56,8 +61,8 @@ final class PhotoCell: UICollectionViewCell {
     
     private let highlightedView: UIView = {
         let view = UIView()
-        view.backgroundColor = .clear
-        view.layer.borderWidth = 1.0
+        view.backgroundColor = .yellow
+        view.layer.borderWidth = 2.0
         view.backgroundColor = .black.withAlphaComponent(0.5)
         view.layer.borderColor = UIColor.systemBlue.cgColor
         view.isUserInteractionEnabled = false
@@ -103,11 +108,11 @@ final class PhotoCell: UICollectionViewCell {
             imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
-            highlightedView.topAnchor.constraint(equalTo: imageView.topAnchor),
-            highlightedView.leadingAnchor.constraint(equalTo: imageView.leadingAnchor),
-            highlightedView.trailingAnchor.constraint(equalTo: imageView.trailingAnchor),
-            highlightedView.bottomAnchor.constraint(equalTo: imageView.bottomAnchor),
-            
+            highlightedView.topAnchor.constraint(equalTo: contentView.topAnchor),
+                       highlightedView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+                       highlightedView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+                       highlightedView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+
             durationLabel.bottomAnchor.constraint(equalTo: imageView.bottomAnchor, constant: -2),
             durationLabel.trailingAnchor.constraint(equalTo: imageView.trailingAnchor, constant: -2),
             durationLabel.heightAnchor.constraint(equalToConstant: 20),
@@ -121,6 +126,8 @@ final class PhotoCell: UICollectionViewCell {
     }
     
     func configure(info: PhotoCellInfo?) {
+        print("Configure cell with selection state: \(String(describing: info?.selectedOrder))")
+
         imageView.image = info?.videoThumbnail
         
         if let duration = info?.duration {
@@ -130,11 +137,16 @@ final class PhotoCell: UICollectionViewCell {
             durationLabel.isHidden = true
         }
         
-        if case .selected(_) = info?.selectedOrder {
-            highlightedView.isHidden = false
-        } else {
-            highlightedView.isHidden = true
-        }
+        // 디버깅을 위해 로그 추가
+        if info?.selectedOrder == .selected {
+                  print("Cell should be highlighted")
+                  highlightedView.isHidden = false
+                  // 디버깅을 위해 임시로 배경색 추가
+                  highlightedView.backgroundColor = UIColor.blue.withAlphaComponent(0.3)
+              } else {
+                  print("Cell should not be highlighted")
+                  highlightedView.isHidden = true
+              }
     }
     
     private func resetCellContents() {

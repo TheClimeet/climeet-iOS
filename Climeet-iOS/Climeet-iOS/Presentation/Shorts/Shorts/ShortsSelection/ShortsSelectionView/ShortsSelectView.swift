@@ -40,7 +40,7 @@ struct ShortsSelectView: View {
                     selectedImageView(self.viewModel.selectedVideoThumbnail,
                                       size: proxy.size)
                     HStack {
-                        moveToUserGalleryButton(viewModel: self.viewModel)
+                       // moveToUserGalleryButton(viewModel: self.viewModel)
                         Spacer()
                     }
                     .padding(.vertical, 10)

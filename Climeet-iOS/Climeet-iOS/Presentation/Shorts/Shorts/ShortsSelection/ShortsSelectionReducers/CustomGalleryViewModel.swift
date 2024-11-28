@@ -9,6 +9,11 @@ import Foundation
 import SwiftUI
 import Photos
 
+protocol ShortsCustomGalleryDelegate: AnyObject {
+    func updateItems(_ items: [PhotoCellInfo])
+    func updateCells(at indexPaths: [IndexPath])
+}
+
 final class CustomGalleryViewModel: ObservableObject {
     var delegate: ShortsCustomGalleryDelegate?
     
@@ -17,11 +22,14 @@ final class CustomGalleryViewModel: ObservableObject {
     @Published private(set) var selectedVideoURL: URL?
     
     //MARK: Batches
-    private let batchSize = 24
+    private let batchSize = 20
     private var currentPage = 0
     private var hasMoreItems: Bool = false
     private var currentPHAssets: [PHAsset] = []
-    private var currentLoadedImageCount = 0
+    private var currentThumbnailTask: Task<Void, Error>?
+    
+    private var activeLoadingTasks: Set<UUID> = []
+    private var isProcessingSelection: Bool = false
     
     private(set) var dataSource = [PhotoCellInfo]()
     private var selectedIndex: Int?
@@ -31,7 +39,7 @@ final class CustomGalleryViewModel: ObservableObject {
     private let photoService: PhotoService = MyPhotoService()
     private let albumService: AlbumService = MyAlbumService()
     private let photoAuthService: PhotoAuthService = MyPhotoAuthService()
-
+    
     private var albums = [PHFetchResult<PHAsset>]()
     private var currentAlbumIndex = 0 {
         didSet { assignAlbums() }
@@ -49,10 +57,6 @@ final class CustomGalleryViewModel: ObservableObject {
         photoAuthService.requestAuthorization {
             
         }
-    }
-    
-    func bringVisibleCellCount() -> Int {
-        return dataSource.count
     }
     
     private func loadAlbums() {
@@ -79,10 +83,10 @@ final class CustomGalleryViewModel: ObservableObject {
     }
     
     func loadNextBatch() {
-        guard currentLoadedImageCount == 0,
+        guard activeLoadingTasks.isEmpty,
+              !isProcessingSelection,
               hasMoreItems,
               !currentPHAssets.isEmpty else {
-            print("모든 에셋이 다 로드 되었음 - 더 이상 불러올 이미지가 없음")
             return
         }
         
@@ -91,12 +95,10 @@ final class CustomGalleryViewModel: ObservableObject {
         
         guard startIndex < currentPHAssets.count else {
             hasMoreItems = false
-            print("startInde가 현재 에셋의 인덱스보다 큼")
             return
         }
         
-        currentLoadedImageCount = endIndex - startIndex
-        
+        let loadingTaskId = startImageLoading()
         let batchAssets = Array(currentPHAssets[startIndex..<endIndex])
         let newItems: [PhotoCellInfo] = batchAssets.map { asset in
                 .init(phAsset: asset,
@@ -110,7 +112,57 @@ final class CustomGalleryViewModel: ObservableObject {
             self.dataSource.append(contentsOf: newItems)
             self.currentPage += 1
             self.delegate?.updateItems(self.dataSource)
+            self.finishImageLoading(loadingTaskId)
         }
+    }
+    
+    @MainActor
+    func handleCellSelection(at indexPath: IndexPath) {
+        guard indexPath.item < dataSource.count,
+              activeLoadingTasks.isEmpty,
+              !isProcessingSelection else {
+            return
+        }
+        
+        let info = dataSource[indexPath.item]
+        currentThumbnailTask?.cancel()
+        
+        isProcessingSelection = true
+        let taskId = startImageLoading()
+        
+        currentThumbnailTask = Task {
+            defer {
+                finishImageLoading(taskId)
+                isProcessingSelection = false
+            }
+            
+            if let highQualityThumbnail = await photoService.fetchHighQualityImage(
+                phAsset: info.phAsset,
+                size: selectedImageSize,
+                contentMode: .aspectFit,
+                deliveryMode: .highQualityFormat
+            ) {
+                if !Task.isCancelled {
+                    selectedVideoThumbnail = highQualityThumbnail
+                    selectedVideoIdentifier = info.localIdentifier
+                    requestVideoURL(for: info)
+                }
+            }
+            
+            if !Task.isCancelled {
+                await updateSelectionState(for: indexPath, with: info)
+            }
+        }
+    }
+    
+    private func startImageLoading() -> UUID {
+        let taskId = UUID()
+        activeLoadingTasks.insert(taskId)
+        return taskId
+    }
+    
+    private func finishImageLoading(_ taskId: UUID) {
+        activeLoadingTasks.remove(taskId)
     }
     
     private func convertTimeIntervalToString(_ timeInterval: TimeInterval) -> String? {
@@ -120,59 +172,29 @@ final class CustomGalleryViewModel: ObservableObject {
         return formatter.string(from: timeInterval)
     }
     
-    func imageLoadingCompleted() {
-        currentLoadedImageCount -= 1
-        print("Image loaded, remaining: \(currentLoadedImageCount)")
-        
-        if currentLoadedImageCount <= 0 {
-            currentLoadedImageCount = 0
-            delegate?.updateScrollState(isEnabled: true)
-            print("All images loaded, scroll enabled")
-        }
-    }
-    
-    @MainActor
-    func handleCellSelection(at indexPath: IndexPath) {
-        guard indexPath.item < dataSource.count else { return }
-        
-        let info = dataSource[indexPath.item]
+    private func updateSelectionState(for indexPath: IndexPath, with info: PhotoCellInfo) async {
         var updatingIndexPaths: [IndexPath] = []
-        
         switch info.selectedOrder {
         case .selected:
-            // 이미 선택된 셀을 다시 선택한 경우 -> 선택 해제
             updateCell(at: indexPath.item, withOrder: .none)
             selectedIndex = indexPath.item
             updatingIndexPaths.append(indexPath)
             
         case .none:
-            // 새로운 셀 선택
             if let prevIndex = prevIndex {
-                // 이전 선택된 셀이 있으면 해제
                 updateCell(at: prevIndex, withOrder: .none)
                 updatingIndexPaths.append(IndexPath(item: prevIndex, section: 0))
             }
             
-            // 새로운 셀 선택 상태로 업데이트
             selectedIndex = indexPath.item
-            updateCell(at: indexPath.item, withOrder: .selected(indexPath.item))
+            updateCell(at: indexPath.item, withOrder: .selected)
             updatingIndexPaths.append(indexPath)
-            
-            // 선택된 비디오 정보 업데이트
-            Task {
-                await setSelectedVideoInfo(info)
-                requestVideoURL(for: info)
-            }
-            
             prevIndex = selectedIndex
         }
-
-        // UI 업데이트 알림
-        notifyUIUpdate(for: updatingIndexPaths)
-    }
-    
-    private func notifyUIUpdate(for indexPaths: [IndexPath]) {
-        delegate?.updateCells(at: indexPaths)
+        
+        await MainActor.run {
+            notifyUIUpdate(for: updatingIndexPaths)
+        }
     }
     
     private func updateCell(at index: Int, withOrder order: SelectionOrder) {
@@ -186,6 +208,10 @@ final class CustomGalleryViewModel: ObservableObject {
             selectedOrder: order,
             localIdentifier: current.localIdentifier
         )
+    }
+    
+    private func notifyUIUpdate(for indexPaths: [IndexPath]) {
+        delegate?.updateCells(at: indexPaths)
     }
     
     private let selectedImageSize: CGSize = {
