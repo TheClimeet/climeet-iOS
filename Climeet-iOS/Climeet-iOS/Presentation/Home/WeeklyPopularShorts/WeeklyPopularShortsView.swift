@@ -6,14 +6,21 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
+import Kingfisher
 
 struct WeeklyPopularShortsView: View {
+    @Bindable var store: StoreOf<WeeklyPopularShortsReducer>
+    
     var body: some View {
         VStack(spacing: 0) {
             header
                 .padding(.horizontal, 16)
                 .padding(.bottom, 20)
             shorts
+        }
+        .onFirstAppear {
+            store.send(.onFirstAppear)
         }
     }
     
@@ -29,11 +36,14 @@ struct WeeklyPopularShortsView: View {
     
     private var shorts: some View {
         ScrollView(.horizontal) {
-            HStack(spacing: 7.75) {
-                ForEach(0..<8, id: \.self) { _ in
-                    RoundedRectangle(cornerRadius: 5)
-                        .foregroundStyle(.gray)
+            HStack(spacing: 8) {
+                ForEach(store.shortsItems) { item in
+                    KFImage(URL(string: item.thumbnailImageURL))
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
                         .frame(width: 96, height: 160)
+                        .clipped()
+                        .cornerRadius(5)
                 }
             }
         }
@@ -42,6 +52,9 @@ struct WeeklyPopularShortsView: View {
 }
 
 #Preview {
-    WeeklyPopularShortsView()
+    let store = Store(initialState: WeeklyPopularShortsReducer.State()) {
+        WeeklyPopularShortsReducer()
+    }
+    WeeklyPopularShortsView(store: store)
         .background(Color.climeetBackground)
 }
