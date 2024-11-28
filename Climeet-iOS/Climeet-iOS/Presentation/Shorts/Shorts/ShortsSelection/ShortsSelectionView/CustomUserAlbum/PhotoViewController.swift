@@ -215,61 +215,34 @@ extension PhotoViewController: ShortsCustomGalleryDelegate {
     }
     
     func updateCells(at indexPaths: [IndexPath]) {
-        
         guard var snapshot = dataSource?.snapshot(),
-                  let viewModel = self.viewModel else { return }
-            
-            var updatedItems = snapshot.itemIdentifiers
-            
-            // Set을 사용하여 중복된 인덱스 패스를 제거합니다
-            let uniqueIndexPaths = Set(indexPaths)
-            
-            // 업데이트가 필요한 아이템들만 찾아서 교체합니다
-            for indexPath in uniqueIndexPaths {
-                guard indexPath.item < viewModel.dataSource.count,
-                      let snapshotIndex = updatedItems.firstIndex(where: { $0.id == viewModel.dataSource[indexPath.item].id }) else {
-                    continue
-                }
-                
-                updatedItems[snapshotIndex] = viewModel.dataSource[indexPath.item]
+              let viewModel = self.viewModel else { return }
+        
+        var updatedItems = snapshot.itemIdentifiers
+        let uniqueIndexPaths = Set(indexPaths)
+        
+        for indexPath in uniqueIndexPaths {
+            guard indexPath.item < viewModel.dataSource.count,
+                  let snapshotIndex = updatedItems.firstIndex(where: { $0.id == viewModel.dataSource[indexPath.item].id }) else {
+                continue
             }
             
-            var newSnapshot = Snapshot()
-            newSnapshot.appendSections([.main])
-            newSnapshot.appendItems(updatedItems)
-            
-            // 중복이 제거된 인덱스 패스로 아이템을 리로드합니다
-            let itemsToReload = uniqueIndexPaths.compactMap { indexPath -> PhotoCellInfo? in
-                guard indexPath.item < viewModel.dataSource.count else { return nil }
-                return viewModel.dataSource[indexPath.item]
-            }
-            
-            // 리로드할 아이템이 있을 때만 처리합니다
-            if !itemsToReload.isEmpty {
-                newSnapshot.reloadItems(Array(itemsToReload))
-                dataSource?.apply(newSnapshot, animatingDifferences: false)
-            }
-//        guard var snapshot = dataSource?.snapshot() else { return }
-//        let currentItems = snapshot.itemIdentifiers
-//        let itemsToReload = indexPaths.compactMap { indexPath -> PhotoCellInfo? in
-//            guard let viewModel = self.viewModel,
-//                  indexPath.item < viewModel.dataSource.count,
-//                  currentItems.contains(where: { $0.id == viewModel.dataSource[indexPath.item].id }) else {
-//               
-//                return nil
-//            }
-//            return viewModel.dataSource[indexPath.item]
-//        }
-//        
-//        print(itemsToReload.map({ info in
-//            info.selectedOrder
-//        }))
-//        
-//        if !itemsToReload.isEmpty {
-//              // 변경된 아이템들만 리로드합니다
-//            snapshot.reconfigureItems(itemsToReload)
-//              dataSource?.apply(snapshot, animatingDifferences: false)
-//          }
+            updatedItems[snapshotIndex] = viewModel.dataSource[indexPath.item]
+        }
+        
+        var newSnapshot = Snapshot()
+        newSnapshot.appendSections([.main])
+        newSnapshot.appendItems(updatedItems)
+        
+        let itemsToReload = uniqueIndexPaths.compactMap { indexPath -> PhotoCellInfo? in
+            guard indexPath.item < viewModel.dataSource.count else { return nil }
+            return viewModel.dataSource[indexPath.item]
+        }
+        
+        if !itemsToReload.isEmpty {
+            newSnapshot.reloadItems(Array(itemsToReload))
+            dataSource?.apply(newSnapshot, animatingDifferences: false)
+        }
     }
 }
 

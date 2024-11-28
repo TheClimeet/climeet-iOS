@@ -7,12 +7,14 @@
 
 import SwiftUI
 import ComposableArchitecture
+import _PhotosUI_SwiftUI
 
 struct ShortsSelectView: View {
     
     //MARK: ViewModel for UICollectioVIewController
     @ObservedObject private var viewModel: CustomGalleryViewModel
     @Bindable var store: StoreOf<ShortsSelectReducer>
+    @State private var selectedVideo: PhotosPickerItem?
     
     private enum Const {
         static let recents = "최근항목"
@@ -40,7 +42,7 @@ struct ShortsSelectView: View {
                     selectedImageView(self.viewModel.selectedVideoThumbnail,
                                       size: proxy.size)
                     HStack {
-                       // moveToUserGalleryButton(viewModel: self.viewModel)
+                        moveToUserGalleryButton()
                         Spacer()
                     }
                     .padding(.vertical, 10)
@@ -94,7 +96,8 @@ struct ShortsSelectView: View {
 }
 
 extension ShortsSelectView {
-    private func selectedImageView(_ uiImage: UIImage?, size: CGSize) -> some View {
+    private func selectedImageView(_ uiImage: UIImage?,
+                                   size: CGSize) -> some View {
         var image: Image
         
         if let uiImage = uiImage {
@@ -111,8 +114,10 @@ extension ShortsSelectView {
             .clipped()
     }
     
-    private func moveToUserGalleryButton(viewModel: CustomGalleryViewModel) -> some View {
-        return NavigationLink(destination: CustomGallery(viewModel)) {
+    private func moveToUserGalleryButton() -> some View {
+        return PhotosPicker(selection: $selectedVideo,
+                     matching: .videos,
+                     preferredItemEncoding: .current) {
             HStack {
                 Text(Const.recents)
                     .font(.climeetFontParagraph2())
@@ -121,7 +126,6 @@ extension ShortsSelectView {
                 Image(Const.recentsIcon)
             }
         }
-        .buttonStyle(PlainButtonStyle())
     }
 }
 
