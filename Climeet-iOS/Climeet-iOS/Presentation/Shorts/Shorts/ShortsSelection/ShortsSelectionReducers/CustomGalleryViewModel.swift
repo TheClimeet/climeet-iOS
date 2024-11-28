@@ -17,7 +17,7 @@ final class CustomGalleryViewModel: ObservableObject {
     @Published private(set) var selectedVideoURL: URL?
     
     //MARK: Batches
-    private let batchSize = 16
+    private let batchSize = 24
     private var currentPage = 0
     private var hasMoreItems: Bool = false
     private var currentPHAssets: [PHAsset] = []

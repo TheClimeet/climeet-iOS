@@ -11,7 +11,6 @@ import Photos
 protocol ShortsCustomGalleryDelegate: AnyObject {
     func updateItems(_ items: [PhotoCellInfo])
     func updateCells(at indexPaths: [IndexPath])
-    func updateScrollState(isEnabled: Bool)
 }
 
 final class PhotoViewController: UIViewController {
@@ -21,6 +20,7 @@ final class PhotoViewController: UIViewController {
         static let length = (UIScreen.main.bounds.size.width - cellSpace * (numberOfColumns - 1)) / numberOfColumns
         static let cellSize = CGSize(width: length, height: length)
         static let scale = UIScreen.main.scale
+        static let footerHeight: CGFloat = 50
     }
     
     // MARK: UI
@@ -48,6 +48,9 @@ final class PhotoViewController: UIViewController {
         collectionView.clipsToBounds = true
         collectionView.register(PhotoCell.self,
                                 forCellWithReuseIdentifier: PhotoCell.id)
+        collectionView.register(IndicatorFooterView.self,
+                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
+                                withReuseIdentifier: IndicatorFooterView.reuseId)
         
         return collectionView
     }()
@@ -82,7 +85,31 @@ final class PhotoViewController: UIViewController {
     //MARK: Private Methods
     private func setupCollectionView() {
         collectionView.delegate = self
-        
+        setupCollectionViewDataSource()
+        setupFooterView()
+    }
+    
+    private func setupFooterView() {
+        dataSource.supplementaryViewProvider = { [weak self]
+            (collectionView: UICollectionView,
+             kind: String,
+             indexPath: IndexPath) -> UICollectionReusableView? in
+            
+            guard kind == UICollectionView.elementKindSectionFooter,
+                  let footerView = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    withReuseIdentifier: IndicatorFooterView.reuseId,
+                    for: indexPath) as? IndicatorFooterView else {
+                return nil
+            }
+            
+            footerView.delegate = self
+            
+            return footerView
+        }
+    }
+    
+    private func setupCollectionViewDataSource() {
         dataSource = DataSource(
             collectionView: collectionView,
             cellProvider: { [weak self] (collectionView, indexPath, item) -> UICollectionViewCell? in
@@ -130,7 +157,6 @@ final class PhotoViewController: UIViewController {
     private func setupUI() {
         view.backgroundColor = .white
         view.addSubview(collectionView)
-        view.addSubview(loadingIndicator)
         
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -138,22 +164,44 @@ final class PhotoViewController: UIViewController {
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            
-            loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            loadingIndicator.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
         ])
     }
     
-    private let loadingIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .medium)
-        indicator.hidesWhenStopped = true
-        indicator.color = .white
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        return indicator
-    }()
-    
     private func setupViewModel() {
         self.viewModel?.delegate = self
+    }
+}
+
+extension PhotoViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView,
+                        didSelectItemAt indexPath: IndexPath) {
+        Task {
+            viewModel?.handleCellSelection(at: indexPath)
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        viewForSupplementaryElementOfKind kind: String,
+                        at indexPath: IndexPath) -> UICollectionReusableView {
+        if kind == UICollectionView.elementKindSectionFooter {
+            guard let footer = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: IndicatorFooterView.reuseId,
+                for: indexPath) as? IndicatorFooterView else {
+                return UICollectionReusableView()
+            }
+            
+            return footer
+        }
+        return UICollectionReusableView()
+    }
+}
+
+extension PhotoViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        referenceSizeForFooterInSection section: Int) -> CGSize {
+        return CGSize(width: view.frame.width, height: Const.footerHeight)
     }
 }
 
@@ -185,32 +233,10 @@ extension PhotoViewController: ShortsCustomGalleryDelegate {
         snapshot.reloadItems(itemsToReload)
         dataSource?.apply(snapshot, animatingDifferences: false)
     }
-    
-    func updateScrollState(isEnabled: Bool) {
-        collectionView.isScrollEnabled = isEnabled
-        if isEnabled {
-            loadingIndicator.stopAnimating()
-        } else {
-            loadingIndicator.startAnimating()
-        }
-    }
 }
 
-extension PhotoViewController: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView,
-                        didSelectItemAt indexPath: IndexPath) {
-        Task {
-            viewModel?.handleCellSelection(at: indexPath)
-        }
-    }
-    
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let offsetY = scrollView.contentOffset.y
-        let contentHeight = scrollView.contentSize.height
-        let screenHeight = scrollView.frame.size.height
-        
-        if offsetY > contentHeight - (screenHeight) {
-            viewModel?.loadNextBatch()
-        }
+extension PhotoViewController: IndicatorFooterViewDelegate {
+    func footerViewDidTapLoadMore(_ footerView: UICollectionReusableView) {
+        viewModel?.loadNextBatch()
     }
 }
