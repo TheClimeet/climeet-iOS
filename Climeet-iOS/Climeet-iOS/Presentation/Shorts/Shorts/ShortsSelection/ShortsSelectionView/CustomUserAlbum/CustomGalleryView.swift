@@ -7,20 +7,18 @@
 
 import Foundation
 import SwiftUI
+import ComposableArchitecture
 
 struct CustomGallery: UIViewControllerRepresentable {
-    let viewModel: CustomGalleryViewModel
+    let store: StoreOf<CustomGalleryReducer>
     
-    init(_ viewModel: CustomGalleryViewModel) {
-        self.viewModel = viewModel
+    init(_ store: StoreOf<CustomGalleryReducer>) {
+        self.store = store
     }
     
     func makeUIViewController(context: Context) -> PhotoViewController {
-        let vc = PhotoViewController(viewModel: viewModel)
-        return vc
+        return PhotoViewController(store: store)
     }
     
-    func updateUIViewController(_ uiViewController: PhotoViewController, context: Context) {
-        // Implement any updates if needed
-    }
+    func updateUIViewController(_ uiViewController: PhotoViewController, context: Context) {}
 }

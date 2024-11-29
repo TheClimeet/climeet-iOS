@@ -7,6 +7,7 @@
 
 import UIKit
 import Photos
+import _PhotosUI_SwiftUI
 
 protocol PhotoService {
     func convertAlbumToPHAssets(album: PHFetchResult<PHAsset>,
@@ -25,8 +26,14 @@ protocol PhotoService {
         phAsset: PHAsset,
         size: CGSize,
         contentMode: PHImageContentMode,
-        deliveryMode: PHVideoRequestOptionsDeliveryMode 
+        deliveryMode: PHVideoRequestOptionsDeliveryMode
     ) async -> UIImage?
+    
+    func fetchVideoData(from asset: PHAsset) async -> Data?
+    
+    func loadImage(from item: PhotosPickerItem) async -> UIImage?
+    
+    func loadVideoData(from item: PhotosPickerItem) async -> Data?
 }
 
 final class MyPhotoService: NSObject, PhotoService {
@@ -67,18 +74,16 @@ final class MyPhotoService: NSObject, PhotoService {
         DispatchQueue.global().async {
             var phAssets = [PHAsset]()
             
-            // PHAsset을 순회하며 배열에 추가
             album.enumerateObjects { asset, _, _ in
                 phAssets.append(asset)
             }
             
-            // 메인 스레드에서 completion 호출
             DispatchQueue.main.async {
                 completion(phAssets)
             }
         }
     }
-    
+
     func fetchHighQualityImage(
         phAsset: PHAsset,
         size: CGSize,
@@ -114,18 +119,18 @@ final class MyPhotoService: NSObject, PhotoService {
         
         return await withCheckedContinuation { continuation in
             let options = generateVideoRequestOptions(deliveryMode, true)
-                imageManager.requestAVAsset(forVideo: phAsset,
-                                            options: options) { [weak self] asset, _, info in
-                    guard let avAsset = asset else {
-                        Log.error("No asset returned for identifier: \(phAsset.localIdentifier)")
-                        continuation.resume(returning: UIImage())
-                        return
-                    }
-                    
-                    self?.convertAVAssetToUIImage(avAsset: avAsset, convertSize: size,
-                                                  cacheKey: cacheKey, continuation)
+            imageManager.requestAVAsset(forVideo: phAsset,
+                                        options: options) { [weak self] asset, _, info in
+                guard let avAsset = asset else {
+                    Log.error("No asset returned for identifier: \(phAsset.localIdentifier)")
+                    continuation.resume(returning: UIImage())
+                    return
                 }
+                
+                self?.convertAVAssetToUIImage(avAsset: avAsset, convertSize: size,
+                                              cacheKey: cacheKey, continuation)
             }
+        }
     }
     
     private func generateVideoRequestOptions(_ deliveryMode: PHVideoRequestOptionsDeliveryMode,
@@ -150,7 +155,7 @@ final class MyPhotoService: NSObject, PhotoService {
             continuation.resume(returning: thumbnailImage)
         } catch {
             Log.error("Thumbnail generation error: \(error)")
-
+            
             continuation.resume(returning: nil)
         }
     }
@@ -162,6 +167,78 @@ final class MyPhotoService: NSObject, PhotoService {
             }
         }
     }
+    
+    func fetchVideoData(from asset: PHAsset) async -> Data? {
+        return await withCheckedContinuation { continuation in
+            let resources = PHAssetResource.assetResources(for: asset)
+            guard let videoResource = resources.first(where: { $0.type == .video }) else {
+                continuation.resume(returning: nil)
+                return
+            }
+            
+            let options = PHAssetResourceRequestOptions()
+            options.isNetworkAccessAllowed = true
+            
+            let data = NSMutableData()
+            
+            PHAssetResourceManager.default().requestData(
+                for: videoResource,
+                options: options,
+                dataReceivedHandler: { (newData) in
+                    data.append(newData)
+                },
+                completionHandler: { (error) in
+                    if let error = error {
+                        continuation.resume(returning: nil)
+                    } else {
+                        continuation.resume(returning: data as Data)
+                    }
+                }
+            )
+        }
+    }
+    
+    //MARK: For PhotoPicker
+    func loadImage(from item: PhotosPickerItem) async -> UIImage? {
+        let data = await translateToData(from: item)
+        
+        let temporaryFileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("mov")
+        
+        try? data?.write(to: temporaryFileURL)
+        
+        let asset = AVAsset(url: temporaryFileURL)
+        let generator = AVAssetImageGenerator(asset: asset)
+        generator.appliesPreferredTrackTransform = true
+        
+        let time = CMTime(seconds: 0, preferredTimescale: 600)
+        guard let cgImage = try? generator.copyCGImage(at: time, actualTime: nil) else{
+            return nil
+        }
+        
+        let thumbnail = UIImage(cgImage: cgImage)
+        
+        try? FileManager.default.removeItem(at: temporaryFileURL)
+        return thumbnail
+    }
+    
+    private func translateToData(from videoItem: PhotosPickerItem) async -> Data? {
+        guard videoItem.supportedContentTypes.contains(where: { $0.conforms(to: .movie) }) else {
+            return nil
+        }
+        
+        guard let videoData = try? await videoItem.loadTransferable(type: Data.self) else {
+            return nil
+        }
+        
+        return videoData
+    }
+    
+    func loadVideoData(from item: PhotosPickerItem) async -> Data? {
+        return try? await item.loadTransferable(type: Data.self)
+    }
+    
 }
 
 extension MyPhotoService: PHPhotoLibraryChangeObserver {

@@ -15,7 +15,9 @@ protocol PhotoAuthService {
     var isAuthorizationLimited: Bool { get }
     
     func requestAuthorization(completion: @escaping () -> Void)
-    func didChangeSelectedPhotos(completion: @escaping () -> Void) 
+    func requestAuthorization() -> Bool
+
+    func didChangeSelectedPhotos(completion: @escaping () -> Void)
 }
 
 extension PhotoAuthService {
@@ -52,8 +54,8 @@ final class MyPhotoAuthService: NSObject, PhotoAuthService {
         changeHandler = completion
     }
     
-    func requestAuthorization() {
-        
+    func requestAuthorization() -> Bool {
+        return true
     }
     
     func requestAuthorization(completion: @escaping () -> Void) {

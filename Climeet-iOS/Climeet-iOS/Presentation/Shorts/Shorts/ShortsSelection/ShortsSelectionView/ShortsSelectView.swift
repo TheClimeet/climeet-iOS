@@ -10,11 +10,11 @@ import ComposableArchitecture
 import _PhotosUI_SwiftUI
 
 struct ShortsSelectView: View {
-    
-    //MARK: ViewModel for UICollectioVIewController
-    @ObservedObject private var viewModel: CustomGalleryViewModel
     @Bindable var store: StoreOf<ShortsSelectReducer>
-    @State private var selectedVideo: PhotosPickerItem?
+    @State private var selectedItem: PhotosPickerItem?
+    
+    private let thumbnailWidthProportion: CGFloat = 189 / 375
+    private let thumbnailHeightProportion: CGFloat = 416 / 894
     
     private enum Const {
         static let recents = "최근항목"
@@ -24,65 +24,67 @@ struct ShortsSelectView: View {
         static let cancelIcon = "uploadCancelIcon"
     }
     
-    private let thumbnailWidthProportion: CGFloat = 189 / 375
-    private let thumbnailHeightProportion: CGFloat = 416 / 894
-    private let screenWidth = UIScreen.main.bounds.width
-    private let screenHeight = UIScreen.main.bounds.height
-    
-    init(viewModel: CustomGalleryViewModel = CustomGalleryViewModel(),
-         store: StoreOf<ShortsSelectReducer>) {
-        self.viewModel = viewModel
-        self.store = store
-    }
-    
     var body: some View {
         NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
             GeometryReader { proxy in
                 VStack(alignment: .center) {
-                    selectedImageView(self.viewModel.selectedVideoThumbnail,
-                                      size: proxy.size)
-                    HStack {
-                        moveToUserGalleryButton()
-                        Spacer()
+//                    selectedImageView(store.shortsThumbnailData,
+//                                      size: proxy.size)
+                    
+                    selectedImageView2(store.shortsThumbnail,
+                                       size: proxy.size)
+
+                    PhotosPicker(selection: $selectedItem,
+                                 matching: .videos,
+                                 preferredItemEncoding: .current) {
+                        HStack {
+                            Text(Const.recents)
+                                .font(.climeetFontParagraph2())
+                                .foregroundColor(.white)
+                                .padding(.leading)
+                            Image(Const.recentsIcon)
+                            Spacer()
+                        }
+                    }
+                    .onChange(of: selectedItem) { oldValue, newValue in
+                        guard oldValue != newValue else {
+                            return
+                        }
+                        
+                        store.send(.changedPhotoPickerItem(newValue))
                     }
                     .padding(.vertical, 10)
                     .background(.climeetBackground)
                     .frame(width: proxy.size.width,
                            height: 20,
                            alignment: .leading)
-                    CustomGallery(viewModel)
+                    
+                    CustomGallery(store.scope(
+                        state: \.gallery,
+                        action: \.gallery
+                    ))
                 }
                 .background(.shorsUploadPartialBackground)
             }
-            .navigationBarTitle("새 게시물",
-                                displayMode: .inline)
+            .navigationBarTitle("새 게시물", displayMode: .inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        store.send(.tapNextButton(viewModel.selectedVideoThumbnail,
-                                                  viewModel.selectedVideoURL))
-                    } label: {
+                    Button(action: { store.send(.tapNextButton) }) {
                         Text(Const.next)
                             .foregroundStyle(.climeetMain)
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
-            }
-            .toolbar {
+                
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        // TODO: 이전 화면으로 돌아가는 기능 추가
-                    } label: {
+                    Button(action: {}) {
                         Image(Const.cancelIcon)
                     }
                 }
             }
-            
-            //TODO: Shorts 버튼 누르면 권한 요청하거나 온보딩 화면에서 요청하도록 추후 위치 옮기기
             .onAppear {
-                viewModel.requestPhotoAuthrization()
+                store.send(.gallery(.requestPhotoAuthorization))
             }
-            
         } destination: { store in
             switch store.case {
             case .videoTagView(let store):
@@ -93,14 +95,11 @@ struct ShortsSelectView: View {
         }
         .ignoresSafeArea(.keyboard)
     }
-}
-
-extension ShortsSelectView {
-    private func selectedImageView(_ uiImage: UIImage?,
+    
+    private func selectedImageView(_ data: Data?,
                                    size: CGSize) -> some View {
         var image: Image
-        
-        if let uiImage = uiImage {
+        if let data = data, let uiImage = UIImage(data: data) {
             image = Image(uiImage: uiImage)
         } else {
             image = Image(Const.plcaeHolder)
@@ -114,23 +113,20 @@ extension ShortsSelectView {
             .clipped()
     }
     
-    private func moveToUserGalleryButton() -> some View {
-        return PhotosPicker(selection: $selectedVideo,
-                     matching: .videos,
-                     preferredItemEncoding: .current) {
-            HStack {
-                Text(Const.recents)
-                    .font(.climeetFontParagraph2())
-                    .foregroundColor(.white)
-                    .padding(.leading)
-                Image(Const.recentsIcon)
-            }
+    private func selectedImageView2(_ uiimage: UIImage?,
+                                   size: CGSize) -> some View {
+        var image: Image
+        if let uiimage = uiimage {
+            image = Image(uiImage: uiimage)
+        } else {
+            image = Image(Const.plcaeHolder)
         }
+        
+        return image
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .frame(width: size.width * thumbnailWidthProportion,
+                   height: size.height * thumbnailHeightProportion)
+            .clipped()
     }
-}
-
-#Preview {
-    ShortsSelectView(store: Store(initialState: ShortsSelectReducer.State()) {
-        ShortsSelectReducer()
-    })
 }

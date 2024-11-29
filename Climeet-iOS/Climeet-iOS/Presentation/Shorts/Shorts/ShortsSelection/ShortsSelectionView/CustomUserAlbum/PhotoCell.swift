@@ -24,7 +24,7 @@ class PhotoCellInfo: Hashable {
     let phAsset: PHAsset
     var videoThumbnail: UIImage?
     let duration: String?
-    let selectedOrder: SelectionOrder
+    var selectedOrder: SelectionOrder
     let localIdentifier: String
     
     func hash(into hasher: inout Hasher) {
@@ -137,11 +137,9 @@ final class PhotoCell: UICollectionViewCell {
             durationLabel.isHidden = true
         }
         
-        // 디버깅을 위해 로그 추가
         if info?.selectedOrder == .selected {
                   print("Cell should be highlighted")
                   highlightedView.isHidden = false
-                  // 디버깅을 위해 임시로 배경색 추가
                   highlightedView.backgroundColor = UIColor.blue.withAlphaComponent(0.3)
               } else {
                   print("Cell should not be highlighted")

@@ -180,7 +180,8 @@ struct DetailTagView: View {
 }
 
 extension ShortsUploadVideoTagView {
-    private func selectedImageView(size: CGSize, image: UIImage?) -> some View {
+    private func selectedImageView(size: CGSize,
+                                   image: UIImage?) -> some View {
         var finalImage: Image
         
         if let image = image {

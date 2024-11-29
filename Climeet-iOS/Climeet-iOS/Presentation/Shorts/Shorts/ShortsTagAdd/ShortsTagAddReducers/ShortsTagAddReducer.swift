@@ -21,7 +21,7 @@ struct ShortsTagAddReducer {
         var privacySheetHeight: CGFloat = 400
         
         var selectedVideoThumbnail: UIImage
-        var selectedVideoURL: URL
+        var selectedVideoData: Data
         var discription: String = ""
         var isMuted: Bool = true
         var acessState: RevealState = .world
@@ -116,9 +116,9 @@ struct ShortsTagAddReducer {
                 })
                 
             case let .generateShortsModel(imageUrl):
-                guard let shortsVideoData = convertVideoToData(videoURL: state.selectedVideoURL) else {
-                    return .send(.showErrorSheet)
-                }
+//                guard let shortsVideoData = convertVideoToData(videoURL: state.selectedVideo) else {
+//                    return .send(.showErrorSheet)
+//                }
                 
                 let request = ShortsRequest(climbingGymId: state.gym?.gymId ?? 0,
                                             routeId: state.selectedRoute?.routeId ?? 0,
@@ -128,7 +128,7 @@ struct ShortsTagAddReducer {
                                             shortsVisibility: state.acessState.literalForServer,
                                             soundEnabled: state.isMuted)
                 
-                let shorts = Shorts(video: shortsVideoData,
+                let shorts = Shorts(video: state.selectedVideoData,
                                     createShortsRequest: request)
                 
                 return .send(.delegate(.shortsData(shorts)))
@@ -246,17 +246,17 @@ struct ShortsTagAddReducer {
     }
 }
 
-extension ShortsTagAddReducer {
-    private func convertVideoToData(videoURL: URL) -> Data? {
-        do {
-            let videoData = try Data(contentsOf: videoURL)
-            return videoData
-        } catch {
-            print("Error loading video data: \(error)")
-            return nil
-        }
-    }
-}
+//extension ShortsTagAddReducer {
+//    private func convertVideoToData(videoURL: URL) -> Data? {
+//        do {
+//            let videoData = try Data(contentsOf: videoURL)
+//            return videoData
+//        } catch {
+//            print("Error loading video data: \(error)")
+//            return nil
+//        }
+//    }
+//}
 
 enum RevealState: String {
     case world = "전체 공개"
