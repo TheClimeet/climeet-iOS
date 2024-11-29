@@ -8,6 +8,7 @@
 import SwiftUI
 import ComposableArchitecture
 import Kingfisher
+import DesignSystem
 
 struct WeeklyPopularShortsView: View {
     @Bindable var store: StoreOf<WeeklyPopularShortsReducer>
@@ -48,6 +49,12 @@ struct WeeklyPopularShortsView: View {
                         ShortsThumbnailView(imageURL: item.thumbnailImageURL)
                             .overlay {
                                 VStack {
+                                    HStack {
+                                        RouteInfo(gymTitle: item.gymName, holdColor: .red)
+                                        Spacer()
+                                    }
+                                    .padding(.top, 4)
+                                    .padding(.leading, 4)
                                     Spacer()
                                     HStack {
                                         Spacer()
@@ -97,6 +104,28 @@ fileprivate struct DifficultyMark: View {
                     )
                     .frame(width: 30, height: 30)
             }
+    }
+}
+
+fileprivate struct RouteInfo: View {
+    let gymTitle: String
+    let holdColor: Color
+    
+    var body: some View {
+        HStack(alignment: .center, spacing: 2) {
+            Text(gymTitle)
+                .font(.climeetFontCustom(size: 8, weight: .regular))
+                .foregroundStyle(.white)
+            Circle()
+                .foregroundStyle(holdColor)
+                .frame(width: 8, height: 8)
+        }
+        .padding(.horizontal, 5)
+        .padding(.vertical, 2)
+        .background {
+            Capsule()
+                .foregroundStyle(Color(hex: "#000000")?.opacity(0.5) ?? Color.red)
+        }
     }
 }
 
