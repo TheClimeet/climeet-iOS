@@ -61,5 +61,20 @@ extension Font {
     public static func climeetFontCaptionText3() -> Self {
         Self.custom("Pretendard-Regular", size: 12)
     }
+    
+    public static func climeetFontCustom(size: CGFloat, weight: Font.Weight) -> Self {
+        switch weight {
+        case .bold:
+            Self.custom("Pretendard-Bold", size: size)
+        case .semibold:
+            Self.custom("Pretendard-SemiBold", size: size)
+        case .medium:
+            Self.custom("Pretendard-Medium", size: size)
+        case .regular:
+            Self.custom("Pretendard-Regular", size: size)
+        default:
+            Font.system(size: size, weight: weight)
+        }
+    }
 }
 #endif
