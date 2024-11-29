@@ -13,7 +13,7 @@ protocol PhotoService {
     func convertAlbumToPHAssets(album: PHFetchResult<PHAsset>,
                                 completion: @escaping ([PHAsset]) -> Void)
     
-    func convertAlbumToPHAssets_new(album: PHFetchResult<PHAsset>) async -> [PHAsset]
+    func convertAlbumToPHAssets(album: PHFetchResult<PHAsset>) async -> [PHAsset]
     
     func fetchVideo(
         phAsset: PHAsset,
@@ -37,7 +37,12 @@ protocol PhotoService {
 }
 
 final class MyPhotoService: NSObject, PhotoService {
-    func convertAlbumToPHAssets_new(album: PHFetchResult<PHAsset>) async -> [PHAsset] {
+    
+    private let imageManager = PHCachingImageManager()
+    private let cacher = VideoThumbnailCacher.shared
+    weak var delegate: PHPhotoLibraryChangeObserver?
+    
+    func convertAlbumToPHAssets(album: PHFetchResult<PHAsset>) async -> [PHAsset] {
         return await withCheckedContinuation { continuation in
             DispatchQueue.global().async {
                 var phAssets = [PHAsset]()
@@ -54,12 +59,7 @@ final class MyPhotoService: NSObject, PhotoService {
             }
         }
     }
-    
-    private let imageManager = PHCachingImageManager()
-    private let cacher = VideoThumbnailCacher.shared
-    
-    weak var delegate: PHPhotoLibraryChangeObserver?
-    
+   
     override init() {
         super.init()
         PHPhotoLibrary.shared().register(self)

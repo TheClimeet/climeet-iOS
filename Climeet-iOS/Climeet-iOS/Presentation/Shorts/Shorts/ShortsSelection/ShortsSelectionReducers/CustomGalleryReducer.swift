@@ -90,6 +90,7 @@ struct CustomGalleryReducer {
                 if authorized {
                     return .send(.loadAlbums)
                 }
+                
                 return .none
                 
             case .loadAlbums:
@@ -105,7 +106,7 @@ struct CustomGalleryReducer {
                 
                 if let firstAlbum = albums.first {
                     return .run { send in
-                        let assets = await photoService.convertAlbumToPHAssets_new(album: firstAlbum)
+                        let assets = await photoService.convertAlbumToPHAssets(album: firstAlbum)
                         await send(.assignPHAssets(assets))
                     }
                 }

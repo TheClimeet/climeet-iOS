@@ -15,18 +15,16 @@ import _PhotosUI_SwiftUI
 struct ShortsSelectReducer {
     @ObservableState
     struct State: Equatable {
-        static func == (lhs: ShortsSelectReducer.State, rhs: ShortsSelectReducer.State) -> Bool {
-            lhs.shortsData == rhs.shortsData
-        }
-        
         var screenSize = CGSize(width: 0, height: 0)
         var shortsThumbnailData: Data?
         var shortsData: Data?
-        
         var shortsThumbnail: UIImage?
-        //        var shortsURL: URL?
+        
         var gallery = CustomGalleryReducer.State()
         var path = StackState<Path.State>()
+        static func == (lhs: ShortsSelectReducer.State, rhs: ShortsSelectReducer.State) -> Bool {
+            lhs.shortsData == rhs.shortsData
+        }
     }
     
     @Reducer(state: .equatable)

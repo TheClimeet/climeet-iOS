@@ -53,7 +53,6 @@ class IndicatorFooterView: UICollectionReusableView {
         ])
     }
     
-    //뷰가 superview에 추가될 때 호출
     override func didMoveToSuperview() {
         super.didMoveToSuperview()
         button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)

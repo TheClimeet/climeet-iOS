@@ -116,10 +116,6 @@ struct ShortsTagAddReducer {
                 })
                 
             case let .generateShortsModel(imageUrl):
-//                guard let shortsVideoData = convertVideoToData(videoURL: state.selectedVideo) else {
-//                    return .send(.showErrorSheet)
-//                }
-                
                 let request = ShortsRequest(climbingGymId: state.gym?.gymId ?? 0,
                                             routeId: state.selectedRoute?.routeId ?? 0,
                                             sectorId: state.selectedRoute?.sectorId ?? 0,
@@ -206,7 +202,6 @@ struct ShortsTagAddReducer {
                 state.destination = .addRoute(reducer)
                 return .none
             
-                //루트선택 결과 전달
             case let .destination(
                 .presented(
                     .addRoute(
@@ -245,18 +240,6 @@ struct ShortsTagAddReducer {
         return index
     }
 }
-
-//extension ShortsTagAddReducer {
-//    private func convertVideoToData(videoURL: URL) -> Data? {
-//        do {
-//            let videoData = try Data(contentsOf: videoURL)
-//            return videoData
-//        } catch {
-//            print("Error loading video data: \(error)")
-//            return nil
-//        }
-//    }
-//}
 
 enum RevealState: String {
     case world = "전체 공개"

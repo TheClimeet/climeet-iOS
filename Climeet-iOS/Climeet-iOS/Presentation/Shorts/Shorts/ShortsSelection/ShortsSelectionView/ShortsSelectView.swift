@@ -28,10 +28,7 @@ struct ShortsSelectView: View {
         NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
             GeometryReader { proxy in
                 VStack(alignment: .center) {
-//                    selectedImageView(store.shortsThumbnailData,
-//                                      size: proxy.size)
-                    
-                    selectedImageView2(store.shortsThumbnail,
+                    selectedImageView(store.shortsThumbnail,
                                        size: proxy.size)
 
                     PhotosPicker(selection: $selectedItem,
@@ -96,24 +93,7 @@ struct ShortsSelectView: View {
         .ignoresSafeArea(.keyboard)
     }
     
-    private func selectedImageView(_ data: Data?,
-                                   size: CGSize) -> some View {
-        var image: Image
-        if let data = data, let uiImage = UIImage(data: data) {
-            image = Image(uiImage: uiImage)
-        } else {
-            image = Image(Const.plcaeHolder)
-        }
-        
-        return image
-            .resizable()
-            .aspectRatio(contentMode: .fill)
-            .frame(width: size.width * thumbnailWidthProportion,
-                   height: size.height * thumbnailHeightProportion)
-            .clipped()
-    }
-    
-    private func selectedImageView2(_ uiimage: UIImage?,
+    private func selectedImageView(_ uiimage: UIImage?,
                                    size: CGSize) -> some View {
         var image: Image
         if let uiimage = uiimage {
