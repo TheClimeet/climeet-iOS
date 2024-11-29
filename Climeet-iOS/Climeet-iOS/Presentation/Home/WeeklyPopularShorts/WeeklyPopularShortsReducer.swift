@@ -8,18 +8,6 @@
 import Foundation
 import ComposableArchitecture
 
-struct PopularShorts: Equatable, Identifiable {
-    let id = UUID()
-    let thumbnailImageURL: String
-    
-    init(from dto: ShortsDTO.Shorts.Response) throws {
-        guard let thumbnailImageURL = dto.thumbnailImageURL else {
-            throw AppError.dataParsingError("dto property nil")
-        }
-        self.thumbnailImageURL = thumbnailImageURL
-    }
-}
-
 @Reducer
 struct WeeklyPopularShortsReducer {
     @ObservableState
@@ -33,6 +21,7 @@ struct WeeklyPopularShortsReducer {
     }
     
     @Dependency(\.shortsClient) var shortsClient
+    @Dependency(\.difficultyMappingClient) var difficultyMappingClient
     
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -41,9 +30,36 @@ struct WeeklyPopularShortsReducer {
                 return .run { send in
                     let request = ShortsDTO.List.Request(page: 0, size: 10)
                     let response = try await shortsClient.popularShorts(request)
-                    let result = try response.result.map {
-                        try PopularShorts(from: $0)
+                    
+                    let result = try await withThrowingTaskGroup(of: PopularShorts?.self) { group in
+                        for responseItem in response.result {
+                            group.addTask {
+                                guard let id = responseItem.shortsDetailInfo?.gymID else {
+                                    throw AppError.dataParsingError("gymID not found")
+                                }
+                                
+                                let difficulty = try await difficultyMappingClient.gymDifficulty(id)
+                                
+                                guard !difficulty.isEmpty else { return nil }
+                                
+                                return try PopularShorts(
+                                    from: responseItem,
+                                    difficulty: try GymDifficulty(from: difficulty[0])
+                                )
+                            }
+                        }
+                        
+                        var popularShorts: [PopularShorts] = []
+                        
+                        for try await item in group {
+                            if let item = item {
+                                popularShorts.append(item)
+                            }
+                        }
+                        
+                        return popularShorts
                     }
+                    
                     await send(.popularShortsResponse(result))
                 }
                 
