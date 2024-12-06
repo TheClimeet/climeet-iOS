@@ -83,7 +83,6 @@ struct BannerReducer {
                 
             case .timerTick:
                 state.timerCount += 1
-                print(state.timerCount)
                 if state.timerCount == bannerChangeTime {
                     state.timerCount = 0
                     // TODO: banner change

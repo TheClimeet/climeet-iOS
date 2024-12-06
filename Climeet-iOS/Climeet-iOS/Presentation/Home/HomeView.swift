@@ -26,7 +26,7 @@ struct HomeView: View {
                         .padding(.bottom, 48)
                     HomeBestClimberView(store: store.scope(state: \.bestClimber, action: \.bestClimber))
                         .padding(.bottom, 48)
-                    WeeklyPopularShortsView()
+                    WeeklyPopularShortsView(store: store.scope(state: \.popularShorts, action: \.popularShorts))
                         .padding(.bottom, 48)
                     WeeklyPopularGymView()
                         .padding(.bottom, 48)

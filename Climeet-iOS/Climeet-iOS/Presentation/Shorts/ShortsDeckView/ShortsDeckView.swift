@@ -95,14 +95,13 @@ struct ShortsDeckView: View {
         }
     }
     
+    @ViewBuilder
     private func GymInfoView(gymName: String?,
                              gymDifficultyColor: String?) -> some View {
-        
         if let gymName = gymName,
            let difficultyColor = gymDifficultyColor {
             let gymDifficultyColor = convertHexadecimal(difficultyColor)
-            
-            return HStack(spacing: 4) {
+            HStack(spacing: 4) {
                 Text(gymName)
                     .font(.system(size: 12, weight: .light))
                     .foregroundColor(.white)
@@ -119,17 +118,18 @@ struct ShortsDeckView: View {
             .padding(.horizontal, 7)
             .padding(.vertical, 10)
         } else {
-            return Rectangle()
+            Rectangle()
                 .foregroundStyle(.clear)
         }
         
     }
-    
+   
+    @ViewBuilder
     private func DifficultyView(colorHexadecimal: String?,
                                 difficulty: String?) -> some View {
         if let colorHexadecimal = colorHexadecimal, let difficulty = difficulty {
             let hexadecimal = convertHexadecimal(colorHexadecimal)
-            return ZStack {
+            ZStack {
                 Circle()
                     .stroke(hexadecimal, lineWidth: 1.5)
                     .frame(width: 30, height: 30)
@@ -139,7 +139,7 @@ struct ShortsDeckView: View {
                     .lineLimit(1)
             }
         } else {
-            return Rectangle()
+            Rectangle()
                 .foregroundStyle(.clear)
         }
     }
