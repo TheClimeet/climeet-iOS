@@ -6,20 +6,19 @@ public final class APIClient: APIProtocol, @unchecked Sendable {
     public static let shared = APIClient()
     private var tokenRefresher: TokenRefreshable?
     private var isConfigured = false
+    private let session: Session
     
-    private init() { }
-    
-    private lazy var session: Session = {
+    private init() {
         let configuration = URLSessionConfiguration.af.default
         configuration.waitsForConnectivity = true
         configuration.timeoutIntervalForRequest = 60 // seconds that a task will wait for data to arrive
         configuration.timeoutIntervalForResource = 300 // seconds for whole resource request to complete ,.
-        return Session(
+        self.session = Session(
             configuration: configuration,
             interceptor: tokenRefresher.map { APIInterceptor(tokenRefresher: $0) },
             eventMonitors: [APILogger()]
         )
-    }()
+    }
     
     public func configure(tokenRefresher: TokenRefreshable) {
         guard !isConfigured else {
