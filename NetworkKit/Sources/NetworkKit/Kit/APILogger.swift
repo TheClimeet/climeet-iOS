@@ -6,7 +6,7 @@ struct APILogger: EventMonitor {
     
     func requestDidFinish(_ request: Request) {
         #if DEBUG
-        print("🚀 NETWORK Reqeust LOG")
+        print("🚀 NETWORK Request LOG")
         print(request.description)
         
         print(
