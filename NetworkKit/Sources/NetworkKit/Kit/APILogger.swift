@@ -22,12 +22,20 @@ struct APILogger: EventMonitor {
     func request<Value>(_ request: DataRequest, didParseResponse response: DataResponse<Value, AFError>) {
         #if DEBUG
         print("✅ NETWORK Response LOG")
-        print(
-          "URL: " + (request.request?.url?.absoluteString ?? "nil") + "\n"
-            + "Result: " + "\(response.result)" + "\n"
-            + "StatusCode: " + "\(response.response?.statusCode ?? 0)" + "\n"
-            + "Data: \(response.data?.prettyJson ?? "nil")"
-        )
+        switch response.result {
+        case let .success(data):
+            print(
+              "URL: " + (request.request?.url?.absoluteString ?? "nil") + "\n"
+              + "Result: " + "\(data)" + "\n"
+                + "StatusCode: " + "\(response.response?.statusCode ?? 0)"
+            )
+        case let .failure(error):
+            print(
+              "URL: " + (request.request?.url?.absoluteString ?? "nil") + "\n"
+              + "Result: " + "\(error.localizedDescription)" + "\n"
+                + "StatusCode: " + "\(response.response?.statusCode ?? 0)"
+            )
+        }
         #endif
     }
 }
