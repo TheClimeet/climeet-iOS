@@ -28,7 +28,7 @@ struct HomeView: View {
                         .padding(.bottom, 48)
                     WeeklyPopularShortsView()
                         .padding(.bottom, 48)
-                    WeeklyPopularGymView()
+                    WeeklyPopularGymView(store: store.scope(state: \.popularGym, action: \.popularGym))
                         .padding(.bottom, 48)
                     WeeklyPopularRoutView()
                         .padding(.bottom, 120)

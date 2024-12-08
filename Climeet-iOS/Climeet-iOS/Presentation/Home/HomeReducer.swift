@@ -15,12 +15,14 @@ struct HomeReducer {
         var banner = BannerReducer.State()
         var shortcut = HomeGymShortcutReducer.State()
         var bestClimber = HomeBestClimberReducer.State()
+        var popularGym = WeeklyPopularGymReducer.State()
     }
     
     enum Action {
         case banner(BannerReducer.Action)
         case shortcut(HomeGymShortcutReducer.Action)
         case bestClimber(HomeBestClimberReducer.Action)
+        case popularGym(WeeklyPopularGymReducer.Action)
     }
     
     var body: some ReducerOf<Self> {
@@ -32,6 +34,9 @@ struct HomeReducer {
         }
         Scope(state: \.bestClimber, action: \.bestClimber) {
             HomeBestClimberReducer()
+        }
+        Scope(state: \.popularGym, action: \.popularGym) {
+            WeeklyPopularGymReducer()
         }
     }
 }
