@@ -111,7 +111,7 @@ struct AddVideoTagReducer {
                         
                         await send(.generateShortsModel(imageUrl))
                     } catch let error {
-                        Log.error("NetworkError", "in startUploading: \(error)")
+                        Log.error("NetworkError", "in startUploading: \(error)") // TODO: 에러 처리
                     }
                 })
                 
@@ -177,14 +177,18 @@ struct AddVideoTagReducer {
                 //MARK: For Search Gym Routes
             case .searchGymRoutes:
                 return .run { [selectedGym = state.gym] send in
-                    guard let gymID = selectedGym?.gymId else { return }
-                    
-                    Log.network("[RouteSelectionReducer.swift]", "암장 특정 루트버전 필터링 키 불러오기 - 1101")
-                    
-                    let response = try await routeVersionClient.gymVersionKey(gymID, nil)
-                    let result = GymRoutes(from: response)
-                    
-                    await send(.routesResponse(result))
+                    do {
+                        guard let gymID = selectedGym?.gymId else { return }
+                        
+                        Log.network("[RouteSelectionReducer.swift]", "암장 특정 루트버전 필터링 키 불러오기 - 1101")
+                        
+                        let response = try await routeVersionClient.gymVersionKey(gymID, nil)
+                        let result = GymRoutes(from: response)
+                        
+                        await send(.routesResponse(result))
+                    } catch let error {
+                        print(error.localizedDescription) // TODO: 에러 처리
+                    }
                 }
                 
             case .routesResponse(let gymRoutes):
@@ -252,7 +256,7 @@ extension AddVideoTagReducer {
             let videoData = try Data(contentsOf: videoURL)
             return videoData
         } catch {
-            print("Error loading video data: \(error)")
+            print("Error loading video data: \(error)") // TODO: 에러 처리
             return nil
         }
     }

@@ -33,23 +33,27 @@ struct HomeBestClimberReducer {
             switch action {
             case .onFirstApear:
                 return .run { send in
-                    let clearResponse = try await bestClearClimberClient.rankWeekClimbersClear()
-                    let clearResult = try clearResponse.map {
-                        try BestClearClimber(from: $0)
+                    do {
+                        let clearResponse = try await bestClearClimberClient.rankWeekClimbersClear()
+                        let clearResult = try clearResponse.map {
+                            try BestClearClimber(from: $0)
+                        }
+                        await send(.bestClearClimberResponse(clearResult))
+                        
+                        let timeResponse = try await bestTimeClimberClient.rankWeeksClimbersTime()
+                        let timeResult = try timeResponse.map {
+                            try BestTimeClimber(from: $0)
+                        }
+                        await send(.bestTimeClimberResponse(timeResult))
+                        
+                        let levelResponse = try await bestLevelClimberClient.rankWeeksClimbersLevel()
+                        let levelResult = try levelResponse.map {
+                            try BestLevelClimber(from: $0)
+                        }
+                        await send(.bestLevelClimberResponse(levelResult))
+                    } catch let error {
+                        print(error) // TODO: 에러 처리
                     }
-                    await send(.bestClearClimberResponse(clearResult))
-                    
-                    let timeResponse = try await bestTimeClimberClient.rankWeeksClimbersTime()
-                    let timeResult = try timeResponse.map {
-                        try BestTimeClimber(from: $0)
-                    }
-                    await send(.bestTimeClimberResponse(timeResult))
-                    
-                    let levelResponse = try await bestLevelClimberClient.rankWeeksClimbersLevel()
-                    let levelResult = try levelResponse.map {
-                        try BestLevelClimber(from: $0)
-                    }
-                    await send(.bestLevelClimberResponse(levelResult))
                 }
                 
             case let .bestClearClimberResponse(bestClearClimbers):

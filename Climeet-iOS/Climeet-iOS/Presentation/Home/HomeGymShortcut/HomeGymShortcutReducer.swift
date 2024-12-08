@@ -28,9 +28,13 @@ struct HomeGymShortcutReducer {
             case .onFirstAppear:
                 return .run { send in
                     // 홈짐 바로가기 데이터 호출
-                    let response = try await userClient.homeGyms(nil)
-                    let result = response.map { HomeGymInfo(from: $0) }
-                    await send(.homeGymInfoResponse(result))
+                    do {
+                        let response = try await userClient.homeGyms(nil)
+                        let result = response.map { HomeGymInfo(from: $0) }
+                        await send(.homeGymInfoResponse(result))
+                    } catch let error {
+                        print(error) // TODO: 에러 처리
+                    }
                 }
                 
             case let .homeGymInfoResponse(homeGymInfo):

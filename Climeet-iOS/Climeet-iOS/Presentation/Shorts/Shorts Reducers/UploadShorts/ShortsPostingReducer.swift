@@ -43,7 +43,7 @@ struct ShortsPostingReducer {
                         )
                         await send(.processResponse)
                     } catch let error {
-                        Log.error("NetworkError", "error: \(error)")
+                        Log.error("NetworkError", "error: \(error)") // TODO: 에러 처리
                     }
                 }
                 
