@@ -26,6 +26,7 @@ enum SortBy {
 struct WeeklyPopularGymView: View {
     @Bindable var store: StoreOf<WeeklyPopularGymReducer>
     @State private var selectedTab: SortBy = .follower
+    @State private var scrollTarget: Int?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -63,6 +64,7 @@ struct WeeklyPopularGymView: View {
                         .foregroundStyle(selectedTab == .follower ? Color.climeetMain : Color.text06_5)
                 }
                 .onTapGesture {
+                    scrollTarget = 1
                     selectedTab = .follower
                 }
             
@@ -75,6 +77,7 @@ struct WeeklyPopularGymView: View {
                         .foregroundStyle(selectedTab == .record ? Color.climeetMain : Color.text06_5)
                 }
                 .onTapGesture {
+                    scrollTarget = 1
                     selectedTab = .record
                 }
             Spacer()
@@ -82,45 +85,55 @@ struct WeeklyPopularGymView: View {
     }
     
     private var gymIcons: some View {
-        ScrollView(.horizontal) {
-            switch selectedTab {
-            case .follower:
-                if store.bestFollowGym.isEmpty {
-                    Text("암장 정보가 없습니다")
-                        .frame(height: 134)
-                        .foregroundStyle(.white)
-                } else {
-                    HStack(spacing: 8) {
-                        ForEach(store.bestFollowGym) { gymInfo in
-                            GymIcon(
-                                rank: gymInfo.rank,
-                                profileImageURL: gymInfo.profileImageURL,
-                                gymName: gymInfo.name,
-                                description: "팔로워 \(gymInfo.followerCount)"
-                            )
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal) {
+                switch selectedTab {
+                case .follower:
+                    if store.bestFollowGym.isEmpty {
+                        Text("암장 정보가 없습니다")
+                            .frame(height: 134)
+                            .foregroundStyle(.white)
+                    } else {
+                        HStack(spacing: 8) {
+                            ForEach(store.bestFollowGym) { gymInfo in
+                                GymIcon(
+                                    rank: gymInfo.rank,
+                                    profileImageURL: gymInfo.profileImageURL,
+                                    gymName: gymInfo.name,
+                                    description: "팔로워 \(gymInfo.followerCount)"
+                                )
+                                .id(gymInfo.rank)
+                            }
                         }
                     }
-                }
-            case .record:
-                if store.bestRecordGym.isEmpty {
-                    Text("암장 정보가 없습니다")
-                        .frame(height: 134)
-                        .foregroundStyle(.white)
-                } else {
-                    HStack(spacing: 8) {
-                        ForEach(store.bestRecordGym) { gymInfo in
-                            GymIcon(
-                                rank: gymInfo.rank,
-                                profileImageURL: gymInfo.profileImageURL,
-                                gymName: gymInfo.name,
-                                description: "기록 \(gymInfo.selectionCount)"
-                            )
+                case .record:
+                    if store.bestRecordGym.isEmpty {
+                        Text("암장 정보가 없습니다")
+                            .frame(height: 134)
+                            .foregroundStyle(.white)
+                    } else {
+                        HStack(spacing: 8) {
+                            ForEach(store.bestRecordGym) { gymInfo in
+                                GymIcon(
+                                    rank: gymInfo.rank,
+                                    profileImageURL: gymInfo.profileImageURL,
+                                    gymName: gymInfo.name,
+                                    description: "기록 \(gymInfo.selectionCount)"
+                                )
+                                .id(gymInfo.rank)
+                            }
                         }
                     }
                 }
             }
+            .contentMargins(.horizontal, 16)
+            .onChange(of: scrollTarget) { oldValue, newValue in
+                if let target = newValue {
+                    scrollTarget = nil
+                    proxy.scrollTo(target, anchor: .center)
+                }
+            }
         }
-        .contentMargins(.horizontal, 16)
     }
 }
 
