@@ -37,7 +37,6 @@ struct ShortsDefaultButton: View {
            // dismiss()
         }
         
-        
         ShortsDefaultButton(title: "적용하기",
                             foregroundColor: .black,
                             backgroundColor: .climeetMain) {
