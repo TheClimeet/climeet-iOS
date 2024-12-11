@@ -28,6 +28,7 @@ class IndicatorFooterView: UICollectionReusableView {
     private let button: UIButton = {
         let button = UIButton(type: .roundedRect)
         let buttonImage: UIImage = UIImage(systemName: "arrow.clockwise") ?? UIImage()
+        button.tintColor = .gray
         button.setImage(buttonImage, for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -43,7 +44,7 @@ class IndicatorFooterView: UICollectionReusableView {
     }
     
     private func configure() {
-        backgroundColor = .yellow
+        backgroundColor = .clear
         addSubview(button)
         
         NSLayoutConstraint.activate([
