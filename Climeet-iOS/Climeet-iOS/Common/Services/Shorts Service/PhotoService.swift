@@ -100,7 +100,7 @@ final class MyPhotoService: NSObject, PhotoService {
                 }
                 
                 self?.convertAVAssetToUIImage(avAsset: avAsset, convertSize: size,
-                                              cacheKey: nil, continuation)
+                                              cacheKey: phAsset.localIdentifier, continuation)
             }
         }
     }

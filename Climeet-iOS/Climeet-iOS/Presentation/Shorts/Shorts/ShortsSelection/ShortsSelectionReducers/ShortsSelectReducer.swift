@@ -17,13 +17,14 @@ struct ShortsSelectReducer {
     struct State: Equatable {
         var screenSize = CGSize(width: 0, height: 0)
         var shortsThumbnailData: Data?
-        var shortsData: Data?
+        var shortsVideoData: Data?
         var shortsThumbnail: UIImage?
+        var customGallerySelectedAsset: PHAsset?
         
         var gallery = CustomGalleryReducer.State()
         var path = StackState<Path.State>()
         static func == (lhs: ShortsSelectReducer.State, rhs: ShortsSelectReducer.State) -> Bool {
-            lhs.shortsData == rhs.shortsData
+            lhs.shortsVideoData == rhs.shortsVideoData
         }
     }
     
@@ -42,9 +43,11 @@ struct ShortsSelectReducer {
         case changedPhotoPickerItem(PhotosPickerItem?)
         case convertShortsToData(PhotosPickerItem)
         
+        case convertSelectedVideoToData
         case assignShortsVideoData(Data)
-        case assignThumbnailImageData(Data)
+        //        case assignThumbnailImageData(Data)
         case assignThumbnailImage(UIImage?)
+        case navigateToNextView
         
         case delegate(Delegation)
         case path(StackActionOf<Path>)
@@ -63,14 +66,35 @@ struct ShortsSelectReducer {
         
         Reduce { state, action in
             switch action {
+                //MARK: On Appear
             case .readViewSize(let size):
                 state.screenSize = size
                 return .none
                 
+                //MARK: Go to Next View
             case .tapNextButton:
-                guard let image = state.shortsThumbnail,
-                      let data = state.shortsData else {
-                    return .send(.showErrorSheet)
+                return .run { send in
+                    await send(.convertSelectedVideoToData)
+                }
+                
+            case .convertSelectedVideoToData:
+                return .run { [asset = state.customGallerySelectedAsset] send in
+                    guard let asset = asset else {
+                        return
+                    }
+                    
+                    guard let videoData = await photoService.fetchVideoData(from: asset) else {
+                        return
+                    }
+                    
+                    await send(.assignShortsVideoData(videoData))
+                    await send(.navigateToNextView)
+                }
+                
+            case .navigateToNextView:
+                guard let data = state.shortsVideoData,
+                      let image = state.shortsThumbnail else {
+                    return .none
                 }
                 
                 state.path.append(
@@ -79,6 +103,7 @@ struct ShortsSelectReducer {
                         selectedVideoData: data
                     ))
                 )
+                
                 return .none
                 
                 //MARK: PhotoPicker Sheet
@@ -90,7 +115,7 @@ struct ShortsSelectReducer {
                 return .run { send in
                     async let imageTask = photoService.loadImage(from: photoItem)
                     async let videoTask = photoService.loadVideoData(from: photoItem)
-
+                    
                     if let image = await imageTask,
                        let videoData = await videoTask {
                         await send(.assignThumbnailImage(image))
@@ -98,15 +123,12 @@ struct ShortsSelectReducer {
                     }
                 }
                 
-            case .assignShortsVideoData(let data):
-                state.shortsData = data
-                return .none
-            case .assignThumbnailImage(let image):
-                state.shortsThumbnail = image
+            case let .assignShortsVideoData(data):
+                state.shortsVideoData = data
                 return .none
                 
-            case .assignThumbnailImageData(let data):
-                state.shortsThumbnailData = data
+            case .assignThumbnailImage(let image):
+                state.shortsThumbnail = image
                 return .none
                 
                 //MARK: Custom Gallery
@@ -114,10 +136,10 @@ struct ShortsSelectReducer {
                 state.shortsThumbnail = thumbnail
                 return .none
                 
-            case .gallery(.assignVideoData(let data)):
-                state.shortsData = data
+            case let .gallery(.saveSelectedVideoInfo(asset)):
+                state.customGallerySelectedAsset = asset
                 return .none
-                
+
             case .path(.element(id: _, action: .videoTagView(.startUploading))):
                 return .none
                 

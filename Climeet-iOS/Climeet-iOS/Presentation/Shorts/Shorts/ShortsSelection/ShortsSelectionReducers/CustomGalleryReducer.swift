@@ -26,9 +26,9 @@ struct CustomGalleryReducer {
         var selectedIndex: Int?
         var prevIndex: Int?
         var updatingIndexPaths: [IndexPath] = []
-        var isProcessingSelection: Bool = false
+        var isThumbnailRequestInFlight: Bool = false
+        var selectedAsset: PHAsset?
         
-        let batchSize = 20
         let cellImageSize: CGSize = {
             let screenWidth = UIScreen.main.bounds.width
             let screenHeight = UIScreen.main.bounds.height
@@ -45,6 +45,9 @@ struct CustomGalleryReducer {
         }()
     }
     
+    //MARK: Internal
+    private var batchSize = 20
+    
     enum Action: Equatable {
         // 초기화 및 권한 관련
         case requestPhotoAuthorization
@@ -60,29 +63,32 @@ struct CustomGalleryReducer {
         // 셀 선택 관련
         case cellSelected(IndexPath)
         case updateCell(IndexPath, SelectionOrder)
+        case updateSelectionState(IndexPath, PhotoCellInfo)
+        case finishSelection
+        case clearUpdatingIndexPaths
+        case saveSelectedVideoInfo(PHAsset)
+
+        //대표이미지 로드 및 비디오 데이터 저장
         case highQualityThumbnailLoaded(UIImage)
         case videoURLLoaded(PhotoCellInfo)
-        case updateSelectionState(IndexPath, PhotoCellInfo)
-        case loadThumbnail(indexPath: IndexPath, item: PhotoCellInfo)
+        case loadCellImage(indexPath: IndexPath, item: PhotoCellInfo)
         case thumbnailLoaded(IndexPath, UIImage)
         case assignVideoData(Data?)
-        case clearUpdatingIndexPaths
+        case cancelThumbnailLoad
+        case startThumbnailLoad
         
         //화면 전환 시 기본값 설정
         case setDefaults
     }
-    
+
     @Dependency(\.photoService) var photoService
     @Dependency(\.albumService) var albumService
     @Dependency(\.photoAuthService) var photoAuthService
-    
-    private func formatDuration(_ timeInterval: TimeInterval) -> String? {
-        let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.minute, .second]
-        formatter.zeroFormattingBehavior = .pad
-        return formatter.string(from: timeInterval)
+        
+    private enum CancelID {
+        case thumbnailRequest
     }
-    
+
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
@@ -125,14 +131,14 @@ struct CustomGalleryReducer {
                 }
                 
             case .loadNextBatch:
-                guard !state.isProcessingSelection,
+                guard !state.isThumbnailRequestInFlight,
                       state.hasMoreItems,
                       !state.currentPHAssets.isEmpty else {
                     return .none
                 }
                 
-                let startIndex = state.currentPage * state.batchSize
-                let endIndex = min(startIndex + state.batchSize, state.currentPHAssets.count)
+                let startIndex = state.currentPage * self.batchSize
+                let endIndex = min(startIndex + self.batchSize, state.currentPHAssets.count)
                 
                 guard startIndex < state.currentPHAssets.count else {
                     state.hasMoreItems = false
@@ -158,41 +164,69 @@ struct CustomGalleryReducer {
                 state.currentPage += 1
                 return .none
                 
+                //MARK: - Cell Selection
             case .cellSelected(let indexPath):
-                guard indexPath.item < state.dataSource.count,
-                      !state.isProcessingSelection else {
+                guard indexPath.item < state.dataSource.count else {
                     return .none
                 }
-                
-                state.isProcessingSelection = true
-                let info = state.dataSource[indexPath.item]
+
+                let cellInfo = state.dataSource[indexPath.item]
                 
                 return .concatenate(
+                    Effect.run { send in
+                        await send(.updateSelectionState(indexPath, cellInfo))
+                    },
+                    
+                    Effect.run { [processState = state.isThumbnailRequestInFlight] send in
+                        if processState == true {
+                            await send(.cancelThumbnailLoad)
+                        }
+                    },
+                    
                     Effect.run { [size = state.thumbnailImageSize] send in
+                        await send(.startThumbnailLoad)
+
                         if let thumbnail = await photoService.fetchHighQualityImage(
-                            phAsset: info.phAsset,
+                            phAsset: cellInfo.phAsset,
                             size: size,
                             contentMode: .aspectFit,
                             deliveryMode: .highQualityFormat
                         ) {
                             await send(.highQualityThumbnailLoaded(thumbnail))
-                            await send(.videoURLLoaded(info))
+                            await send(.saveSelectedVideoInfo(cellInfo.phAsset))
+                            //TODO: 최종 쇼츠 비디오 데이터만 변환 후 다음 화면으로 넘기기
+                            //await send(.videoURLLoaded(cellInfo))
                         }
-                    },
-                    
-                    Effect.run { send in
-                        await send(.updateSelectionState(indexPath, info))
-                    }
+                        await send(.finishSelection)
+                    }.cancellable(id: CancelID.thumbnailRequest)
                 )
+            
+            case .startThumbnailLoad:
+                state.isThumbnailRequestInFlight = true
+                return .none
+                
+            case .finishSelection:
+                 state.isThumbnailRequestInFlight = false
+                return .none
+                
+                //MARK: Thumbnail Image
+            case .cancelThumbnailLoad:
+                print("cancleVideoLoadTask--------------------------------------")
+                state.isThumbnailRequestInFlight = false
+                return .cancel(id: CancelID.thumbnailRequest)
                 
             case let .highQualityThumbnailLoaded(thumbnail):
                 state.selectedVideoThumbnail = thumbnail
                 return .none
                 
-            case .videoURLLoaded(let info):
+            case let .saveSelectedVideoInfo(phAsset):
+                state.selectedAsset = phAsset
+                return .none
+                
+            case let .videoURLLoaded(info):
                 return .run { send in
                     let videoData = await photoService.fetchVideoData(from: info.phAsset)
-                    await send(.assignVideoData(videoData))
+                  //  await send(.assignVideoData(videoData))
                 }
                 
             case .assignVideoData(let data):
@@ -201,7 +235,7 @@ struct CustomGalleryReducer {
                 
             case let .updateSelectionState(indexPath, info):
                 return .concatenate(
-                    Effect.run { [state = state] send in
+                    Effect.run { send in
                         await send(.updateCell(indexPath, info.selectedOrder))
                     },
                     
@@ -250,14 +284,13 @@ struct CustomGalleryReducer {
                     state.prevIndex = state.selectedIndex
                 }
                 
-                state.isProcessingSelection = false
                 return .none
                 
             case .clearUpdatingIndexPaths:
                 state.updatingIndexPaths = []
                 return .none
                 
-            case let .loadThumbnail(indexPath, item):
+            case let .loadCellImage(indexPath, item):
                 return .run { [size = state.cellImageSize] send in
                     if let thumbnail = await photoService.fetchVideo(
                         phAsset: item.phAsset,
@@ -280,7 +313,7 @@ struct CustomGalleryReducer {
                 return .none
                 
             case .setDefaults:
-                state.isProcessingSelection = false
+                state.isThumbnailRequestInFlight = false
                 return .none
                 
             default:
@@ -289,12 +322,10 @@ struct CustomGalleryReducer {
         }
     }
     
-    //    private func updateCell(at index: Int,
-    //                            withOrder order: SelectionOrder,
-    //                            in state: inout State) {
-    //        guard index < state.dataSource.count else { return }
-    //        let item = state.dataSource[index]
-    //        item.selectedOrder = order
-    //        state.dataSource[index] = item
-    //    }
+    private func formatDuration(_ timeInterval: TimeInterval) -> String? {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.minute, .second]
+        formatter.zeroFormattingBehavior = .pad
+        return formatter.string(from: timeInterval)
+    }
 }

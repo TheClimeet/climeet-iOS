@@ -97,7 +97,7 @@ final class PhotoViewController: UIViewController {
                 }
                 
                 cell.configure(info: item)
-                self?.store.send(.loadThumbnail(indexPath: indexPath, item: item))
+                self?.store.send(.loadCellImage(indexPath: indexPath, item: item))
                 
                 return cell
             }
