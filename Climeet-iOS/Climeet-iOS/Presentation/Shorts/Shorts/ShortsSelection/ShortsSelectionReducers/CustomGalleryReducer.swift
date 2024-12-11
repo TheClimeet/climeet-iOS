@@ -23,7 +23,6 @@ struct CustomGalleryReducer {
         var currentPHAssets: [PHAsset] = []
         var loadedIndexPath: IndexPath?
         
-        var selectedIndex: Int?
         var prevIndex: Int?
         var isThumbnailRequestInFlight: Bool = false
         var selectedAsset: PHAsset?
@@ -65,6 +64,7 @@ struct CustomGalleryReducer {
         case updateSelectionState(IndexPath, PhotoCellInfo)
         case finishSelection
         case saveSelectedVideoInfo(PHAsset)
+        case unselectCell
         
         //대표이미지 로드 및 비디오 데이터 저장
         case highQualityThumbnailLoaded(UIImage)
@@ -189,8 +189,7 @@ struct CustomGalleryReducer {
                         }
                         
                         await send(.finishSelection)
-                    }.cancellable(id: CancelID.thumbnailRequest)
-                    ,
+                    }.cancellable(id: CancelID.thumbnailRequest),
                     
                     Effect.run { send in
                         await send(.updateSelectionState(indexPath, cellInfo))
@@ -213,7 +212,6 @@ struct CustomGalleryReducer {
             case let .updateCell(indexPath, selectedOrder):
                 switch selectedOrder {
                 case .selected:
-                    //update cell
                     guard indexPath.item < state.dataSource.count else {
                         return .none
                     }
@@ -222,8 +220,9 @@ struct CustomGalleryReducer {
                     item.selectedOrder = .none
                     state.dataSource[indexPath.item] = item
                     
-                    //데이터 리프레싱을 위한 작업
-                    state.selectedIndex = indexPath.item
+                    return .run { send in
+                        await send(.unselectCell)
+                    }
                     
                 case .none:
                     if let prevIndex = state.prevIndex {
@@ -236,7 +235,8 @@ struct CustomGalleryReducer {
                         state.dataSource[prevIndex] = item
                     }
                     
-                    state.selectedIndex = indexPath.item
+                    
+                    let selectedIndex = indexPath.item
                     
                     guard indexPath.item < state.dataSource.count else {
                         return .none
@@ -245,9 +245,11 @@ struct CustomGalleryReducer {
                     var item = state.dataSource[indexPath.item]
                     item.selectedOrder = .selected
                     state.dataSource[indexPath.item] = item
-                    state.prevIndex = state.selectedIndex
+                    state.prevIndex = selectedIndex
+                    return .none
                 }
                 
+            case .unselectCell:
                 return .none
                 
                 //MARK: Thumbnail Image

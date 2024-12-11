@@ -82,6 +82,9 @@ struct ShortsSelectView: View {
             .onAppear {
                 store.send(.gallery(.requestPhotoAuthorization))
             }
+            .onDisappear {
+                store.send(.clearSavedInfo)
+            }
         } destination: { store in
             switch store.case {
             case .videoTagView(let store):

@@ -16,7 +16,6 @@ struct ShortsSelectReducer {
     @ObservableState
     struct State: Equatable {
         var screenSize = CGSize(width: 0, height: 0)
-        var shortsThumbnailData: Data?
         var shortsVideoData: Data?
         var shortsThumbnail: UIImage?
         var customGallerySelectedAsset: PHAsset?
@@ -45,10 +44,11 @@ struct ShortsSelectReducer {
         
         case convertSelectedVideoToData
         case assignShortsVideoData(Data)
-        //        case assignThumbnailImageData(Data)
         case assignThumbnailImage(UIImage?)
         case navigateToNextView
         
+        case clearSavedInfo
+
         case delegate(Delegation)
         case path(StackActionOf<Path>)
         case gallery(CustomGalleryReducer.Action)
@@ -69,6 +69,15 @@ struct ShortsSelectReducer {
                 //MARK: On Appear
             case .readViewSize(let size):
                 state.screenSize = size
+                return .none
+                
+                //MARK: On Dissappear
+                
+            case .clearSavedInfo:
+                state.shortsVideoData = nil
+                state.shortsThumbnail = nil
+                state.customGallerySelectedAsset = nil
+                
                 return .none
                 
                 //MARK: Go to Next View
@@ -134,6 +143,10 @@ struct ShortsSelectReducer {
                 //MARK: Custom Gallery
             case .gallery(.highQualityThumbnailLoaded(let thumbnail)):
                 state.shortsThumbnail = thumbnail
+                return .none
+                
+            case .gallery(.unselectCell):
+                state.shortsThumbnail = nil
                 return .none
                 
             case let .gallery(.saveSelectedVideoInfo(asset)):

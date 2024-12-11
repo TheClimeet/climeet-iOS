@@ -88,7 +88,7 @@ final class MyPhotoService: NSObject, PhotoService {
         phAsset: PHAsset,
         size: CGSize,
         contentMode: PHImageContentMode,
-        deliveryMode: PHVideoRequestOptionsDeliveryMode = .automatic
+        deliveryMode: PHVideoRequestOptionsDeliveryMode = .highQualityFormat
     ) async -> UIImage? {
         
         return await withCheckedContinuation { continuation in
