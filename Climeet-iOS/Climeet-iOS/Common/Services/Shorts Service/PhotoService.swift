@@ -88,7 +88,7 @@ final class MyPhotoService: NSObject, PhotoService {
         phAsset: PHAsset,
         size: CGSize,
         contentMode: PHImageContentMode,
-        deliveryMode: PHVideoRequestOptionsDeliveryMode = .highQualityFormat
+        deliveryMode: PHVideoRequestOptionsDeliveryMode = .automatic
     ) async -> UIImage? {
         return await withCheckedContinuation { continuation in
             let options = generateVideoRequestOptions(deliveryMode, true)
@@ -189,6 +189,7 @@ final class MyPhotoService: NSObject, PhotoService {
                 },
                 completionHandler: { (error) in
                     if let error = error {
+                        print(error)
                         continuation.resume(returning: nil)
                     } else {
                         continuation.resume(returning: data as Data)

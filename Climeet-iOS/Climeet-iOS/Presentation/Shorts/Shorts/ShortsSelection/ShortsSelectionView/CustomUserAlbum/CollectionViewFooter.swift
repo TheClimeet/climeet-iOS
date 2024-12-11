@@ -14,7 +14,6 @@ protocol IndicatorFooterViewDelegate: AnyObject {
 
 class IndicatorFooterView: UICollectionReusableView {
     static let reuseId = "loadMoreButton"
-    private var viewModel: CustomGalleryViewModel?
     weak var delegate: IndicatorFooterViewDelegate?
     
     

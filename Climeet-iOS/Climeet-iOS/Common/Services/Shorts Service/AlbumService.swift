@@ -12,12 +12,12 @@ import UIKit
 protocol AlbumService {
     func getAlbums(mediaType: MediaType, completion: @escaping ([AlbumInfo]) -> Void)
     
-    func getAlbums_New(mediaType: MediaType) async -> [AlbumInfo]
+    func getAlbums(mediaType: MediaType) async -> [AlbumInfo]
 }
 
 //TODO: 추후 Repository패턴 등 이용하여 앱 시작 시 사용자 앨범 비동기적으로 가져오는 작업 필요
 final class MyAlbumService: AlbumService {
-    func getAlbums_New(mediaType: MediaType) async -> [AlbumInfo] {
+    func getAlbums(mediaType: MediaType) async -> [AlbumInfo] {
         return await withCheckedContinuation { continuation in
             DispatchQueue.global().async { [weak self] in
                 guard let self else {

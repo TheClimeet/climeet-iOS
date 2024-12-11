@@ -12,10 +12,9 @@ import UIKit
 actor VideoThumbnailCacher {
     static let shared = VideoThumbnailCacher()
    
-    
     private let cache: NSCache<NSString, UIImage> = {
         let cache = NSCache<NSString, UIImage>()
-        cache.countLimit = 200
+        cache.countLimit = 50
         cache.totalCostLimit = 1024 * 1024 * 100
         return cache
     }()

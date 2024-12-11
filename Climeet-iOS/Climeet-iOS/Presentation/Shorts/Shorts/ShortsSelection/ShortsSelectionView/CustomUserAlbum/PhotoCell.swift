@@ -109,10 +109,10 @@ final class PhotoCell: UICollectionViewCell {
             imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
             highlightedView.topAnchor.constraint(equalTo: contentView.topAnchor),
-                       highlightedView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-                       highlightedView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-                       highlightedView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-
+            highlightedView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            highlightedView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            highlightedView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            
             durationLabel.bottomAnchor.constraint(equalTo: imageView.bottomAnchor, constant: -2),
             durationLabel.trailingAnchor.constraint(equalTo: imageView.trailingAnchor, constant: -2),
             durationLabel.heightAnchor.constraint(equalToConstant: 20),
@@ -127,7 +127,7 @@ final class PhotoCell: UICollectionViewCell {
     
     func configure(info: PhotoCellInfo?) {
         print("Configure cell with selection state: \(String(describing: info?.selectedOrder))")
-
+        
         imageView.image = info?.videoThumbnail
         
         if let duration = info?.duration {
@@ -138,13 +138,13 @@ final class PhotoCell: UICollectionViewCell {
         }
         
         if info?.selectedOrder == .selected {
-                  print("Cell should be highlighted")
-                  highlightedView.isHidden = false
-                  highlightedView.backgroundColor = UIColor.blue.withAlphaComponent(0.3)
-              } else {
-                  print("Cell should not be highlighted")
-                  highlightedView.isHidden = true
-              }
+            print("Cell should be highlighted")
+            highlightedView.isHidden = false
+            highlightedView.backgroundColor = UIColor.blue.withAlphaComponent(0.3)
+        } else {
+            print("Cell should not be highlighted")
+            highlightedView.isHidden = true
+        }
     }
     
     private func resetCellContents() {

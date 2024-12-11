@@ -1,9 +1,9 @@
-////
-////  PhotoViewController.swift
-////
-////
-////  Created by mac on 6/18/24.
-////
+//
+//  PhotoViewController.swift
+//
+//
+//  Created by mac on 6/18/24.
+//
 
 import UIKit
 import Photos
@@ -38,8 +38,8 @@ final class PhotoViewController: UIViewController {
         collectionView.clipsToBounds = true
         collectionView.register(PhotoCell.self, forCellWithReuseIdentifier: PhotoCell.id)
         collectionView.register(IndicatorFooterView.self,
-                              forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
-                              withReuseIdentifier: IndicatorFooterView.reuseId)
+                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
+                                withReuseIdentifier: IndicatorFooterView.reuseId)
         
         return collectionView
     }()
@@ -71,6 +71,11 @@ final class PhotoViewController: UIViewController {
         
         // 초기 데이터 로드 요청
         store.send(.requestPhotoAuthorization)
+    }
+    
+    override func viewWillAppear(_ animate: Bool) {
+        super.viewWillAppear(animate)
+        store.send(.setDefaults)
     }
     
     // MARK: - Setup Methods
@@ -135,10 +140,37 @@ final class PhotoViewController: UIViewController {
     private func setupBindings() {
         store.publisher.dataSource
             .receive(on: DispatchQueue.main)
+            .removeDuplicates()
             .sink { [weak self] items in
                 self?.updateItems(items)
             }
             .store(in: &cancellables)
+        
+        //TODO: 수정 필요
+//        store.publisher.updatingIndexPaths
+//            .receive(on: DispatchQueue.main)
+//            .removeDuplicates()
+//            .sink { [weak self] paths in
+//                if paths == [] {
+//                    print("updatingIndexPaths is empty")
+//                    return
+//                }
+//                
+//                self?.updateCells(paths)
+//            }
+//            .store(in: &cancellables)
+        
+//        store.publisher.loadedIndexPath
+//            .receive(on: DispatchQueue.main)
+//            .removeDuplicates()
+//            .sink { [weak self] path in
+//                guard let path = path else {
+//                    return
+//                }
+//                
+//                self?.updateCells([path])
+//            }
+//            .store(in: &cancellables)
     }
     
     // MARK: - Private Methods
@@ -149,9 +181,31 @@ final class PhotoViewController: UIViewController {
         dataSource?.apply(snapshot, animatingDifferences: true)
     }
     
+    private func updateCells(_ indexPaths: [IndexPath]) {
+        guard var snapshot = dataSource?.snapshot(),
+              !indexPaths.isEmpty else { return }
+        
+        let uniqueIndexPaths = Set(indexPaths)
+        let currentItems = store.state.dataSource
+        
+        let itemsToReload = uniqueIndexPaths.compactMap { indexPath -> PhotoCellInfo? in
+            guard indexPath.item < currentItems.count else { return nil }
+            let updatedItem = currentItems[indexPath.item]
+            return updatedItem
+        }
+        
+        if !itemsToReload.isEmpty {
+            snapshot.reloadItems(itemsToReload)
+            DispatchQueue.main.async { [weak self] in
+                self?.dataSource?.apply(snapshot, animatingDifferences: false) {
+                }
+            }
+        }
+    }
+    
     private func calculateImageSize() -> CGSize {
         return CGSize(width: Const.cellSize.width * Const.scale,
-                     height: Const.cellSize.height * Const.scale)
+                      height: Const.cellSize.height * Const.scale)
     }
 }
 
@@ -165,8 +219,8 @@ extension PhotoViewController: UICollectionViewDelegate {
 // MARK: - UICollectionViewDelegateFlowLayout
 extension PhotoViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
-                       layout collectionViewLayout: UICollectionViewLayout,
-                       referenceSizeForFooterInSection section: Int) -> CGSize {
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        referenceSizeForFooterInSection section: Int) -> CGSize {
         return CGSize(width: view.frame.width, height: Const.footerHeight)
     }
 }
