@@ -90,7 +90,10 @@ final class MyPhotoService: NSObject, PhotoService {
         contentMode: PHImageContentMode,
         deliveryMode: PHVideoRequestOptionsDeliveryMode = .automatic
     ) async -> UIImage? {
+        
         return await withCheckedContinuation { continuation in
+            let cacheKey = phAsset.localIdentifier
+
             let options = generateVideoRequestOptions(deliveryMode, true)
             imageManager.requestAVAsset(forVideo: phAsset, options: options) { [weak self] asset, _, info in
                 guard let avAsset = asset else {
@@ -100,7 +103,7 @@ final class MyPhotoService: NSObject, PhotoService {
                 }
                 
                 self?.convertAVAssetToUIImage(avAsset: avAsset, convertSize: size,
-                                              cacheKey: phAsset.localIdentifier, continuation)
+                                              cacheKey: cacheKey, continuation)
             }
         }
     }

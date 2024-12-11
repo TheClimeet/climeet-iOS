@@ -18,7 +18,7 @@ enum PhotoSection {
     case main
 }
 
-class PhotoCellInfo: Hashable {
+struct PhotoCellInfo: Hashable {
     let id: String
     
     let phAsset: PHAsset
@@ -32,7 +32,9 @@ class PhotoCellInfo: Hashable {
     }
     
     static func == (lhs: PhotoCellInfo, rhs: PhotoCellInfo) -> Bool {
-        return lhs.id == rhs.id
+        return lhs.id == rhs.id &&
+        lhs.videoThumbnail == rhs.videoThumbnail &&
+        lhs.selectedOrder == rhs.selectedOrder
     }
     
     init(phAsset: PHAsset, videoThumbnail: UIImage? = nil,

@@ -25,14 +25,13 @@ struct CustomGalleryReducer {
         
         var selectedIndex: Int?
         var prevIndex: Int?
-        var updatingIndexPaths: [IndexPath] = []
         var isThumbnailRequestInFlight: Bool = false
         var selectedAsset: PHAsset?
         
         let cellImageSize: CGSize = {
             let screenWidth = UIScreen.main.bounds.width
             let screenHeight = UIScreen.main.bounds.height
-            let width = screenWidth / 4
+            let width = screenWidth / 2
             return CGSize(width: width, height: width)
         }()
         
@@ -65,29 +64,26 @@ struct CustomGalleryReducer {
         case updateCell(IndexPath, SelectionOrder)
         case updateSelectionState(IndexPath, PhotoCellInfo)
         case finishSelection
-        case clearUpdatingIndexPaths
         case saveSelectedVideoInfo(PHAsset)
-
+        
         //대표이미지 로드 및 비디오 데이터 저장
         case highQualityThumbnailLoaded(UIImage)
-        case videoURLLoaded(PhotoCellInfo)
         case loadCellImage(indexPath: IndexPath, item: PhotoCellInfo)
-        case thumbnailLoaded(IndexPath, UIImage)
-        case assignVideoData(Data?)
+        case cellImageLoaded(IndexPath, UIImage)
         case cancelThumbnailLoad
         case startThumbnailLoad
         
         //화면 전환 시 기본값 설정
         case setDefaults
     }
-
-    @Dependency(\.photoService) var photoService
-    @Dependency(\.albumService) var albumService
-    @Dependency(\.photoAuthService) var photoAuthService
-        
+    
     private enum CancelID {
         case thumbnailRequest
     }
+    
+    @Dependency(\.photoService) var photoService
+    @Dependency(\.albumService) var albumService
+    @Dependency(\.photoAuthService) var photoAuthService
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -169,14 +165,10 @@ struct CustomGalleryReducer {
                 guard indexPath.item < state.dataSource.count else {
                     return .none
                 }
-
+                
                 let cellInfo = state.dataSource[indexPath.item]
                 
                 return .concatenate(
-                    Effect.run { send in
-                        await send(.updateSelectionState(indexPath, cellInfo))
-                    },
-                    
                     Effect.run { [processState = state.isThumbnailRequestInFlight] send in
                         if processState == true {
                             await send(.cancelThumbnailLoad)
@@ -185,7 +177,7 @@ struct CustomGalleryReducer {
                     
                     Effect.run { [size = state.thumbnailImageSize] send in
                         await send(.startThumbnailLoad)
-
+                        
                         if let thumbnail = await photoService.fetchHighQualityImage(
                             phAsset: cellInfo.phAsset,
                             size: size,
@@ -194,24 +186,72 @@ struct CustomGalleryReducer {
                         ) {
                             await send(.highQualityThumbnailLoaded(thumbnail))
                             await send(.saveSelectedVideoInfo(cellInfo.phAsset))
-                            //TODO: 최종 쇼츠 비디오 데이터만 변환 후 다음 화면으로 넘기기
-                            //await send(.videoURLLoaded(cellInfo))
                         }
+                        
                         await send(.finishSelection)
                     }.cancellable(id: CancelID.thumbnailRequest)
+                    ,
+                    
+                    Effect.run { send in
+                        await send(.updateSelectionState(indexPath, cellInfo))
+                    }
                 )
-            
+                
             case .startThumbnailLoad:
                 state.isThumbnailRequestInFlight = true
                 return .none
                 
             case .finishSelection:
-                 state.isThumbnailRequestInFlight = false
+                state.isThumbnailRequestInFlight = false
+                return .none
+                
+            case let .updateSelectionState(indexPath, info):
+                return .run { send in
+                    await send(.updateCell(indexPath, info.selectedOrder))
+                }
+                
+            case let .updateCell(indexPath, selectedOrder):
+                switch selectedOrder {
+                case .selected:
+                    //update cell
+                    guard indexPath.item < state.dataSource.count else {
+                        return .none
+                    }
+                    
+                    var item = state.dataSource[indexPath.item]
+                    item.selectedOrder = .none
+                    state.dataSource[indexPath.item] = item
+                    
+                    //데이터 리프레싱을 위한 작업
+                    state.selectedIndex = indexPath.item
+                    
+                case .none:
+                    if let prevIndex = state.prevIndex {
+                        guard prevIndex < state.dataSource.count else {
+                            return .none
+                        }
+                        
+                        var item = state.dataSource[prevIndex]
+                        item.selectedOrder = .none
+                        state.dataSource[prevIndex] = item
+                    }
+                    
+                    state.selectedIndex = indexPath.item
+                    
+                    guard indexPath.item < state.dataSource.count else {
+                        return .none
+                    }
+                    
+                    var item = state.dataSource[indexPath.item]
+                    item.selectedOrder = .selected
+                    state.dataSource[indexPath.item] = item
+                    state.prevIndex = state.selectedIndex
+                }
+                
                 return .none
                 
                 //MARK: Thumbnail Image
             case .cancelThumbnailLoad:
-                print("cancleVideoLoadTask--------------------------------------")
                 state.isThumbnailRequestInFlight = false
                 return .cancel(id: CancelID.thumbnailRequest)
                 
@@ -223,92 +263,24 @@ struct CustomGalleryReducer {
                 state.selectedAsset = phAsset
                 return .none
                 
-            case let .videoURLLoaded(info):
-                return .run { send in
-                    let videoData = await photoService.fetchVideoData(from: info.phAsset)
-                  //  await send(.assignVideoData(videoData))
-                }
-                
-            case .assignVideoData(let data):
-                state.selectedVideoData = data
-                return .none
-                
-            case let .updateSelectionState(indexPath, info):
-                return .concatenate(
-                    Effect.run { send in
-                        await send(.updateCell(indexPath, info.selectedOrder))
-                    },
-                    
-                    Effect.run(operation: { send in
-                        await send(.clearUpdatingIndexPaths)
-                    })
-                )
-                
-            case let .updateCell(indexPath, selectedOrder):
-                switch selectedOrder {
-                case .selected:
-                    //update cell
-                    guard indexPath.item < state.dataSource.count else {
-                        return .none
-                    }
-                    
-                    let item = state.dataSource[indexPath.item]
-                    item.selectedOrder = .none
-                    state.dataSource[indexPath.item] = item
-                    
-                    //데이터 리프레싱을 위한 작업
-                    state.selectedIndex = indexPath.item
-                    state.updatingIndexPaths.append(indexPath)
-                    
-                case .none:
-                    if let prevIndex = state.prevIndex {
-                        guard prevIndex < state.dataSource.count else {
-                            return .none
-                        }
-                        
-                        let item = state.dataSource[prevIndex]
-                        item.selectedOrder = .none
-                        state.dataSource[prevIndex] = item
-                        state.updatingIndexPaths.append(IndexPath(item: prevIndex, section: 0))
-                    }
-                    
-                    state.selectedIndex = indexPath.item
-                    
-                    guard indexPath.item < state.dataSource.count else {
-                        return .none
-                    }
-                    
-                    let item = state.dataSource[indexPath.item]
-                    item.selectedOrder = .selected
-                    state.dataSource[indexPath.item] = item
-                    state.prevIndex = state.selectedIndex
-                }
-                
-                return .none
-                
-            case .clearUpdatingIndexPaths:
-                state.updatingIndexPaths = []
-                return .none
-                
             case let .loadCellImage(indexPath, item):
                 return .run { [size = state.cellImageSize] send in
-                    if let thumbnail = await photoService.fetchVideo(
+                    if let cellImage = await photoService.fetchVideo(
                         phAsset: item.phAsset,
                         size: size,
                         contentMode: .aspectFit,
-                        deliveryMode: .automatic
+                        deliveryMode: .mediumQualityFormat
                     ) {
-                        await send(.thumbnailLoaded(indexPath, thumbnail))
+                        await send(.cellImageLoaded(indexPath, cellImage))
                     }
                 }
                 
-            case let .thumbnailLoaded(indexPath, thumbnail):
+            case let .cellImageLoaded(indexPath, cellImage):
                 guard indexPath.item < state.dataSource.count else { return .none }
                 
-                let updatedItem = state.dataSource[indexPath.item]
-                updatedItem.videoThumbnail = thumbnail
+                var updatedItem = state.dataSource[indexPath.item]
+                updatedItem.videoThumbnail = cellImage
                 state.dataSource[indexPath.item] = updatedItem
-                state.loadedIndexPath = indexPath
                 
                 return .none
                 

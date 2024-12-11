@@ -145,32 +145,6 @@ final class PhotoViewController: UIViewController {
                 self?.updateItems(items)
             }
             .store(in: &cancellables)
-        
-        //TODO: 수정 필요
-//        store.publisher.updatingIndexPaths
-//            .receive(on: DispatchQueue.main)
-//            .removeDuplicates()
-//            .sink { [weak self] paths in
-//                if paths == [] {
-//                    print("updatingIndexPaths is empty")
-//                    return
-//                }
-//                
-//                self?.updateCells(paths)
-//            }
-//            .store(in: &cancellables)
-        
-//        store.publisher.loadedIndexPath
-//            .receive(on: DispatchQueue.main)
-//            .removeDuplicates()
-//            .sink { [weak self] path in
-//                guard let path = path else {
-//                    return
-//                }
-//                
-//                self?.updateCells([path])
-//            }
-//            .store(in: &cancellables)
     }
     
     // MARK: - Private Methods
@@ -201,11 +175,6 @@ final class PhotoViewController: UIViewController {
                 }
             }
         }
-    }
-    
-    private func calculateImageSize() -> CGSize {
-        return CGSize(width: Const.cellSize.width * Const.scale,
-                      height: Const.cellSize.height * Const.scale)
     }
 }
 
