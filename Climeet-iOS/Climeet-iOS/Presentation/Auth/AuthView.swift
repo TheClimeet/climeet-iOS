@@ -13,33 +13,38 @@ struct AuthView: View {
     @Bindable var store: StoreOf<AuthReducer>
     
     var body: some View {
-        VStack(spacing: 83) {
-            Image(.authLogo)
-            
-            VStack(spacing: 22) {
-                kakaoBtn()
-                    .overlay {
-                        TooltipView(
-                            alignment: .top,
-                            isVisible: .constant(true),
-                            xPadding: 0,
-                            yPadding: 14
-                        ) {
-                            HStack {
-                                Image(.authTooltipIcon)
-                                
-                                Text("3초만에 로그인하세요")
-                                    .foregroundStyle(.black)
+        NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
+            VStack(spacing: 83) {
+                Image(.authLogo)
+                
+                VStack(spacing: 22) {
+                    kakaoBtn()
+                        .overlay {
+                            TooltipView(
+                                alignment: .top,
+                                isVisible: .constant(true),
+                                xPadding: 0,
+                                yPadding: 14
+                            ) {
+                                HStack {
+                                    Image(.authTooltipIcon)
+                                    
+                                    Text("3초만에 로그인하세요")
+                                        .foregroundStyle(.black)
+                                }
                             }
                         }
-                    }
-                
-                naverBtn()
+                    naverBtn()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.text09)
+        } destination: { store in
+            switch store.case {
+            case .setNickname(let store):
+                SetNicknameView(store: store)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.text09)
-        .toolbar(.hidden, for: .automatic)
     }
 }
 
