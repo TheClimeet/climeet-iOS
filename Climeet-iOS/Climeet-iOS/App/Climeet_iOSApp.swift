@@ -11,6 +11,7 @@ import DesignSystem
 import KakaoSDKCommon
 import KakaoSDKAuth
 import NaverThirdPartyLogin
+import Alamofire
 import NetworkKit
 
 @main
@@ -20,7 +21,6 @@ struct ClimeetiOSApp: App {
         KeyChain.shared.refreshToken = Env.MASTER_TOKEN // 테스트 값 설정
 //        print(KeyChain.shared.refreshToken) // 값 읽어오기
 //        KeyChain.shared.deleteRefreshToken() // 리프레시 토큰 초기화(테스트메서드)
-        configureAPIClient()
         applyGlobalNavigationTitleAttributes()
         KakaoSDK.initSDK(appKey: Env.KAKAO_APP_KEY)
         initNaver()
@@ -65,9 +65,5 @@ struct ClimeetiOSApp: App {
         instance?.consumerKey = Env.NAVER_CLIENT_ID
         instance?.consumerSecret = Env.NAVER_CLIENT_SECRET
         instance?.appName = "Climeet"
-    }
-    
-    func configureAPIClient() {
-        APIClient.shared.configure(tokenRefresher: TokenRefresher())
     }
 }
