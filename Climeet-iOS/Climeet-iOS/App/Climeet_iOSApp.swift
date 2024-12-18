@@ -17,7 +17,6 @@ struct ClimeetiOSApp: App {
         KeyChain.shared.refreshToken = Env.MASTER_TOKEN // 테스트 값 설정
 //        print(KeyChain.shared.refreshToken) // 값 읽어오기
 //        KeyChain.shared.deleteRefreshToken() // 리프레시 토큰 초기화(테스트메서드)
-        configureAPIClient()
         applyGlobalNavigationTitleAttributes()
     }
     
@@ -33,9 +32,5 @@ struct ClimeetiOSApp: App {
 //            .font: UIFont(name: "Pretendard-Bold", size: 18)!
             // Font.climeetFontTitle4 해당함
         ]
-    }
-    
-    func configureAPIClient() {
-        APIClient.shared.configure(tokenRefresher: TokenRefresher())
     }
 }
