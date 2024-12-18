@@ -71,7 +71,7 @@ struct ShortsGymRoutesReducer {
                 state.isSelectionDone = false
                 return .none
                 
-            case .doneSelection :
+            case .doneSelection:
                 state.isSelectionDone = true
                 return .none
                 
@@ -84,4 +84,3 @@ struct ShortsGymRoutesReducer {
         }
     }
 }
-

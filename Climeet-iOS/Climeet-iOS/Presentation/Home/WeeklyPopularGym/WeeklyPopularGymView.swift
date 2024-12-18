@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
+import Kingfisher
 
 enum SortBy {
     case follower
@@ -22,8 +24,10 @@ enum SortBy {
 }
 
 struct WeeklyPopularGymView: View {
+    @Bindable var store: StoreOf<WeeklyPopularGymReducer>
     @State private var selectedTab: SortBy = .follower
-    
+    @State private var scrollTarget: Int?
+
     var body: some View {
         VStack(spacing: 0) {
             header
@@ -33,6 +37,9 @@ struct WeeklyPopularGymView: View {
                 .padding(.leading, 16)
                 .padding(.bottom, 15)
             gymIcons
+        }
+        .onFirstAppear {
+            store.send(.onFirstAppear)
         }
     }
     
@@ -56,6 +63,10 @@ struct WeeklyPopularGymView: View {
                     RoundedRectangle(cornerRadius: 5)
                         .foregroundStyle(selectedTab == .follower ? Color.climeetMain : Color.text06_5)
                 }
+                .onTapGesture {
+                    scrollTarget = 1
+                    selectedTab = .follower
+                }
             
             Text("기록순")
                 .font(.climeetFontCaptionText3())
@@ -65,28 +76,78 @@ struct WeeklyPopularGymView: View {
                     RoundedRectangle(cornerRadius: 5)
                         .foregroundStyle(selectedTab == .record ? Color.climeetMain : Color.text06_5)
                 }
+                .onTapGesture {
+                    scrollTarget = 1
+                    selectedTab = .record
+                }
             Spacer()
         }
     }
     
     private var gymIcons: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: 8) {
-                ForEach(0..<6, id: \.self) { _ in
-                    GymIcon()
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal) {
+                switch selectedTab {
+                case .follower:
+                    if store.bestFollowGym.isEmpty {
+                        Text("암장 정보가 없습니다")
+                            .frame(height: 134)
+                            .foregroundStyle(.white)
+                    } else {
+                        HStack(spacing: 8) {
+                            ForEach(store.bestFollowGym) { gymInfo in
+                                GymIcon(
+                                    rank: gymInfo.rank,
+                                    profileImageURL: gymInfo.profileImageURL,
+                                    gymName: gymInfo.name,
+                                    description: "팔로워 \(gymInfo.followerCount)"
+                                )
+                                .id(gymInfo.rank)
+                            }
+                        }
+                    }
+                case .record:
+                    if store.bestRecordGym.isEmpty {
+                        Text("암장 정보가 없습니다")
+                            .frame(height: 134)
+                            .foregroundStyle(.white)
+                    } else {
+                        HStack(spacing: 8) {
+                            ForEach(store.bestRecordGym) { gymInfo in
+                                GymIcon(
+                                    rank: gymInfo.rank,
+                                    profileImageURL: gymInfo.profileImageURL,
+                                    gymName: gymInfo.name,
+                                    description: "기록 \(gymInfo.selectionCount)"
+                                )
+                                .id(gymInfo.rank)
+                            }
+                        }
+                    }
+                }
+            }
+            .contentMargins(.horizontal, 16)
+            .onChange(of: scrollTarget) { oldValue, newValue in
+                if let target = newValue {
+                    scrollTarget = nil
+                    proxy.scrollTo(target, anchor: .center)
                 }
             }
         }
-        .contentMargins(.horizontal, 16)
     }
 }
 
 fileprivate
 struct GymIcon: View {
+    let rank: Int
+    let profileImageURL: String
+    let gymName: String
+    let description: String
+    
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("1")
+                Text("\(rank)")
                     .font(.climeetFontCaptionText3())
                     .foregroundStyle(Color.text00)
                     .padding(.horizontal, 3)
@@ -100,21 +161,28 @@ struct GymIcon: View {
             .padding(.leading, 5)
             .padding(.top, 7)
             .padding(.bottom, 8)
-            Image(.activitytabEllipse)
+            KFImage(URL(string: profileImageURL))
+                .placeholder {
+                    Circle()
+                        .foregroundStyle(.gray)
+                        .frame(width: 45, height: 45)
+                }
                 .resizable()
                 .scaledToFit()
                 .frame(width: 45, height: 45)
                 .padding(.bottom, 10)
                 .padding(.horizontal, 24)
-            Text("더클라임 연남")
+            Text(gymName)
                 .font(.climeetFontCaptionText2())
                 .foregroundStyle(Color.text01)
                 .padding(.bottom, 4)
-            Text("팔로워 20202")
+            
+            Text(description)
                 .font(.climeetFontCaptionText3())
                 .foregroundStyle(Color.text01)
                 .padding(.bottom, 18)
         }
+        .frame(width: 94, height: 134)
         .background {
             RoundedRectangle(cornerRadius: 5)
                 .foregroundStyle(Color.text07)
@@ -123,6 +191,9 @@ struct GymIcon: View {
 }
 
 #Preview {
-    WeeklyPopularGymView()
+    let store = Store(initialState: WeeklyPopularGymReducer.State()) {
+        WeeklyPopularGymReducer()
+    }
+    WeeklyPopularGymView(store: store)
         .background(Color.climeetBackground)
 }
