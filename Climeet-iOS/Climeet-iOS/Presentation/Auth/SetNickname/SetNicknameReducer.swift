@@ -11,36 +11,70 @@ import ComposableArchitecture
 @Reducer
 struct SetNicknameReducer {
     @Dependency(\.dismiss) var dismiss
+    @Dependency(\.climberClient) var climberClient
+    @Dependency(\.validateService) var validateService
     
     @Reducer(state: .equatable)
     enum Path {
 //        case setNickname(SetNicknameReducer)
     }
+    
+    enum WarningText: String {
+        case invalid = "닉네임을 규칙에 따라 지어주세요."
+        case enable = "사용 가능한 닉네임입니다."
+        case duplicate = "중복된 닉네임 입니다."
+        case none = ""
+    }
 
     @ObservableState
     struct State: Equatable {
         var nickname: String = ""
-        var isEnabledNext: Bool = false
+        var isValidNickname: Bool = true
+        var warningText: WarningText = .none
         var path = StackState<Path.State>()
+        
+        var isEnabledNextButton: Bool { isValidNickname && warningText == .enable }
     }
     
     enum Action {
         case updateNickname(String)
         case duplicateBtnTap
+        case checkNicknameResponse(TaskResult<Bool>)
         case nextBtnTap
         case path(StackActionOf<Path>)
         case pop
     }
     
+    private enum CancelID { case checkNickname }
+    
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .updateNickname(var nickname):
+            case .updateNickname(let nickname):
                 state.nickname = nickname
+                state.warningText = .none
+                state.isValidNickname = true
                 return .none
             case .duplicateBtnTap:
+                guard self.validateService.isValidNickname(state.nickname) else {
+                    state.isValidNickname = false
+                    state.warningText = .invalid
+                    return .none
+                }
+                return .run { [nickname = state.nickname] send in
+                    let response = try await self.climberClient.checkNickname(nickname)
+                    await send(.checkNicknameResponse(TaskResult { response }))
+                }
+                .cancellable(id: CancelID.checkNickname)
+            case .checkNicknameResponse(.success(let isDuplicated)):
+                state.warningText = isDuplicated ? .enable : .duplicate
+                return .none
+            case .checkNicknameResponse(.failure(let error)):
+                Log.debug("API fail", error)
                 return .none
             case .nextBtnTap:
+                guard state.isEnabledNextButton else { return .none }
+//                state.path.append(<#T##newElement: Path.State##Path.State#>)
                 return .none
             case .path:
                 return .none

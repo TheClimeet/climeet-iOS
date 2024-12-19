@@ -18,13 +18,21 @@ struct SetNicknameView: View {
         VStack(alignment: .leading, spacing: 48) {
             headerSection()
             
-            NicknameTextField(
-                text: $nickname,
-                btnAction: { store.send(.duplicateBtnTap) }
-            )
-            .onChange(of: nickname) { _, newValue in
-                nickname = String(newValue.prefix(8))
-                store.send(.updateNickname(nickname))
+            VStack(alignment: .leading, spacing: 10) {
+                NicknameTextField(
+                    text: $nickname,
+                    isValidNickname: store.isValidNickname,
+                    btnAction: { store.send(.duplicateBtnTap) }
+                )
+                .onChange(of: nickname) { _, newValue in
+                    nickname = String(newValue.prefix(8))
+                    store.send(.updateNickname(nickname))
+                }
+                
+                Text(store.warningText.rawValue)
+                    .font(.climeetFontParagraph6())
+                    .foregroundStyle(store.warningText == .enable ? Color.climeetMain : Color.errorText)
+                    .padding(.leading, 12)
             }
             
             Spacer()
@@ -69,6 +77,7 @@ extension SetNicknameView {
     
     struct NicknameTextField: View {
         @Binding var text: String
+        var isValidNickname: Bool
         var btnAction: () -> Void
         
         private var isEmptyText: Bool { text.count > 0 }
@@ -95,31 +104,41 @@ extension SetNicknameView {
                     .fill(Color.text06)
             )
             .overlay(alignment: .trailing) {
-                Button {
-                    btnAction()
-                } label: {
-                    Text("중복확인")
-                        .font(.climeetFontCaptionText3())
-                        .foregroundStyle(btnTextColor)
+                if isValidNickname {
+                    duplicButton()
+                } else {
+                    Image(.errorOutline)
+                        .padding(.trailing, 5)
                 }
-                .padding(.horizontal, 12)
-                .frame(height: 32)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(btnBGColor)
-                )
-                .padding(.trailing, 5)
             }
+        }
+        
+        @ViewBuilder
+        private func duplicButton() -> some View {
+            Button {
+                btnAction()
+            } label: {
+                Text("중복확인")
+                    .font(.climeetFontCaptionText3())
+                    .foregroundStyle(btnTextColor)
+            }
+            .padding(.horizontal, 12)
+            .frame(height: 32)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(btnBGColor)
+            )
+            .padding(.trailing, 5)
         }
     }
     
     @ViewBuilder
     private func nextButton() -> some View {
         var bgColor: Color {
-            store.isEnabledNext ? Color.climeetMain : Color.grayButton
+            store.isEnabledNextButton ? Color.climeetMain : Color.grayButton
         }
         var arrowColor: Color {
-            store.isEnabledNext ? Color.levelBlack : Color.levelWhite
+            store.isEnabledNextButton ? Color.levelBlack : Color.levelWhite
         }
         Button {
             store.send(.nextBtnTap)
