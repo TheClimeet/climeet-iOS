@@ -76,7 +76,7 @@ extension ClimberClient: DependencyKey {
         },
         login: { param in
             let endPoint = ClimberEndPoint.login(param)
-            return try await APIClient.shared.request(endPoint, decode: SignResponse.self)
+            return try await APIClient(session: .default, tokenRefresher: nil).request(endPoint, decode: SignResponse.self)
         }
     )
 }

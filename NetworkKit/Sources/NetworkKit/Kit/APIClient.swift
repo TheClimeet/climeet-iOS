@@ -4,12 +4,19 @@ import Alamofire
 public final class APIClient: APIProtocol, @unchecked Sendable {
     private let session: Session
     
-    public init(session: Session, tokenRefresher: TokenRefreshable) {
-        self.session = Session(
-            configuration: session.sessionConfiguration,
-            interceptor: APIInterceptor(tokenRefresher: tokenRefresher),
-            eventMonitors: [APILogger()]
-        )
+    public init(session: Session, tokenRefresher: TokenRefreshable?) {
+        if let tokenRefresher {
+            self.session = Session(
+                configuration: session.sessionConfiguration,
+                interceptor: APIInterceptor(tokenRefresher: tokenRefresher),
+                eventMonitors: [APILogger()]
+            )
+        } else {
+            self.session = Session(
+                configuration: session.sessionConfiguration,
+                eventMonitors: [APILogger()]
+            )
+        }
     }
     
     public func request<T: Decodable>(_ endpoint: Endpoint, decode: T.Type) async throws -> T {
