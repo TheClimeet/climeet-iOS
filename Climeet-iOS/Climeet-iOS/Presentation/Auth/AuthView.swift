@@ -8,6 +8,7 @@
 import SwiftUI
 import ComposableArchitecture
 import DesignSystem
+import AuthenticationServices
 
 struct AuthView: View {
     @Bindable var store: StoreOf<AuthReducer>
@@ -35,6 +36,8 @@ struct AuthView: View {
                             }
                         }
                     naverBtn()
+                    
+                    appleBtn()
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -51,46 +54,85 @@ struct AuthView: View {
 extension AuthView {
     @ViewBuilder
     private func kakaoBtn() -> some View {
-        Button {
-            self.store.send(.kakaoBtnDidTap)
-        } label: {
-            HStack {
-                Image(.kakaoLogo)
-                
-                Text("카카오 아이디로 시작하기")
-                    .font(.climeetFontTitle3())
-                    .foregroundStyle(.black)
-            }
-            .padding(.vertical, 10)
-            .frame(maxWidth: .infinity)
-            
-        }
-        .buttonStyle(.borderedProminent)
-        .buttonBorderShape(.roundedRectangle(radius: 8))
-        .tint(Color(hex: "#FAE100"))
-        .padding(.horizontal, 14)
+        SocialButton(
+            text: "카카오 아이디로 시작하기",
+            textColor: .levelBlack,
+            image: .kakaoLogo,
+            bgColor: Color(hex: "#FAE100"),
+            action: { self.store.send(.kakaoBtnDidTap) }
+        )
     }
     
     @ViewBuilder
     private func naverBtn() -> some View {
-        Button {
-            self.store.send(.naverBtnDidTap)
-        } label: {
-            HStack {
-                Image(.naverLogo)
-                
-                Text("네이버 아이디로 시작하기")
-                    .font(.climeetFontTitle3())
-                    .foregroundStyle(.white)
+        SocialButton(
+            text: "네이버 아이디로 시작하기",
+            textColor: .levelWhite,
+            image: .naverLogo,
+            bgColor: Color(hex: "#03C75A"),
+            action: { self.store.send(.naverBtnDidTap) }
+        )
+    }
+    
+    @ViewBuilder
+    private func appleBtn() -> some View {
+        SocialButton(
+            text: "애플 아이디로 시작하기",
+            textColor: .levelWhite,
+            image: .appleLogo,
+            bgColor: .levelBlack,
+            action: {  }
+        )
+        .overlay {
+            SignInWithAppleButton { request in
+                request.requestedScopes = [.email]
+            } onCompletion: { result in
+                switch result {
+                case .success(let auth):
+                    switch auth.credential {
+                    case let appleIDCredential as ASAuthorizationAppleIDCredential:
+                        store.send(.appleBtnDidTap(idToken: appleIDCredential.identityToken))
+                    default:
+                        break
+                    }
+                case .failure(let error):
+                    break
+                }
             }
-            .padding(.vertical, 10)
-            .frame(maxWidth: .infinity)
-            
+            .blendMode(.overlay)
+            .padding(.horizontal, 14)
         }
-        .buttonStyle(.borderedProminent)
-        .buttonBorderShape(.roundedRectangle(radius: 8))
-        .tint(Color(hex: "#03C75A"))
-        .padding(.horizontal, 14)
+    }
+    
+    struct SocialButton: View {
+        var text: String
+        var textColor: Color
+        var image: ImageResource
+        var bgColor: Color?
+        var action: () -> Void
+        
+        var body: some View {
+            Button {
+                action()
+            } label: {
+                HStack {
+                    Image(image)
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                    
+                    Text(text)
+                        .font(.climeetFontTitle3())
+                        .foregroundStyle(textColor)
+                }
+                .padding(.vertical, 10)
+                .frame(maxWidth: .infinity)
+                
+            }
+            .buttonStyle(.borderedProminent)
+            .buttonBorderShape(.roundedRectangle(radius: 8))
+            .tint(bgColor)
+            .padding(.horizontal, 14)
+        }
     }
 }
 

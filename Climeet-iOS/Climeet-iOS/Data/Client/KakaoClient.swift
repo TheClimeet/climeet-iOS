@@ -12,7 +12,6 @@ import KakaoSDKCommon
 
 struct KakaoClient {
     var login: @MainActor @Sendable () async -> Result<String, AppError>
-    var me: @Sendable () async -> Result<KakaoDTO.Response, AppError>
 }
 
 extension KakaoClient {
@@ -39,19 +38,6 @@ extension KakaoClient {
             }
         }
     }
-    
-    private static func myInfo() async throws -> User {
-        return try await withCheckedThrowingContinuation { continuation in
-            UserApi.shared.me { user, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                }
-                if let user {
-                    continuation.resume(returning: user)
-                }
-            }
-        }
-    }
 }
 
 extension KakaoClient: DependencyKey {
@@ -62,25 +48,6 @@ extension KakaoClient: DependencyKey {
                 return .success(oAuthToken)
             } catch {
                 return .failure(AppError.dataParsingError("Kakao OAuthToken 호출 실패"))
-            }
-        },
-        me: {
-            do {
-                let user: User = try await KakaoClient.myInfo()
-                let birthYear = user.kakaoAccount?.birthyear ?? ""
-                let birthDay = user.kakaoAccount?.birthday ?? ""
-                return .success(KakaoDTO.Response(
-                    id: user.id,
-                    imageURL: user.kakaoAccount?.profile?.profileImageUrl?.absoluteString,
-                    name: user.kakaoAccount?.name,
-                    nickname: user.kakaoAccount?.profile?.nickname,
-                    email: user.kakaoAccount?.email,
-                    birthDay: birthYear + birthDay,
-                    gender: user.kakaoAccount?.gender?.rawValue,
-                    phoneNumber: user.kakaoAccount?.phoneNumber
-                ))
-            } catch {
-                return .failure(AppError.dataParsingError("Kakao User Profile 호출 실패"))
             }
         }
     )

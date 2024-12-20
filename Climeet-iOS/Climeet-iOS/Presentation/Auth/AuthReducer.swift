@@ -12,6 +12,7 @@ import ComposableArchitecture
 struct AuthReducer {
     @Dependency(\.kakaoClient) var kakaoClient
     @Dependency(\.userClient) var userClient
+    @Dependency(\.climberClient) var climberClient
     let naverClinet: NaverRepository = .init()
     
     @Reducer(state: .equatable)
@@ -21,17 +22,17 @@ struct AuthReducer {
 
     @ObservableState
     struct State: Equatable {
-        var token: String? = nil
-        
         var path = StackState<Path.State>()
     }
     
     enum Action {
         case kakaoBtnDidTap
         case naverBtnDidTap
+        case appleBtnDidTap(idToken: Data?)
         case kakaoLoginResponse(Result<String, AppError>)
-        case kakaoProfileResponse(Result<KakaoDTO.Response, AppError>)
         
+        case climeetLoginRequest(provider: SocialType, accessToken: String)
+        case climeetLoginResponse(Result<SignResponse, AppError>)
         case path(StackActionOf<Path>)
     }
     
@@ -49,22 +50,45 @@ struct AuthReducer {
                 }
                 .cancellable(id: CancelID.kakaoLogin)
             case .naverBtnDidTap:
-                return .run { _ in
-                    naverClinet.login()
-                }
-            case .kakaoLoginResponse(.success(let oAuthToken)):
-                Log.debug("KakaoLogin API Success\n Token:", oAuthToken)
-                state.token = oAuthToken
                 return .run { send in
-                    let profile = await kakaoClient.me()
-                    await send(.kakaoProfileResponse(profile))
+                    naverClinet.login()
+                    naverClinet.accessToken = { accessToken in
+                        guard let accessToken else { return }
+                        await send(.climeetLoginRequest(provider: .naver, accessToken: accessToken))
+                    }
                 }
-            case .kakaoProfileResponse(.success(let userData)):
-                Log.debug("KakaoProfile API Success\n userData:", userData)
-                state.path.append(.setNickname(SetNicknameReducer.State()))
+            case .appleBtnDidTap(let idToken):
+                guard let idToken, let idTokenString = String(data: idToken, encoding: .utf8) else { return .none }
+                return .send(.climeetLoginRequest(provider: .apple, accessToken: idTokenString))
+            case .kakaoLoginResponse(.success(let accessToken)):
+                Log.debug("KakaoLogin API Success\n Token:", accessToken)
+                return .send(.climeetLoginRequest(provider: .kakao, accessToken: accessToken))
+            case .climeetLoginRequest(let provider, let accessToken):
+                return .run { send in
+                    let response = try await self.climberClient.login(.init(
+                        provider: provider,
+                        accessToken: accessToken
+                    ))
+                    await send(.climeetLoginResponse(Result { response }))
+                }
+            case .climeetLoginResponse(.success(let response)):
+                switch response.responseType {
+                case .SIGN_IN:
+                    // TODO: Global State move mainView
+                    Log.debug("move to Main")
+                case .SIGN_UP:
+                    Log.debug("move to SetNickname")
+                    guard let accessToken = response.accessToken else { return .none }
+                    state.path.append(.setNickname(SetNicknameReducer.State(
+                        accessToken: accessToken
+                    )))
+                case .none:
+                    Log.debug("SERVER API ERROR")
+                }
+                KeyChain.shared.refreshToken = response.refreshToken
                 return .none
             case .kakaoLoginResponse(.failure(let error)),
-                    .kakaoProfileResponse(.failure(let error)):
+                    .climeetLoginResponse(.failure(let error)):
                 Log.debug("API fail", error)
                 return .none
             case .path:
@@ -72,16 +96,5 @@ struct AuthReducer {
             }
         }
         .forEach(\.path, action: \.path)
-    }
-}
-
-extension AuthReducer: NaverDelegate {
-    func naverUserInfo(_ response: Result<NaverDTO.Response, AppError>) {
-        switch response {
-        case .success(let success):
-            break
-        case .failure(let failure):
-            break
-        }
     }
 }

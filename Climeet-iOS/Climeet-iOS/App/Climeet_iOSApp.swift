@@ -18,9 +18,6 @@ import NetworkKit
 struct ClimeetiOSApp: App {
     
     init() {
-        KeyChain.shared.refreshToken = Env.MASTER_TOKEN // 테스트 값 설정
-//        print(KeyChain.shared.refreshToken) // 값 읽어오기
-//        KeyChain.shared.deleteRefreshToken() // 리프레시 토큰 초기화(테스트메서드)
         applyGlobalNavigationTitleAttributes()
         KakaoSDK.initSDK(appKey: Env.KAKAO_APP_KEY)
         initNaver()
@@ -56,10 +53,8 @@ struct ClimeetiOSApp: App {
         instance?.isNaverAppOauthEnable = true
         // 브라우저 로그인 허용
         instance?.isInAppOauthEnable = true
-        
         // 네이버 로그인 세로모드 고정
         instance?.setOnlyPortraitSupportInIphone(true)
-        
         // NaverThirdPartyConstantsForApp.h에 선언한 상수 등록
         instance?.serviceUrlScheme = "com.climeet.climeet"
         instance?.consumerKey = Env.NAVER_CLIENT_ID

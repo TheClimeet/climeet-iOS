@@ -159,7 +159,7 @@ extension SetNicknameView {
 
 #Preview {
     SetNicknameView(store: Store(
-        initialState: .init(),
+        initialState: .init(accessToken: ""),
         reducer: {
             SetNicknameReducer()
     }))

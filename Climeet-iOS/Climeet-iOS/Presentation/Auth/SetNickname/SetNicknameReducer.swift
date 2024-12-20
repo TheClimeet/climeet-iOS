@@ -28,6 +28,7 @@ struct SetNicknameReducer {
 
     @ObservableState
     struct State: Equatable {
+        var accessToken: String
         var nickname: String = ""
         var isValidNickname: Bool = true
         var warningText: WarningText = .none
@@ -39,7 +40,7 @@ struct SetNicknameReducer {
     enum Action {
         case updateNickname(String)
         case duplicateBtnTap
-        case checkNicknameResponse(TaskResult<Bool>)
+        case checkNicknameResponse(Result<Bool, AppError>)
         case nextBtnTap
         case path(StackActionOf<Path>)
         case pop
@@ -63,7 +64,7 @@ struct SetNicknameReducer {
                 }
                 return .run { [nickname = state.nickname] send in
                     let response = try await self.climberClient.checkNickname(nickname)
-                    await send(.checkNicknameResponse(TaskResult { response }))
+                    await send(.checkNicknameResponse(Result { response }))
                 }
                 .cancellable(id: CancelID.checkNickname)
             case .checkNicknameResponse(.success(let isDuplicated)):
