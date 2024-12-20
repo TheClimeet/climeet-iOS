@@ -20,7 +20,11 @@ final class APIInterceptor: RequestInterceptor {
         let token = tokenRefresher.readToken()
         
         guard !token.isEmpty else {
-            completion(.failure(APIError(errorCode: "401 Token Error", message: "Token Missing")))
+            completion(.failure(APIError(
+                statusCode: 401,
+                errorCode: "401 Token Error",
+                message: "Token Missing"
+            )))
             return
         }
         
@@ -34,7 +38,11 @@ final class APIInterceptor: RequestInterceptor {
     }
     
     func retry(_ request: Request, for session: Session, dueTo error: any Error, completion: @escaping @Sendable (RetryResult) -> Void) {
-        
+        guard let response = request.task?.response as? HTTPURLResponse,
+              response.statusCode == 401 else {
+            completion(.doNotRetryWithError(error))
+            return
+        }
         let retryLimit = 3
         guard request.retryCount < retryLimit else {
             completion(.doNotRetry)
