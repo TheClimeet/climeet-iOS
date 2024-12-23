@@ -16,7 +16,7 @@ struct SetNicknameReducer {
     
     @Reducer(state: .equatable)
     enum Path {
-//        case setNickname(SetNicknameReducer)
+        case setProfile(SetProfileReducer)
     }
     
     enum WarningText: String {
@@ -75,7 +75,10 @@ struct SetNicknameReducer {
                 return .none
             case .nextBtnTap:
                 guard state.isEnabledNextButton else { return .none }
-//                state.path.append(<#T##newElement: Path.State##Path.State#>)
+                state.path.append(.setProfile(.init(
+                    accessToken: state.accessToken,
+                    nickname: state.nickname
+                )))
                 return .none
             case .path:
                 return .none
@@ -83,7 +86,6 @@ struct SetNicknameReducer {
                 return .run { _ in
                     await self.dismiss()
                 }
-            
             }
         }
         .forEach(\.path, action: \.path)
