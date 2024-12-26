@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import DesignSystem
 
 struct CutomAccessSelectToggle: View {
     let index: Int
@@ -25,12 +26,12 @@ struct CutomAccessSelectToggle: View {
         }) {
             ZStack(alignment: .center) {
                 Circle()
-                    .stroke(.climeetMain, lineWidth: 5)
-                    .fill(.climeetBackground)
+                    .stroke(Color.climeetMain, lineWidth: 5)
+                    .fill(Color.climeetBackground)
                     .frame(width: 24, height: 24)
                 
                 Circle()
-                    .fill(selectedToggle == index ? .climeetMain : .climeetBackground)
+                    .fill(selectedToggle == index ? Color.climeetMain : Color.climeetBackground)
                     .frame(width: 18, height: 18)
             }
         }

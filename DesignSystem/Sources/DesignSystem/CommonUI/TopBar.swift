@@ -25,7 +25,7 @@ struct TopBarModifier<Left, Right>: ViewModifier where Left: View, Right: View {
             content
                 .frame(maxHeight: .infinity, alignment: .top)
         }
-        .navigationBarHidden(true)
+        .navigationBarBackButtonHidden()
     }
 }
 

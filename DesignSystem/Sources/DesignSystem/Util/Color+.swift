@@ -44,7 +44,7 @@ extension Color {
     public static let text06_5 = Color(.text65)
     public static let text07 = Color(.text07)
     public static let text08 = Color(.text08)
-    public static let text09 = Color(.textBlack)
+    public static let text09 = Color(.text09)
     
     // unnamed
     public static let gray72 = Color(.unnamedGray72)

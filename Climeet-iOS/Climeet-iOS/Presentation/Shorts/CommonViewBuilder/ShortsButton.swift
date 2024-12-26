@@ -33,7 +33,7 @@ struct ShortsDefaultButton: View {
     HStack(spacing: 10) {
         ShortsDefaultButton(title: "취소",
                             foregroundColor: .white,
-                            backgroundColor: .text065) {
+                            backgroundColor: Color.text06) {
            // dismiss()
         }
         

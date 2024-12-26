@@ -8,6 +8,7 @@
 import SwiftUI
 import Kingfisher
 import ComposableArchitecture
+import DesignSystem
 
 struct BannerView: View {
     @Bindable var store: StoreOf<BannerReducer>
@@ -62,7 +63,7 @@ struct BannerView: View {
                         .padding(.horizontal, 4)
                         .background {
                             RoundedRectangle(cornerRadius: 6)
-                                .foregroundStyle(.text09.opacity(0.4))
+                                .foregroundStyle(Color.text09.opacity(0.4))
                         }
                         .padding(.trailing, 11)
                         .padding(.bottom, 11)

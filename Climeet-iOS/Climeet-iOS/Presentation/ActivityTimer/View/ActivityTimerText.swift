@@ -24,7 +24,7 @@ struct ActivityTimerText: View {
             
             Text("시간")
                 .font(.climeetFontTitle3())
-                .foregroundColor(Color.levelColorWhite)
+                .foregroundColor(Color.levelWhite)
             
         }
     }

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import DesignSystem
 
 struct UploadShortsAcessSelectView: View {
     @Bindable var store: StoreOf<AccessStateReducer>
@@ -26,14 +27,14 @@ struct UploadShortsAcessSelectView: View {
             VStack(alignment: .center, spacing: 10) {
                 Text("공개 대상")
                 //TODO: 피그마 폰트 확인 시 적용하기
-                    .foregroundStyle(.text01)
+                    .foregroundStyle(Color.text01)
                 
                 climeetDividerView(screenSize: proxy.size,
                                    dividerWidth: 375)
                 
                 VStack(alignment: .leading, spacing: 30) {
                     Text("누구와 게시물을 공유하고 싶으신가요?")
-                        .foregroundStyle(.text0)
+                        .foregroundStyle(Color.text00)
                         .font(.climeetFontParagraph1())
                         .padding(.top, 20)
                     
@@ -62,7 +63,7 @@ struct UploadShortsAcessSelectView: View {
                 .padding()
             }
         }
-        .background(.climeetBackground)
+        .background(Color.climeetBackground)
     }
 }
 

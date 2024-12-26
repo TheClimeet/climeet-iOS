@@ -8,6 +8,7 @@
 import SwiftUI
 import ComposableArchitecture
 import Kingfisher
+import DesignSystem
 
 struct ShortsDeckView: View {
     @Bindable var store: StoreOf<ShortsDeckReducer>
@@ -29,7 +30,7 @@ struct ShortsDeckView: View {
                             VStack(alignment: .leading, spacing: 0) {
                                 ShortsItemView(item, screenSize: store.screenSize)
                             }
-                            .background(.climeetBackground)
+                            .background(Color.climeetBackground)
                             .onAppear {
                                 if item == store.shortsDeckItems.last {
                                     store.send(.startFetching)
@@ -44,12 +45,12 @@ struct ShortsDeckView: View {
                 case .isLoading:
                     ProgressView()
                         .progressViewStyle(.circular)
-                        .foregroundStyle(.climeetMain)
+                        .foregroundStyle(Color.climeetMain)
                 default:
                     EmptyView()
                 }
             }
-            .background(.climeetBackground)
+            .background(Color.climeetBackground)
             .onAppear {
                 if store.shortsDeckItems.count == .zero {
                     store.send(.startFetching)
@@ -140,12 +141,12 @@ struct ShortsDeckView: View {
             }
         } else {
             return Rectangle()
-                .foregroundStyle(.clear)
+                .foregroundStyle(Color.clear)
         }
     }
     
     private func convertHexadecimal(_ from: String) -> Color {
-        return Color(hex: from) ?? .climeetMain
+        return Color(hex: from) ?? Color.climeetMain
     }
 }
 
