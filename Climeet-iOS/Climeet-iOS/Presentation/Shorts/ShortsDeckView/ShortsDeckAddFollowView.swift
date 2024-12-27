@@ -6,13 +6,14 @@
 //
 
 import SwiftUI
+import DesignSystem
 
 struct ShortsDeckAddFollowView: View {
     var body: some View {
         Text("숏츠")
             .font(.largeTitle)
             .foregroundStyle(.white)
-            .background(.climeetBackground)
+            .background(Color.climeetBackground)
     }
 }
 

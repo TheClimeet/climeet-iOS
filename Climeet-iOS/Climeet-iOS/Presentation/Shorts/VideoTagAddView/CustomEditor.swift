@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import DesignSystem
 
 struct CustomTextEditorStyle: ViewModifier {
     let placeholder: String
@@ -35,8 +36,8 @@ struct CustomTextEditorStyle: ViewModifier {
                 .textInputAutocapitalization(.none)
                 .autocorrectionDisabled()
                 .scrollContentBackground(.hidden)
-                .background(.climeetBackground)
-                .foregroundColor(.text06)
+                .background(Color.climeetBackground)
+                .foregroundColor(Color.text06)
                 .font(.climeetFontParagraph6())
     }
 }

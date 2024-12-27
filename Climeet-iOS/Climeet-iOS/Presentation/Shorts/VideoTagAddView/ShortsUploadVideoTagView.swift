@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import DesignSystem
 
 enum IconName: String {
     case mute = "shortsUpload_sounds"
@@ -99,7 +100,7 @@ struct ShortsUploadVideoTagView: View {
                 UploadShortsAcessSelectView(store: store)
                     .presentationDetents([.height(videoTagStore.privacySheetHeight)])
             }
-            .background(.climeetBackground)
+            .background(Color.climeetBackground)
         })
         
         .sheet(item: $videoTagStore.scope(
@@ -122,7 +123,7 @@ struct ShortsUploadVideoTagView: View {
                     .padding([.leading, .trailing], 28)
             }
         )
-        .background(.climeetBackground)
+        .background(Color.climeetBackground)
     }
 }
 
@@ -133,7 +134,7 @@ struct DetailTagView: View {
         VStack(alignment: .leading, spacing: 29) {
             shortsUploadOptionView(iconImageName: IconName.mute.literal, title: "소리 음소거") {
                 Toggle(isOn: $videoTagStore.isMuted) { }
-                    .tint(.climeetMain)
+                    .tint(Color.climeetMain)
                     .toggleStyle(.switch)
             }
             
@@ -173,7 +174,7 @@ struct DetailTagView: View {
         return HStack {
             Text(text)
                 .font(.climeetFontParagraph2())
-                .foregroundStyle(.text06)
+                .foregroundStyle(Color.text06)
             Image(IconName.navigationArrow.literal)
         }
     }
@@ -216,13 +217,13 @@ struct ShortsGymRoutesView: View {
                         state: \.routeSelector, action: \.routeSelector)
                     )
                     .padding(.all, 10)
-                    .background(.text08)
+                    .background(Color.text08)
                     .clipShape(RoundedRectangle(cornerRadius: 15))
                     
                     HStack(spacing: 10) {
                         ShortsDefaultButton(title: "취소",
                                             foregroundColor: .white,
-                                            backgroundColor: .text065) {
+                                            backgroundColor: Color.text07) {
                             dismiss()
                         }
                         
@@ -265,7 +266,7 @@ struct ClimeetNavigationBar: View {
                 Spacer()
             }
             .padding([.leading, .top, .bottom])
-            .background(.text08)
+            .background(Color.text08)
             .frame(height: 35)
             
             Spacer()

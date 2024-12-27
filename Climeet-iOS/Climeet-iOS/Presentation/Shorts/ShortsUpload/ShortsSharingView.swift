@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import DesignSystem
 
 struct ShortsSharingView: View {
     @Bindable var store: StoreOf<ShortsPostingReducer>
@@ -28,12 +29,12 @@ struct ShortsSharingView: View {
                 
                 Text(store.isSuccessed == true ? "영상이 업로드 되었어요!" : "영상이 업로드 되고 있어요")
                     .font(.climeetFontParagraph1())
-                    .foregroundStyle(.text0)
+                    .foregroundStyle(Color.text00)
             }
             .padding(.leading, proxy.size.width * Const.leadingPadding)
             .padding(.top, proxy.size.height * Const.topPadding)
         }
-        .background(.climeetBackground)
+        .background(Color.climeetBackground)
         .navigationBarBackButtonHidden()
         .onAppear {
             store.send(.uploadShorts)

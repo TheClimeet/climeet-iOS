@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import DesignSystem
 
 struct ShortsSelectView: View {
     
@@ -38,13 +39,13 @@ struct ShortsSelectView: View {
                         Spacer()
                     }
                     .padding(.vertical, 10)
-                    .background(.climeetBackground)
+                    .background(Color.climeetBackground)
                     .frame(width: proxy.size.width,
                            height: 20,
                            alignment: .leading)
                     CustomGallery(viewModel)
                 }
-                .background(.shorsUploadPartialBackground)
+                .background(Color.shorsUploadPartialBackground)
             }
             .navigationBarTitle("새 게시물",
                                 displayMode: .inline)
@@ -54,7 +55,7 @@ struct ShortsSelectView: View {
                         store.send(.tapNextButton(viewModel.selectedVideoThumbnail, viewModel.bringSelectedVideoURL()))
                     } label: {
                         Text(Const.next)
-                            .foregroundStyle(.climeetMain)
+                            .foregroundStyle(Color.climeetMain)
                     }
                     .buttonStyle(PlainButtonStyle())
                 }

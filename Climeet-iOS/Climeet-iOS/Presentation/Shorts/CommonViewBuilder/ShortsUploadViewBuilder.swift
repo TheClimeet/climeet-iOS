@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import DesignSystem
 
 @ViewBuilder
 func climeetDividerView(screenSize: CGSize, dividerWidth: CGFloat,
@@ -15,7 +16,7 @@ func climeetDividerView(screenSize: CGSize, dividerWidth: CGFloat,
     Rectangle()
         .frame(width: screenSize.width * (dividerWidth / figmaWidth),
                height: 0.2, alignment: .center)
-        .foregroundStyle(.text07)
+        .foregroundStyle(Color.text07)
 }
 
 func shortsUploadOptionView<V: View>(iconImageName: String,
@@ -25,7 +26,7 @@ func shortsUploadOptionView<V: View>(iconImageName: String,
         Image(iconImageName)
         Text(title)
             .font(.climeetFontParagraph2())
-            .foregroundStyle(.text0)
+            .foregroundStyle(Color.text00)
         Spacer()
         if let view = optionalView() {
             view

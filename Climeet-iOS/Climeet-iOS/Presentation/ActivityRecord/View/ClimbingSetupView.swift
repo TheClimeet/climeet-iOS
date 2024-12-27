@@ -15,7 +15,7 @@ struct ClimbingSetupView: View {
     var body: some View {
         HStack {
             Text(gym?.name ?? placeholderText)
-                .foregroundColor(gym == nil ? .starNotfilledEyes : .levelWhite)
+                .foregroundColor(gym == nil ? Color.starNotFilledEyes : .levelWhite)
                 .padding(.leading, 18)
             
             Spacer()
