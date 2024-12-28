@@ -28,7 +28,7 @@ struct SetProfileView: View {
         .padding(.horizontal)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.text09)
-        .backTopBar(title: "프로필 설정", backAction: { store.send(.pop) })
+        .backTopBar(title: "프로필 설정", backAction: { store.send(.pop) }, underLine: true)
         .task {
             Log.debug("init SetNickname View")
         }
@@ -49,6 +49,7 @@ extension SetProfileView {
                 .foregroundStyle(Color.levelWhite)
                 .multilineTextAlignment(.leading)
         }
+        .padding(.top, 60)
     }
     
     @ViewBuilder

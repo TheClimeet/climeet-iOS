@@ -64,6 +64,7 @@ extension SetNicknameView {
                 .foregroundStyle(Color.levelWhite)
                 .multilineTextAlignment(.leading)
         }
+        .padding(.top, 60)
     }
     
     struct NicknameTextField: View {
