@@ -48,7 +48,7 @@ extension ClimberClient: DependencyKey {
         },
         checkNickname: { nickname in
             let endPoint = ClimberEndPoint.checkNickname(nickname: nickname)
-            return try await APIClient.shared.request(endPoint, decode: Bool.self)
+            return try await APIClient(session: .default, tokenRefresher: nil).request(endPoint, decode: Bool.self)
         },
         shortsPrivacySetting: {
             let endPoint = ClimberEndPoint.shortsPrivacySetting

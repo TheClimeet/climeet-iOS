@@ -43,16 +43,7 @@ struct SetNicknameView: View {
         .padding(.horizontal)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.text09)
-        .navigationBarBackButtonHidden()
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    store.send(.pop)
-                } label: {
-                    Image(.searchBack)
-                }
-            }
-        }
+        .backTopBar(title: "닉네임 설정", backAction: { store.send(.pop)})
         .task {
             Log.debug("init SetNickname View")
         }
