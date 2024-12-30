@@ -104,6 +104,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		6C9FD00C2D22DEA30050214F /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				04ED90052CD3A519009B59A0 /* Release.xcconfig */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		B94EC2192BD13CBB00DC3FDB = {
 			isa = PBXGroup;
 			children = (
@@ -114,6 +122,7 @@
 				604B97AC2CC394F7005EDD29 /* Climeet-iOSUITests */,
 				B94EC2232BD13CBB00DC3FDB /* Products */,
 				0489EE9A2C2EA18D00BFC55B /* Frameworks */,
+				6C9FD00C2D22DEA30050214F /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
