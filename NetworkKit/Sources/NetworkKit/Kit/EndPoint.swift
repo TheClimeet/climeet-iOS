@@ -13,7 +13,7 @@ public protocol Endpoint: URLRequestConvertible {
 
 extension Endpoint {
     private var defaultHeaders: HTTPHeaders {
-        var headers: HTTPHeaders = []
+        var headers: HTTPHeaders = [.contentType("application/json")]
         
         if let token = token {
             headers.add(.authorization(bearerToken: token))
