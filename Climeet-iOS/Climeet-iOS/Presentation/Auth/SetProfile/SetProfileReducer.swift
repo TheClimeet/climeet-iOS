@@ -15,7 +15,7 @@ struct SetProfileReducer {
     
     @Reducer(state: .equatable)
     enum Path {
-//        case setNickname(SetNicknameReducer)
+        case checkLevel(CheckLevelReducer)
     }
 
     @ObservableState
@@ -28,6 +28,7 @@ struct SetProfileReducer {
     
     enum Action {
         case nextBtnTap
+        case moveToCheckLevel(imageURL: String?)
         case path(StackActionOf<Path>)
         case pop
     }
@@ -39,20 +40,19 @@ struct SetProfileReducer {
             switch action {
             case .nextBtnTap:
                 guard let image = state.image else {
-//                    state.path.append(.setProfile(.init(
-//                        accessToken: state.accessToken,
-//                        nickname: state.nickname
-//                    )))
-                    return .none
+                    return .send(.moveToCheckLevel(imageURL: nil))
                 }
                 return .run { send in
-                    let imageURL = try await s3client.file(.init(file: image))
-//                    state.path.append(.setProfile(.init(
-//                        accessToken: state.accessToken,
-//                        nickname: state.nickname,
-//                        image: imageURL
-//                    )))
+                    let response = try await s3client.file(.init(file: image))
+                    await send(.moveToCheckLevel(imageURL: response.imgUrl))
                 }
+            case .moveToCheckLevel(let imageURL):
+                state.path.append(.checkLevel(.init(
+                    accessToken: state.accessToken,
+                    nickname: state.nickname,
+                    imageURL: imageURL
+                )))
+                return .none
             case .path:
                 return .none
             case .pop:
