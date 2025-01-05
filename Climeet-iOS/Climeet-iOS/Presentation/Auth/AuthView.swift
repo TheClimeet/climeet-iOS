@@ -46,6 +46,10 @@ struct AuthView: View {
             switch store.case {
             case .setNickname(let store):
                 SetNicknameView(store: store)
+            case .setProfile(let store):
+                SetProfileView(store: store)
+            case .checkLevel(let store):
+                CheckLevelView(store: store)
             }
         }
     }

@@ -12,26 +12,16 @@ import ComposableArchitecture
 struct CheckLevelReducer {
     @Dependency(\.dismiss) var dismiss
     
-    @Reducer(state: .equatable)
-    enum Path {
-        //        case setProfile(SetProfileReducer)
-    }
-    
     @ObservableState
     struct State: Equatable {
-        var accessToken: String
-        var nickname: String
-        var imageURL: String?
-        var climbingLevel: ClimbingLevel?
+        var signupExtra: SignupExtra
         
         var rows: [CheckLevel] = ClimbingLevel.allCases.map { CheckLevel(level: $0) }
-        var path = StackState<Path.State>()
     }
     
     enum Action {
         case nextBtnTap
         case rowTap(CheckLevelReducer.State.CheckLevel)
-        case path(StackActionOf<Path>)
         case pop
     }
     
@@ -46,10 +36,8 @@ struct CheckLevelReducer {
                 if let index = state.rows.firstIndex(where: { $0.id == element.id }) {
                     state.rows.indices.forEach { state.rows[$0].isSelected = false }
                     state.rows[index].isSelected.toggle()
-                    state.climbingLevel = element.level
+                    state.signupExtra.climbingLevel = element.level
                 }
-                return .none
-            case .path:
                 return .none
             case .pop:
                 return .run { _ in
@@ -57,7 +45,6 @@ struct CheckLevelReducer {
                 }
             }
         }
-        .forEach(\.path, action: \.path)
     }
 }
 

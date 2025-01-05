@@ -14,11 +14,6 @@ struct SetNicknameReducer {
     @Dependency(\.climberClient) var climberClient
     @Dependency(\.validateService) var validateService
     
-    @Reducer(state: .equatable)
-    enum Path {
-        case setProfile(SetProfileReducer)
-    }
-    
     enum WarningText: String {
         case invalid = "닉네임을 규칙에 따라 지어주세요."
         case enable = "사용 가능한 닉네임입니다."
@@ -28,11 +23,9 @@ struct SetNicknameReducer {
 
     @ObservableState
     struct State: Equatable {
-        var accessToken: String
-        var nickname: String = ""
+        var signupExtra: SignupExtra
         var isValidNickname: Bool = true
         var warningText: WarningText = .none
-        var path = StackState<Path.State>()
         
         var isEnabledNextButton: Bool { isValidNickname && warningText == .enable }
     }
@@ -40,9 +33,9 @@ struct SetNicknameReducer {
     enum Action {
         case updateNickname(String)
         case duplicateBtnTap
-        case checkNicknameResponse(Result<Bool, AppError>)
+        case checkNicknameResponse(Result<Bool, Error>)
         case nextBtnTap
-        case path(StackActionOf<Path>)
+        case moveToSetProfile(SignupExtra)
         case pop
     }
     
@@ -52,17 +45,18 @@ struct SetNicknameReducer {
         Reduce { state, action in
             switch action {
             case .updateNickname(let nickname):
-                state.nickname = nickname
+                state.signupExtra.nickName = nickname
                 state.warningText = .none
                 state.isValidNickname = true
                 return .none
             case .duplicateBtnTap:
-                guard self.validateService.isValidNickname(state.nickname) else {
+                guard let nickname = state.signupExtra.nickName,
+                      self.validateService.isValidNickname(nickname) else {
                     state.isValidNickname = false
                     state.warningText = .invalid
                     return .none
                 }
-                return .run { [nickname = state.nickname] send in
+                return .run { [nickname = nickname] send in
                     let response = try await self.climberClient.checkNickname(nickname)
                     await send(.checkNicknameResponse(Result { response }))
                 }
@@ -75,12 +69,8 @@ struct SetNicknameReducer {
                 return .none
             case .nextBtnTap:
                 guard state.isEnabledNextButton else { return .none }
-                state.path.append(.setProfile(.init(
-                    accessToken: state.accessToken,
-                    nickname: state.nickname
-                )))
-                return .none
-            case .path:
+                return .send(.moveToSetProfile(state.signupExtra))
+            case .moveToSetProfile:
                 return .none
             case .pop:
                 return .run { _ in
@@ -88,6 +78,5 @@ struct SetNicknameReducer {
                 }
             }
         }
-        .forEach(\.path, action: \.path)
     }
 }

@@ -18,6 +18,8 @@ struct AuthReducer {
     @Reducer(state: .equatable)
     enum Path {
         case setNickname(SetNicknameReducer)
+        case setProfile(SetProfileReducer)
+        case checkLevel(CheckLevelReducer)
     }
 
     @ObservableState
@@ -29,10 +31,10 @@ struct AuthReducer {
         case kakaoBtnDidTap
         case naverBtnDidTap
         case appleBtnDidTap(idToken: Data?)
-        case kakaoLoginResponse(Result<String, AppError>)
+        case kakaoLoginResponse(Result<String, Error>)
         
         case climeetLoginRequest(provider: SocialType, accessToken: String)
-        case climeetLoginResponse(Result<SignResponse, AppError>)
+        case climeetLoginResponse(Result<SignResponse, Error>)
         case path(StackActionOf<Path>)
     }
     
@@ -80,7 +82,7 @@ struct AuthReducer {
                     Log.debug("move to SetNickname")
                     guard let accessToken = response.accessToken else { return .none }
                     state.path.append(.setNickname(SetNicknameReducer.State(
-                        accessToken: accessToken
+                        signupExtra: .init(accessToken: accessToken)
                     )))
                 case .none:
                     Log.debug("SERVER API ERROR")
@@ -90,6 +92,16 @@ struct AuthReducer {
             case .kakaoLoginResponse(.failure(let error)),
                     .climeetLoginResponse(.failure(let error)):
                 Log.debug("API fail", error)
+                return .none
+            case .path(.element(let id, action: .setNickname(.moveToSetProfile(let signupExtra)))):
+                state.path.append(.setProfile(.init(
+                    signupExtra: signupExtra
+                )))
+                return .none
+            case .path(.element(let id, action: .setProfile(.moveToCheckLevel(let signupExtra)))):
+                state.path.append(.checkLevel(.init(
+                    signupExtra: signupExtra
+                )))
                 return .none
             case .path:
                 return .none

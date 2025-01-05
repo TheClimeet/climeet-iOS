@@ -25,17 +25,16 @@ struct ClimeetiOSApp: App {
     
     var body: some Scene {
         WindowGroup {
-            SetProfileView(store: .init(initialState: .init(accessToken: "", nickname: "123"), reducer: { SetProfileReducer() }))
-//            AuthView(store: .init(initialState: .init(), reducer: { AuthReducer() }))
-//                .onOpenURL { url in
-//                    if AuthApi.isKakaoTalkLoginUrl(url) {
-//                        _ = AuthController.handleOpenUrl(url: url)
-//                    }
-//                    
-//                    NaverThirdPartyLoginConnection
-//                        .getSharedInstance()
-//                        .receiveAccessToken(url)
-//                }
+            AuthView(store: .init(initialState: .init(), reducer: { AuthReducer() }))
+                .onOpenURL { url in
+                    if AuthApi.isKakaoTalkLoginUrl(url) {
+                        _ = AuthController.handleOpenUrl(url: url)
+                    }
+                    
+                    NaverThirdPartyLoginConnection
+                        .getSharedInstance()
+                        .receiveAccessToken(url)
+                }
 //            MainTabView()
         }
     }

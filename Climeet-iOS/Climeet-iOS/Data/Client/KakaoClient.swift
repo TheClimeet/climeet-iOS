@@ -11,7 +11,7 @@ import KakaoSDKAuth
 import KakaoSDKCommon
 
 struct KakaoClient {
-    var login: @MainActor @Sendable () async -> Result<String, AppError>
+    var login: @MainActor @Sendable () async -> Result<String, Error>
 }
 
 extension KakaoClient {

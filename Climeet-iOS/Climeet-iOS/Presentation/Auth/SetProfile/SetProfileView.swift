@@ -75,13 +75,16 @@ extension SetProfileView {
                 Task {
                     if let data = try? await newValue?.loadTransferable(type: Data.self) {
                         selectedImageData = data
+                        store.send(.saveImageData(data))
                     }
                 }
             }
-            Text(store.nickname)
-                .font(.climeetFontTitle3())
-                .foregroundStyle(Color.levelWhite)
-                .multilineTextAlignment(.center)
+            if let nickname = store.signupExtra.nickName {
+                Text(nickname)
+                    .font(.climeetFontTitle3())
+                    .foregroundStyle(Color.levelWhite)
+                    .multilineTextAlignment(.center)
+            }
         }
         .frame(maxWidth: .infinity)
     }
@@ -107,7 +110,15 @@ extension SetProfileView {
 
 #Preview {
     SetProfileView(store: Store(
-        initialState: .init(accessToken: "", nickname: "켈리0921"),
+        initialState: .init(signupExtra: .init(
+            accessToken: "",
+            socialType: .kakao,
+            nickName: "Nickname",
+            climbingLevel: .BEGINNER,
+            discoveryChannel: .INSTAGRAM_FACEBOOK,
+            profileImgURL: "",
+            gymFollowList: [1]
+        )),
         reducer: {
             SetProfileReducer()
         }))
