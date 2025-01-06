@@ -42,14 +42,18 @@ struct RouteSelectionReducer {
             switch action {
             case .gymSet:
                 return .run { [selectedGym = state.selectedGym] send in
-                    guard let gymID = selectedGym?.gymId else {
-                        return
+                    do {
+                        guard let gymID = selectedGym?.gymId else {
+                            return
+                        }
+                        
+                        let response = try await routeVersionClient.gymVersionKey(gymID, nil)
+                        let result = GymRoutes(from: response)
+                        
+                        await send(.routesResponse(result))
+                    } catch let error {
+                        print(error) // TODO: 에러 처리
                     }
-                    
-                    let response = try await routeVersionClient.gymVersionKey(gymID, nil)
-                    let result = GymRoutes(from: response)
-                    
-                    await send(.routesResponse(result))
                 }
                 
             case .floorChangeSegmentedControlTapped(let floor):
@@ -119,7 +123,7 @@ struct RouteSelectionReducer {
                             hasNext = hasNextResponse
                             currentPage += 1
                         } catch let error {
-                            Log.error("RoteSelectionReducerError", "error: \(error)")
+                            Log.error("RoteSelectionReducerError", "error: \(error)") // TODO: 에러 처리
                         }
                     }
                     

@@ -115,7 +115,7 @@ struct ShortsDeckReducer {
                         
                         await send(.fetchResult(result))
                     } catch let error {
-                        Log.error("fetchShortsItem에서 에러 발생", "error: \(error)")
+                        Log.error("fetchShortsItem에서 에러 발생", "error: \(error)") // TODO: 에러 처리
                     }
                 }
                 
