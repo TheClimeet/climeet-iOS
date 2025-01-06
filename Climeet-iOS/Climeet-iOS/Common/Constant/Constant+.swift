@@ -13,7 +13,7 @@ enum SocialType: String, Codable {
     case apple = "APPLE"
 }
 
-enum ClimbingLevel: String, Codable {
+enum ClimbingLevel: String, Codable, CaseIterable {
     case BEGINNER, NOVICE, INTERMEDIATE, ADVANCED, EXPERT
 }
 

@@ -1,5 +1,5 @@
 {
-  "originHash" : "3f4d94a709e82083aa14da64aff854f18404b8eaf1a882ca4d6fae30523d9e15",
+  "originHash" : "246698f427dc0f7fcdcdfb6ef5ef6bccf3293986b544fb842a7f765b8299748b",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -20,12 +20,30 @@
       }
     },
     {
+      "identity" : "kakao-ios-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kakao/kakao-ios-sdk",
+      "state" : {
+        "revision" : "ab4309c1950550add307046ad1e08024c7514603",
+        "version" : "2.23.0"
+      }
+    },
+    {
       "identity" : "kingfisher",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/onevcat/Kingfisher.git",
       "state" : {
         "revision" : "2ef543ee21d63734e1c004ad6c870255e8716c50",
         "version" : "7.12.0"
+      }
+    },
+    {
+      "identity" : "naveridlogin-sdk-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/naver/naveridlogin-sdk-ios",
+      "state" : {
+        "revision" : "0d89660344926a625824387a130f7e38e0fad2d7",
+        "version" : "4.2.3"
       }
     },
     {
