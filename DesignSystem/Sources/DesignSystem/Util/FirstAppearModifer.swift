@@ -1,10 +1,3 @@
-//
-//  ViewModifier + onFirstAppear.swift
-//  Climeet-iOS
-//
-//  Created by 권승용 on 10/28/24.
-//
-
 import SwiftUI
 
 struct FirstAppearModifer: ViewModifier {
@@ -23,11 +16,5 @@ struct FirstAppearModifer: ViewModifier {
                 hasAppeared = true
                 await action()
             }
-    }
-}
-
-extension View {
-    func onFirstAppear(_ action: @escaping () async -> Void) -> some View {
-        modifier(FirstAppearModifer(action))
     }
 }
