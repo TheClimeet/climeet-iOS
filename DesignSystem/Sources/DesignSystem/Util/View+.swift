@@ -1,20 +1,13 @@
-//
-//  View + onReadSize.swift
-//  Climeet-iOS
-//
-//  Created by KOVI on 6/12/24.
-//
-
 import SwiftUI
 
 fileprivate struct SizePreferenceKey: PreferenceKey {
-    static var defaultValue: CGSize = .zero
+    nonisolated(unsafe) static var defaultValue: CGSize = .zero
     static func reduce(value: inout CGSize, nextValue: () -> CGSize) { }
 }
 
 extension View {
     @ViewBuilder
-    func onReadSize(
+    public func onReadSize(
         _ perform: @escaping (CGSize) -> Void)
     -> some View {
         self.customBackground {
@@ -33,5 +26,9 @@ extension View {
     -> some View
     {
         self.background(alignment: alignment, content: content)
+    }
+    
+    public func onFirstAppear(_ action: @escaping () async -> Void) -> some View {
+        modifier(FirstAppearModifer(action))
     }
 }

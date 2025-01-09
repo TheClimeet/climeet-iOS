@@ -11,12 +11,14 @@ let package = Package(
             name: "DesignSystem",
             targets: ["DesignSystem"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/onevcat/Kingfisher", .upToNextMajor(from: "7.12.0"))
+    ],
     targets: [
         .target(
             name: "DesignSystem",
             resources: [.process("Resources/Font")]
         ),
 
-    ],
-    swiftLanguageModes: [.v5]
+    ]
 )

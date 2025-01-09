@@ -35,7 +35,7 @@ fileprivate class PassthroughWindow: UIWindow {
 }
 
 public class Toast: ObservableObject {
-    public static let shared = Toast()
+    nonisolated(unsafe) public static let shared = Toast()
     @Published fileprivate var toasts: [ToastItem] = []
     
     public func present(title: String, image: Image?, tint: Color = .primary, isUserInteractionEnabled: Bool = false, timing: ToastTime = .medium) {
