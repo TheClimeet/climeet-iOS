@@ -10,6 +10,8 @@ import ComposableArchitecture
 
 @Reducer
 struct AuthScreenReducer {
+    @Dependency(\.dismiss) var dismiss
+    
     @Reducer(state: .equatable)
     enum Path {
         case setNickname(SetNicknameReducer)
@@ -26,6 +28,7 @@ struct AuthScreenReducer {
     enum Action {
         case auth(AuthReducer.Action)
         case path(StackActionOf<Path>)
+        case dismiss
         case popToRoot
     }
     
@@ -61,6 +64,10 @@ struct AuthScreenReducer {
             case .popToRoot:
                 state.path.removeAll()
                 return .none
+            case .dismiss:
+                return .run { _ in
+                    await self.dismiss()
+                }
             }
         }
         .forEach(\.path, action: \.path)
