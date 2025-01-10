@@ -15,16 +15,9 @@ struct AuthReducer {
     @Dependency(\.climberClient) var climberClient
     let naverClinet: NaverRepository = .init()
     
-    @Reducer(state: .equatable)
-    enum Path {
-        case setNickname(SetNicknameReducer)
-        case setProfile(SetProfileReducer)
-        case checkLevel(CheckLevelReducer)
-    }
-
     @ObservableState
     struct State: Equatable {
-        var path = StackState<Path.State>()
+        
     }
     
     enum Action {
@@ -32,13 +25,17 @@ struct AuthReducer {
         case naverBtnDidTap
         case appleBtnDidTap(idToken: Data?)
         case kakaoLoginResponse(Result<String, Error>)
+        case moveToSetNickname(accessToken: String?)
         
         case climeetLoginRequest(provider: SocialType, accessToken: String)
         case climeetLoginResponse(Result<SignResponse, Error>)
-        case path(StackActionOf<Path>)
     }
     
-    private enum CancelID { case kakaoLogin }
+    private enum CancelID: Hashable {
+        case kakaoLogin
+        case naverLogin
+        case climeetLogin
+    }
     
     init() {}
     
@@ -59,6 +56,7 @@ struct AuthReducer {
                         await send(.climeetLoginRequest(provider: .naver, accessToken: accessToken))
                     }
                 }
+                .cancellable(id: CancelID.naverLogin)
             case .appleBtnDidTap(let idToken):
                 guard let idToken, let idTokenString = String(data: idToken, encoding: .utf8) else { return .none }
                 return .send(.climeetLoginRequest(provider: .apple, accessToken: idTokenString))
@@ -73,6 +71,7 @@ struct AuthReducer {
                     ))
                     await send(.climeetLoginResponse(Result { response }))
                 }
+                .cancellable(id: CancelID.climeetLogin)
             case .climeetLoginResponse(.success(let response)):
                 switch response.responseType {
                 case .SIGN_IN:
@@ -80,10 +79,7 @@ struct AuthReducer {
                     Log.debug("move to Main")
                 case .SIGN_UP:
                     Log.debug("move to SetNickname")
-                    guard let accessToken = response.accessToken else { return .none }
-                    state.path.append(.setNickname(SetNicknameReducer.State(
-                        signupExtra: .init(accessToken: accessToken)
-                    )))
+                    return .send(.moveToSetNickname(accessToken: response.accessToken))
                 case .none:
                     Log.debug("SERVER API ERROR")
                 }
@@ -93,20 +89,9 @@ struct AuthReducer {
                     .climeetLoginResponse(.failure(let error)):
                 Log.debug("API fail", error)
                 return .none
-            case .path(.element(let id, action: .setNickname(.moveToSetProfile(let signupExtra)))):
-                state.path.append(.setProfile(.init(
-                    signupExtra: signupExtra
-                )))
-                return .none
-            case .path(.element(let id, action: .setProfile(.moveToCheckLevel(let signupExtra)))):
-                state.path.append(.checkLevel(.init(
-                    signupExtra: signupExtra
-                )))
-                return .none
-            case .path:
+            case .moveToSetNickname:
                 return .none
             }
         }
-        .forEach(\.path, action: \.path)
     }
 }

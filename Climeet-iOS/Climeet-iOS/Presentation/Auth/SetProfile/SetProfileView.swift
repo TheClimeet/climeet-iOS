@@ -30,7 +30,7 @@ struct SetProfileView: View {
         .background(Color.text09)
         .backTopBar(title: "프로필 설정", backAction: { store.send(.pop) }, underLine: true)
         .task {
-            Log.debug("init SetNickname View")
+            Log.debug("init SetProfile View")
         }
     }
 }

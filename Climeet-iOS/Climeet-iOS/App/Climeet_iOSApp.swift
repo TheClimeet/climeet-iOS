@@ -16,6 +16,10 @@ import NetworkKit
 
 @main
 struct ClimeetiOSApp: App {
+    let authReducer: StoreOf<AuthScreenReducer> = .init(
+        initialState: .init(),
+        reducer: { AuthScreenReducer() }
+    )
     
     init() {
         applyGlobalNavigationTitleAttributes()
@@ -25,7 +29,7 @@ struct ClimeetiOSApp: App {
     
     var body: some Scene {
         WindowGroup {
-            AuthView(store: .init(initialState: .init(), reducer: { AuthReducer() }))
+            AuthScreen(store: authReducer)
                 .onOpenURL { url in
                     if AuthApi.isKakaoTalkLoginUrl(url) {
                         _ = AuthController.handleOpenUrl(url: url)

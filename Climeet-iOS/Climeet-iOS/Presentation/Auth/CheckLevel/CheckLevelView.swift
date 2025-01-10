@@ -26,7 +26,7 @@ struct CheckLevelView: View {
         .background(Color.text09)
         .backTopBar(title: "클라이밍 레벨", backAction: { store.send(.pop) }, underLine: true)
         .task {
-            Log.debug("init SetNickname View")
+            Log.debug("init CheckLevel View")
         }
     }
 }

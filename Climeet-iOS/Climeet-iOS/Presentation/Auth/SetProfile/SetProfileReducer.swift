@@ -23,9 +23,10 @@ struct SetProfileReducer {
         case saveImageData(Data)
         case nextBtnTap
         case moveToCheckLevel(SignupExtra)
-        case path(StackActionOf<AuthReducer.Path>)
         case pop
     }
+    
+    private enum CancelID: Hashable { case fileUpload }
     
     init() {}
     
@@ -51,9 +52,8 @@ struct SetProfileReducer {
                         gymFollowList: signupExtra.gymFollowList
                     )))
                 }
+                .cancellable(id: CancelID.fileUpload)
             case .moveToCheckLevel:
-                return .none
-            case .path:
                 return .none
             case .pop:
                 return .run { _ in
