@@ -13,47 +13,47 @@ struct SetProfileReducer {
     @Dependency(\.dismiss) var dismiss
     @Dependency(\.s3Client) var s3client
     
-    @Reducer(state: .equatable)
-    enum Path {
-        case checkLevel(CheckLevelReducer)
-    }
-
     @ObservableState
     struct State: Equatable {
-        var accessToken: String
-        var nickname: String
-        var image: Data?
-        var path = StackState<Path.State>()
+        var signupExtra: SignupExtra
+        var imageData: Data?
     }
     
     enum Action {
+        case saveImageData(Data)
         case nextBtnTap
-        case moveToCheckLevel(imageURL: String?)
-        case path(StackActionOf<Path>)
+        case moveToCheckLevel(SignupExtra)
         case pop
     }
+    
+    private enum CancelID: Hashable { case fileUpload }
     
     init() {}
     
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .nextBtnTap:
-                guard let image = state.image else {
-                    return .send(.moveToCheckLevel(imageURL: nil))
-                }
-                return .run { send in
-                    let response = try await s3client.file(.init(file: image))
-                    await send(.moveToCheckLevel(imageURL: response.imgUrl))
-                }
-            case .moveToCheckLevel(let imageURL):
-                state.path.append(.checkLevel(.init(
-                    accessToken: state.accessToken,
-                    nickname: state.nickname,
-                    imageURL: imageURL
-                )))
+            case .saveImageData(let data):
+                state.imageData = data
                 return .none
-            case .path:
+            case .nextBtnTap:
+                guard let image = state.imageData else {
+                    return .send(.moveToCheckLevel(state.signupExtra))
+                }
+                return .run { [signupExtra = state.signupExtra] send in
+                    let response = try await s3client.file(.init(file: image))
+                    await send(.moveToCheckLevel(.init(
+                        accessToken: signupExtra.accessToken,
+                        socialType: signupExtra.socialType,
+                        nickName: signupExtra.nickName,
+                        climbingLevel: signupExtra.climbingLevel,
+                        discoveryChannel: signupExtra.discoveryChannel,
+                        profileImgURL: response.imgUrl,
+                        gymFollowList: signupExtra.gymFollowList
+                    )))
+                }
+                .cancellable(id: CancelID.fileUpload)
+            case .moveToCheckLevel:
                 return .none
             case .pop:
                 return .run { _ in
@@ -61,6 +61,5 @@ struct SetProfileReducer {
                 }
             }
         }
-        .forEach(\.path, action: \.path)
     }
 }

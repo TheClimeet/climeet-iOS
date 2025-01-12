@@ -26,7 +26,7 @@ struct CheckLevelView: View {
         .background(Color.text09)
         .backTopBar(title: "클라이밍 레벨", backAction: { store.send(.pop) }, underLine: true)
         .task {
-            Log.debug("init SetNickname View")
+            Log.debug("init CheckLevel View")
         }
     }
 }
@@ -105,7 +105,17 @@ extension CheckLevelView {
 
 #Preview {
     CheckLevelView(store: Store(
-        initialState: .init(accessToken: "", nickname: "켈리0921", imageURL: ""),
+        initialState: .init(
+            signupExtra: .init(
+                accessToken: "",
+                socialType: .kakao,
+                nickName: "Nickname",
+                climbingLevel: .BEGINNER,
+                discoveryChannel: .INSTAGRAM_FACEBOOK,
+                profileImgURL: "",
+                gymFollowList: [1]
+            )
+        ),
         reducer: {
             CheckLevelReducer()
         }))

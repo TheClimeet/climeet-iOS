@@ -151,7 +151,15 @@ extension SetNicknameView {
 
 #Preview {
     SetNicknameView(store: Store(
-        initialState: .init(accessToken: ""),
+        initialState: .init(signupExtra: .init(
+            accessToken: "",
+            socialType: .kakao,
+            nickName: "Nickname",
+            climbingLevel: .BEGINNER,
+            discoveryChannel: .INSTAGRAM_FACEBOOK,
+            profileImgURL: "",
+            gymFollowList: [1]
+        )),
         reducer: {
             SetNicknameReducer()
     }))
