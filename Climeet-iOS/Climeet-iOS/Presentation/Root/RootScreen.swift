@@ -7,17 +7,20 @@
 
 import SwiftUI
 import ComposableArchitecture
+import DesignSystem
 
 struct RootScreen: View {
     @Bindable var store: StoreOf<RootScreenReducer>
     
     var body: some View {
-        MainTabView()
-            .fullScreenCover(store: store.scope(state: \.$auth, action: \.auth)) { store in
-                AuthScreen(store: store)
-            }
-            .task {
-                store.send(.onLoad)
-            }
+        RootView {
+            MainTabView()
+                .fullScreenCover(store: store.scope(state: \.$auth, action: \.auth)) { store in
+                    AuthScreen(store: store)
+                }
+                .task {
+                    store.send(.onLoad)
+                }
+        }
     }
 }

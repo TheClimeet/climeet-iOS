@@ -5,6 +5,11 @@ public struct RootView<Content: View>: View {
     @ViewBuilder var content: Content
     /// View Properties
     @State private var overlayWindow: UIWindow?
+    
+    public init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+    
     public var body: some View {
         content
             .onAppear {
@@ -38,7 +43,27 @@ public class Toast: ObservableObject {
     nonisolated(unsafe) public static let shared = Toast()
     @Published fileprivate var toasts: [ToastItem] = []
     
-    public func present(title: String, image: Image?, tint: Color = .primary, isUserInteractionEnabled: Bool = false, timing: ToastTime = .medium) {
+    public func info(title: String, tint: Color = .primary, isUserInteractionEnabled: Bool = false, timing: ToastTime = .medium) {
+        self.present(
+            title: title,
+            image: Image(.icInfo),
+            tint: tint,
+            isUserInteractionEnabled: isUserInteractionEnabled,
+            timing: timing
+        )
+    }
+    
+    public func check(title: String, tint: Color = .primary, isUserInteractionEnabled: Bool = false, timing: ToastTime = .medium) {
+        self.present(
+            title: title,
+            image: Image(.checkCircleOn24),
+            tint: tint,
+            isUserInteractionEnabled: isUserInteractionEnabled,
+            timing: timing
+        )
+    }
+    
+    public func present(title: String, image: Image? = nil, tint: Color = .primary, isUserInteractionEnabled: Bool = false, timing: ToastTime = .medium) {
         
         withAnimation(.snappy) {
             toasts.append(
@@ -110,18 +135,17 @@ fileprivate struct ToastView: View {
     /// View Properties
     @State private var delayTask: DispatchWorkItem?
     var body: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 10) {
             if let image = item.image {
                 image
-                    .font(.title3)
-                    .padding(.trailing, 10)
             }
             
             Text(item.title)
-                .lineLimit(1)
+                .font(.climeetFontParagraph6())
+                .padding(.trailing, 4)
         }
         .foregroundStyle(item.tint)
-        .padding(.horizontal, 12)
+        .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(
             .background
@@ -154,7 +178,7 @@ fileprivate struct ToastView: View {
             }
         }
         /// Limiting Size
-        .frame(maxWidth: size.width * 0.7)
+        .frame(maxWidth: size.width * 0.8)
         .transition(.offset(y: 150))
     }
     
