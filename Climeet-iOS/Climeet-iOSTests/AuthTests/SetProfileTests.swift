@@ -26,7 +26,7 @@ struct SetProfileTests {
         }
         
         await store.send(.saveImageData(data)) {
-            $0.imageData = "1234".data(using: .utf8)
+            $0.imageData = "123".data(using: .utf8)
         }
     }
     
