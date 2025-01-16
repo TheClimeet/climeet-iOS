@@ -53,7 +53,8 @@ struct SetProfileReducer {
                     )))
                 }
                 .cancellable(id: CancelID.fileUpload)
-            case .moveToCheckLevel:
+            case .moveToCheckLevel(let signupExtra):
+                state.signupExtra = signupExtra
                 return .none
             case .pop:
                 return .run { _ in
