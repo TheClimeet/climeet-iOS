@@ -39,7 +39,6 @@ struct ClimeetiOSApp: App {
                         .getSharedInstance()
                         .receiveAccessToken(url)
                 }
-//            MainTabView()
         }
     }
     
