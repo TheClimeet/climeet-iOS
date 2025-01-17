@@ -7,7 +7,9 @@
 
 import NetworkKit
 import Dependencies
+import DependenciesMacros
 
+@DependencyClient
 struct ClimberClient {
     /// 클라이머 탈퇴
     var deactivate: @Sendable () async throws -> Bool
@@ -29,6 +31,10 @@ struct ClimberClient {
     var signupExtra: @Sendable (ClimberDTO.SignupExtra.Request) async throws -> SignResponse
     /// OAuth 2.0 소셜 로그인
     var login: @Sendable (ClimberDTO.Login.Request) async throws -> SignResponse
+}
+
+extension ClimberClient: TestDependencyKey {
+    static var testValue: ClimberClient = Self()
 }
 
 extension ClimberClient: DependencyKey {
